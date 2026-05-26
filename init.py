@@ -31,8 +31,9 @@ RECORD_FOLDER = "recordings"
 LOG_DIR = "logs"
 PORT = 5001
 CAM_WIDTH, CAM_HEIGHT = 1640, 1232
-FPS = 30.0
-STREAM_HEIGHT = 480
+FPS = 24.0
+STREAM_WIDTH = 1280
+STREAM_HEIGHT = 720
 MJPEG_QUALITY = 80
 VIDEO_BITRATE = 1500000
 
@@ -385,7 +386,7 @@ def camera_worker():
 
         config = picam2.create_video_configuration(
             main={"size": (CAM_WIDTH, CAM_HEIGHT), "format": "YUV420"},
-            lores={"size": (640, 480), "format": "YUV420"},
+            lores={"size": (STREAM_WIDTH, STREAM_HEIGHT), "format": "YUV420"},
             transform=Transform(hflip=True, vflip=True),
             controls={"FrameRate": FPS},
             buffer_count=6
@@ -507,7 +508,8 @@ def camera_worker():
                         t.daemon = True
                         t.start()
 
-            time.sleep(0.05)
+            # Keep loop delay low so 720p MJPEG can sustain the target FPS.
+            time.sleep(0.005)
 
             try:
                 raw_yuv = picam2.capture_array("lores")
@@ -619,9 +621,10 @@ def stream_info():
         "status": "online" if has_frame and age is not None and age < 2.0 else "warming" if not camera_error else "error",
         "url": "/video_feed",
         "host_urls": [f"http://{ip}:{PORT}/video_feed" for ip in get_lan_addresses()],
-        "width": 640,
+        "width": STREAM_WIDTH,
         "height": STREAM_HEIGHT,
         "fps_target": FPS,
+        "fps_estimated": round((1.0 / age), 2) if age and age > 0 else None,
         "jpeg_quality": MJPEG_QUALITY,
         "has_frame": has_frame,
         "last_frame_age_seconds": age,
