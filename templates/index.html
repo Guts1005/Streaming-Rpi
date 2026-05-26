@@ -882,9 +882,18 @@
         }
 
         function startGPS() {
+            const secureContext = (window.isSecureContext === true);
+            const isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+            if (!secureContext && !isLocalhost) {
+                $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Browser blocked on HTTP</span>';
+                setText('gpsDetailText', 'Browser GPS requires HTTPS on LAN IP. Using server GPS if available.');
+                setText('gpsAgeChip', 'HTTP');
+                return;
+            }
+
             if (!('geolocation' in navigator)) {
-                $('gpsStatus').innerHTML = '<span class="dot error"></span><span>GPS: Not supported</span>';
-                setText('gpsDetailText', 'Browser GPS is not supported');
+                $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Browser not supported</span>';
+                setText('gpsDetailText', 'Browser GPS is not supported. Using server GPS if available.');
                 return;
             }
 
@@ -911,8 +920,8 @@
                 },
                 function(error) {
                     console.log('[GPS] Error:', error.message);
-                    $('gpsStatus').innerHTML = '<span class="dot error"></span><span>GPS: Error</span>';
-                    setText('gpsDetailText', error.message);
+                    $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Browser blocked/error</span>';
+                    setText('gpsDetailText', 'Browser GPS error: ' + error.message + '. Using server GPS if available.');
                     setText('gpsAgeChip', 'Error');
                 },
                 {enableHighAccuracy: true, maximumAge: 0, timeout: 10000}
@@ -968,6 +977,16 @@
                     }
 
                     if (currentRecordingFiles.length > 0) loadMedia();
+
+                    const g = d.gps || {};
+                    const lat = Number(g.lat || 0);
+                    const lon = Number(g.lon || 0);
+                    const acc = Number(g.accuracy || 0);
+                    if (!hasGPS && (lat !== 0 || lon !== 0)) {
+                        $('gpsStatus').innerHTML = '<span class="dot ok"></span><span>GPS: Locked (Server)</span>';
+                        setText('gpsDetailText', lat.toFixed(5) + ', ' + lon.toFixed(5) + ' / +/- ' + Math.round(acc) + ' m');
+                        setText('gpsAgeChip', 'Server');
+                    }
                 })
                 .catch(() => {
                     setText('statusText', 'STATUS UNAVAILABLE');
