@@ -1,0 +1,34 @@
+# SSL Certificates (auto-generated)
+cert.pem
+key.pem
+*.pem
+
+# Recordings folder
+recordings/
+*.mp4
+*.h264
+*.csv
+*.jpg
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Environment
+.env
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,107 @@
+{
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\generate_certs.sh": {
+    "mtime": 1770830276.0,
+    "ast_hash": "556f348f5ddf352844b0bdbf2d53c32e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\init.py": {
+    "mtime": 1779739621.5986862,
+    "ast_hash": "608c4b2b2cdc0d19dfff0f0fe0ac470c",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\main.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "f31a6ed98362a844dab5ed94828ab434",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\uploader.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "d180828ae4c98dece9a0838e65e6905c",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tests\\test_uploader.py": {
+    "mtime": 1779739735.6363974,
+    "ast_hash": "6edcfc4e67a47239ebe06dedc082ddfa",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\camera.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "e16b4376fd594455ee5c1c3da2aee8d9",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\gpio_handler.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "e5b1e1f2017c7828dad742c97cf7f0c6",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\merger.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "8226fd13efdc0c04e5099fd2f7dc0bc4",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\recorder.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "0ae98c9535133e905c8c3a8e0fde6299",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\utils.py": {
+    "mtime": 1770830276.0,
+    "ast_hash": "b1f4266cfe8a3aa8ad6b6f74fbf6e33b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\README.md": {
+    "mtime": 1779708019.2622583,
+    "ast_hash": "b620c4ffd6d1451c594600cd9b28b0f7",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\templates\\index.html": {
+    "mtime": 1770830276.0,
+    "ast_hash": "75298dc3ba32cdf578c29f5742e30be6",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tests\\test_v1_static.py": {
+    "mtime": 1779739705.7070022,
+    "ast_hash": "59b60d5d3993f354236ba596901b21c8",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\host_mjpeg_viewer.py": {
+    "mtime": 1779707977.1117022,
+    "ast_hash": "00d23acb66b92ecbb408667d0237ff2c",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\pi_smoke_check.py": {
+    "mtime": 1779739664.4120417,
+    "ast_hash": "923e3f73b91146c65b77f77357e1f4e4",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\start_rtsp_stream.sh": {
+    "mtime": 1779707986.277534,
+    "ast_hash": "ccce992cb6c2e5ed0ac95e00d8ef313a",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\requirements-host.txt": {
+    "mtime": 1779707991.4118433,
+    "ast_hash": "72de0e59aac3bcba0be525b3bbe87296",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\requirements.txt": {
+    "mtime": 1779707989.175778,
+    "ast_hash": "b5b7a524a4db09e71f4fad7abd6639bc",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\TEAM_INTERFACE_HANDOFF.md": {
+    "mtime": 1779736493.1899533,
+    "ast_hash": "d2d6231f8a5fed6121c28892d0f51fae",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\V1_PROGRESS.md": {
+    "mtime": 1779739760.6634738,
+    "ast_hash": "77e5a649fc1024938b9b5ecbf5e39e42",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\V1_STREAMING_PLAN.md": {
+    "mtime": 1779739748.3285136,
+    "ast_hash": "6181e979c8494fd32cf67e124ec06d62",
+    "semantic_hash": ""
+  }
+}

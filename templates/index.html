@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Helmet {{ version }}</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        :root {
+            --bg: #090b0f;
+            --panel: #121721;
+            --panel-2: #171d28;
+            --line: #283140;
+            --text: #f4f7fb;
+            --muted: #98a4b5;
+            --green: #34d399;
+            --blue: #38bdf8;
+            --amber: #f59e0b;
+            --red: #ef4444;
+            --violet: #a78bfa;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            letter-spacing: 0;
+        }
+
+        button, input { font: inherit; }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: 0.7;
+        }
+
+        .app-shell {
+            width: min(1240px, 100%);
+            margin: 0 auto;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: grid;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(9, 11, 15, 0.94);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(10px);
+        }
+
+        .brand-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 800;
+        }
+
+        .version {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-strip {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .status-pill, .metric, .chip {
+            min-width: 0;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            border-radius: 8px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 38px;
+            padding: 8px 10px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: var(--muted);
+            flex: 0 0 auto;
+        }
+
+        .dot.ok { background: var(--green); box-shadow: 0 0 12px rgba(52, 211, 153, 0.7); }
+        .dot.warn { background: var(--amber); }
+        .dot.error { background: var(--red); }
+
+        .dashboard {
+            display: grid;
+            gap: 12px;
+            padding: 12px;
+        }
+
+        .live-panel {
+            display: grid;
+            gap: 10px;
+        }
+
+        .feed-container {
+            position: relative;
+            overflow: hidden;
+            background: #000;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            aspect-ratio: 4 / 3;
+        }
+
+        .feed-container img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+        }
+
+        .feed-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .rec-indicator {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(239, 68, 68, 0.92);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .rec-indicator.active { display: flex; animation: pulse 1.4s infinite; }
+
+        .audio-indicator {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: none;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(52, 211, 153, 0.9);
+            color: #04100b;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .audio-indicator.active { display: block; }
+        .audio-indicator.muted { display: block; background: rgba(239, 68, 68, 0.9); color: #fff; }
+
+        .ai-overlay-hook {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.72; }
+        }
+
+        .control-bar {
+            display: grid;
+            grid-template-columns: 1fr 52px 1fr;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px 10px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+            transition: transform 0.16s ease, filter 0.16s ease;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn:hover { filter: brightness(1.08); }
+
+        .btn-record { background: var(--red); }
+        .btn-record.recording { background: #525866; }
+        .btn-photo { background: var(--blue); color: #06111a; }
+        .btn-shutdown { background: #8f1d1d; }
+
+        .btn-audio-toggle {
+            width: 52px;
+            border: 1px solid rgba(52, 211, 153, 0.7);
+            border-radius: 8px;
+            background: rgba(52, 211, 153, 0.14);
+            color: var(--green);
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .btn-audio-toggle.muted {
+            border-color: rgba(239, 68, 68, 0.75);
+            background: rgba(239, 68, 68, 0.14);
+            color: var(--red);
+        }
+
+        .stream-grid, .side-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .stream-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .metric {
+            padding: 10px;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 5px;
+            overflow-wrap: anywhere;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .metric-value.good { color: var(--green); }
+        .metric-value.warn { color: var(--amber); }
+        .metric-value.bad { color: var(--red); }
+
+        .panel {
+            border-top: 1px solid var(--line);
+            padding-top: 12px;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .panel-title {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 28px;
+            padding: 5px 8px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .media-list {
+            display: grid;
+            gap: 10px;
+            padding-bottom: 40px;
+        }
+
+        .media-item, .batch-group, .recording-session-card {
+            position: relative;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            padding: 12px;
+        }
+
+        .recording-session-card {
+            border-color: rgba(239, 68, 68, 0.8);
+            background: rgba(127, 29, 29, 0.28);
+        }
+
+        .recording-session-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .recording-icon {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--red);
+            animation: pulse 1.2s infinite;
+        }
+
+        .recording-session-title, .batch-title {
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .recording-session-info, .batch-info {
+            color: var(--muted);
+            font-size: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .recording-chunks-list, .chunk-list {
+            display: grid;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .recording-chunk-item, .chunk-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 8px;
+            align-items: center;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px;
+        }
+
+        .chunk-item {
+            cursor: pointer;
+        }
+
+        .recording-chunk-name, .chunk-name {
+            overflow: hidden;
+            color: var(--text);
+            font-size: 12px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .recording-chunk-size, .chunk-size {
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .batch-group {
+            background: #111b2b;
+            border-color: #23405f;
+        }
+
+        .batch-header, .media-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .batch-stats, .batch-actions, .media-actions, .chunk-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .batch-stat, .chunk-status, .status-badge {
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 5px 8px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .chunk-status.uploaded, .status-badge.uploaded { background: rgba(52, 211, 153, 0.18); color: var(--green); }
+        .chunk-status.uploading, .status-badge.uploading { background: rgba(56, 189, 248, 0.18); color: var(--blue); }
+        .chunk-status.failed, .status-badge.failed { background: rgba(239, 68, 68, 0.18); color: var(--red); }
+        .chunk-status.converting, .status-badge.converting { background: rgba(245, 158, 11, 0.18); color: var(--amber); }
+        .chunk-status.incomplete, .status-badge.incomplete { background: rgba(167, 139, 250, 0.18); color: var(--violet); }
+
+        .media-item.uploaded { border-color: rgba(52, 211, 153, 0.7); }
+        .media-item.failed { border-color: rgba(239, 68, 68, 0.7); }
+        .media-item.incomplete { border-color: rgba(167, 139, 250, 0.7); }
+
+        .media-header {
+            cursor: pointer;
+            align-items: flex-start;
+        }
+
+        .media-name {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .media-size {
+            flex: 0 0 auto;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .action-btn, .batch-btn, .chunk-btn {
+            flex: 1 1 86px;
+            min-width: 76px;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .btn-copy-link { background: var(--violet); color: #090b0f; }
+        .btn-upload, .batch-btn-upload, .chunk-btn-upload { background: var(--green); color: #04100b; }
+        .btn-delete, .batch-btn-delete { background: var(--red); color: #fff; }
+        .btn-rename, .batch-btn-rename { background: var(--amber); color: #111; }
+
+        .status-badge {
+            position: static;
+            display: inline-flex;
+            margin-bottom: 8px;
+        }
+
+        .empty-state {
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            padding: 28px 14px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            z-index: 3000;
+            display: none;
+            transform: translateX(-50%);
+            border-radius: 8px;
+            background: var(--green);
+            color: #04100b;
+            padding: 12px 16px;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .copy-notification.show { display: block; }
+
+        .modal, .rename-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.94);
+        }
+
+        .modal.active { display: block; }
+        .rename-modal.active { display: flex; align-items: center; justify-content: center; padding: 16px; }
+
+        .modal-content {
+            width: min(960px, 100%);
+            margin: 0 auto;
+            padding: 14px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .modal-title {
+            min-width: 0;
+            overflow-wrap: anywhere;
+            color: var(--green);
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .modal-close {
+            flex: 0 0 auto;
+            border-radius: 8px;
+            background: var(--red);
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .modal-video, .photo-preview {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .modal-video {
+            max-height: 42vh;
+            margin-bottom: 12px;
+        }
+
+        .modal-map {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 320px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+        }
+
+        #map { width: 100%; height: 100%; }
+
+        .map-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .map-info {
+            display: grid;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .map-info-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            padding: 9px;
+            font-size: 12px;
+        }
+
+        .map-label { color: var(--muted); font-weight: 800; }
+        .map-value { color: var(--text); text-align: right; overflow-wrap: anywhere; }
+
+        .rename-dialog {
+            width: min(420px, 100%);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            padding: 18px;
+        }
+
+        .rename-title {
+            margin-bottom: 12px;
+            color: var(--green);
+            font-size: 15px;
+            font-weight: 900;
+        }
+
+        .rename-input {
+            width: 100%;
+            margin-bottom: 12px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #090b0f;
+            color: var(--text);
+            padding: 12px;
+        }
+
+        .rename-input:focus {
+            border-color: var(--green);
+            outline: 0;
+        }
+
+        .rename-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .rename-btn {
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .rename-btn-save { background: var(--green); color: #04100b; }
+        .rename-btn-cancel { background: #3b4351; color: #fff; }
+
+        @media (min-width: 860px) {
+            .topbar {
+                grid-template-columns: auto 1fr;
+                align-items: center;
+            }
+
+            .status-strip {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+
+            .dashboard {
+                grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.8fr);
+                align-items: start;
+            }
+
+            .media-panel {
+                grid-column: 1 / -1;
+            }
+
+            .feed-container {
+                min-height: 520px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="copyNotification" class="copy-notification">Download link copied</div>
+
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-row">
+                <h1>Smart Helmet</h1>
+                <div class="version">{{ version }}</div>
+            </div>
+            <div class="status-strip">
+                <div class="status-pill"><span id="healthDot" class="dot warn"></span><span id="statusText">STANDBY</span></div>
+                <div id="gpsStatus" class="status-pill gps-status"><span class="dot warn"></span><span>GPS: Initializing</span></div>
+                <div class="status-pill"><span class="dot ok"></span><span id="storageText">Storage: -- GB</span></div>
+                <div class="status-pill"><span class="dot warn"></span><span id="streamSummary">Stream: warming</span></div>
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <section class="live-panel" aria-label="Live view">
+                <div class="feed-container">
+                    <img id="videoFeed" src="/video_feed" alt="Live MJPEG feed">
+                    <div class="feed-overlay">
+                        <div id="recIndicator" class="rec-indicator"><span>REC</span><span id="recTimer">00:00</span></div>
+                        <div id="audioIndicator" class="audio-indicator">AUDIO</div>
+                        <div class="ai-overlay-hook" id="aiOverlay"></div>
+                    </div>
+                </div>
+
+                <div class="stream-grid">
+                    <div class="metric">
+                        <div class="metric-label">Frame Age</div>
+                        <div id="frameAgeText" class="metric-value warn">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Frame Count</div>
+                        <div id="frameCountText" class="metric-value">--</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Stream URL</div>
+                        <div id="streamUrlText" class="metric-value">/video_feed</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Mode</div>
+                        <div id="streamModeText" class="metric-value">MJPEG V1</div>
+                    </div>
+                </div>
+
+                <div class="control-bar" aria-label="Primary controls">
+                    <button id="btnRecord" class="btn btn-record" onclick="toggleRecord()">REC VIDEO</button>
+                    <button id="btnAudio" class="btn-audio-toggle" onclick="toggleAudio()" title="Toggle audio">A</button>
+                    <button class="btn btn-photo" onclick="capturePhoto()">CAPTURE PHOTO</button>
+                </div>
+            </section>
+
+            <aside class="side-grid" aria-label="Device status">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Device</h2>
+                        <span id="deviceStateChip" class="chip"><span class="dot warn"></span> Checking</span>
+                    </div>
+                    <div class="stream-grid">
+                        <div class="metric">
+                            <div class="metric-label">Device ID</div>
+                            <div id="deviceIdText" class="metric-value">--</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Hostname</div>
+                            <div id="hostnameText" class="metric-value">--</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">LAN IP</div>
+                            <div id="lanText" class="metric-value">--</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">Audio</div>
+                            <div id="audioStateText" class="metric-value">--</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Host Stream</h2>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Open From Host</div>
+                        <div id="hostUrlText" class="metric-value">Waiting for stream info</div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">GPS</h2>
+                        <span id="gpsAgeChip" class="chip">Waiting</span>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Current Position</div>
+                        <div id="gpsDetailText" class="metric-value">Browser GPS initializing</div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">AI Host</h2>
+                        <span class="chip"><span class="dot warn"></span> Not connected</span>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-label">Overlay Status</div>
+                        <div class="metric-value">Reserved for external host overlays</div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Power</h2>
+                    </div>
+                    <button id="btnShutdown" class="btn btn-shutdown" onclick="shutdownDevice()">SHUTDOWN</button>
+                </section>
+            </aside>
+
+            <section class="panel media-panel" aria-label="Media">
+                <div class="panel-header">
+                    <h2 class="panel-title">Media</h2>
+                    <span id="mediaCountChip" class="chip">Loading</span>
+                </div>
+                <div id="mediaList" class="media-list"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Video</div>
+                <button class="modal-close" onclick="closePreview()">Close</button>
+            </div>
+            <video id="previewVideo" class="modal-video" controls></video>
+            <div class="modal-map">
+                <div id="map"></div>
+                <div id="mapLoading" class="map-loading">Loading GPS</div>
+            </div>
+            <div class="map-info" id="mapInfo"></div>
+        </div>
+    </div>
+
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="photoTitle">Photo</div>
+                <button class="modal-close" onclick="closePhotoModal()">Close</button>
+            </div>
+            <img id="photoPreview" class="photo-preview" src="" alt="Photo preview">
+            <div class="media-actions">
+                <button class="action-btn btn-upload" onclick="uploadImage(document.getElementById('photoTitle').textContent)">Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="renameModal" class="rename-modal">
+        <div class="rename-dialog">
+            <div class="rename-title" id="renameTitle">Rename Video</div>
+            <input type="text" id="renameInput" class="rename-input" placeholder="Enter new name">
+            <div class="rename-buttons">
+                <button class="rename-btn rename-btn-save" onclick="saveRename()">Save</button>
+                <button class="rename-btn rename-btn-cancel" onclick="closeRenameModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let isRecording = false;
+        let audioEnabled = true;
+        let currentRenameFile = null;
+        let currentRenameType = null;
+        let currentRenameBase = null;
+        let currentRecordingFiles = [];
+        let previewMap = null;
+        let gpsWatchId = null;
+        let hasGPS = false;
+        let lastGPSUpdate = 0;
+        let recordingStartTime = null;
+        let timerInterval = null;
+        let gpsPoints = [];
+        let currentMarker = null;
+        let wakeLock = null;
+
+        const $ = (id) => document.getElementById(id);
+        const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[c]));
+        const jsArg = (value) => JSON.stringify(String(value ?? ''));
+
+        async function requestWakeLock() {
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {});
+                } catch (err) {
+                    console.error('[WAKE LOCK]', err.name, err.message);
+                }
+            }
+        }
+
+        function setText(id, text) {
+            const el = $(id);
+            if (el) el.textContent = text;
+        }
+
+        function formatAge(seconds) {
+            if (seconds === null || seconds === undefined) return '--';
+            if (seconds < 1) return Math.round(seconds * 1000) + ' ms';
+            return seconds.toFixed(1) + ' s';
+        }
+
+        function startRecordingTimer() {
+            recordingStartTime = Date.now();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+                const mins = Math.floor(elapsed / 60);
+                const secs = elapsed % 60;
+                setText('recTimer', String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0'));
+            }, 1000);
+        }
+
+        function stopRecordingTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            setText('recTimer', '00:00');
+        }
+
+        function startGPS() {
+            if (!('geolocation' in navigator)) {
+                $('gpsStatus').innerHTML = '<span class="dot error"></span><span>GPS: Not supported</span>';
+                setText('gpsDetailText', 'Browser GPS is not supported');
+                return;
+            }
+
+            gpsWatchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    hasGPS = true;
+                    lastGPSUpdate = Date.now();
+                    const gpsData = {
+                        lat: position.coords.latitude,
+                        lon: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        speed: position.coords.speed || 0.0
+                    };
+
+                    fetch('/api/update_gps', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(gpsData)
+                    });
+
+                    $('gpsStatus').innerHTML = '<span class="dot ok"></span><span>GPS: Locked</span>';
+                    setText('gpsDetailText', gpsData.lat.toFixed(5) + ', ' + gpsData.lon.toFixed(5) + ' / +/- ' + Math.round(gpsData.accuracy || 0) + ' m');
+                    setText('gpsAgeChip', 'Fresh');
+                },
+                function(error) {
+                    console.log('[GPS] Error:', error.message);
+                    $('gpsStatus').innerHTML = '<span class="dot error"></span><span>GPS: Error</span>';
+                    setText('gpsDetailText', error.message);
+                    setText('gpsAgeChip', 'Error');
+                },
+                {enableHighAccuracy: true, maximumAge: 0, timeout: 10000}
+            );
+        }
+
+        function updateGpsAge() {
+            if (hasGPS && (Date.now() - lastGPSUpdate) > 5000) {
+                $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Searching</span>';
+                setText('gpsAgeChip', 'Stale');
+            }
+        }
+
+        function updateStatus() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(d => {
+                    const wasRecording = isRecording;
+                    isRecording = d.is_recording;
+                    audioEnabled = d.audio_enabled;
+                    currentRecordingFiles = d.current_recording || [];
+
+                    if (isRecording && !wasRecording) startRecordingTimer();
+                    if (!isRecording && wasRecording) stopRecordingTimer();
+
+                    setText('statusText', d.status || 'STANDBY');
+                    setText('storageText', 'Storage: ' + (d.storage_free_gb ?? '--') + ' GB');
+                    $('recIndicator').className = 'rec-indicator' + (isRecording ? ' active' : '');
+
+                    const btn = $('btnAudio');
+                    const audioIndicator = $('audioIndicator');
+                    if (audioEnabled) {
+                        btn.className = 'btn-audio-toggle';
+                        btn.textContent = 'A';
+                        audioIndicator.className = 'audio-indicator active';
+                        audioIndicator.textContent = 'AUDIO';
+                        setText('audioStateText', 'Enabled');
+                    } else {
+                        btn.className = 'btn-audio-toggle muted';
+                        btn.textContent = 'M';
+                        audioIndicator.className = 'audio-indicator muted';
+                        audioIndicator.textContent = 'MUTED';
+                        setText('audioStateText', 'Muted');
+                    }
+
+                    const recBtn = $('btnRecord');
+                    if (isRecording) {
+                        recBtn.textContent = 'STOP RECORDING';
+                        recBtn.className = 'btn btn-record recording';
+                    } else {
+                        recBtn.textContent = 'REC VIDEO';
+                        recBtn.className = 'btn btn-record';
+                    }
+
+                    if (currentRecordingFiles.length > 0) loadMedia();
+                })
+                .catch(() => {
+                    setText('statusText', 'STATUS UNAVAILABLE');
+                });
+        }
+
+        function updateRuntimeHealth() {
+            Promise.all([
+                fetch('/api/health').then(r => r.json()),
+                fetch('/api/stream_info').then(r => r.json())
+            ]).then(([health, stream]) => {
+                const ok = Boolean(health.ok) && stream.status !== 'error';
+                const hasFrame = Boolean(stream.has_frame);
+                $('healthDot').className = 'dot ' + (ok && hasFrame ? 'ok' : ok ? 'warn' : 'error');
+                $('deviceStateChip').innerHTML = '<span class="dot ' + (ok ? 'ok' : 'error') + '"></span>' + (ok ? 'Online' : 'Error');
+                setText('deviceIdText', health.device_id || '--');
+                setText('hostnameText', health.hostname || '--');
+                setText('lanText', (health.lan_addresses || []).join(', ') || '--');
+
+                const frameAge = stream.last_frame_age_seconds;
+                const ageClass = frameAge === null || frameAge === undefined ? 'warn' : frameAge < 2 ? 'good' : 'bad';
+                $('frameAgeText').className = 'metric-value ' + ageClass;
+                setText('frameAgeText', formatAge(frameAge));
+                setText('frameCountText', String(stream.frame_count ?? health.stream_frame_count ?? '--'));
+                setText('streamModeText', 'MJPEG / ' + (stream.width || 640) + 'x' + (stream.height || '--') + ' / Q' + (stream.jpeg_quality || '--'));
+                setText('streamSummary', 'Stream: ' + (stream.status || 'warming'));
+
+                const bestHostUrl = (stream.host_urls || [])[0] || (health.lan_addresses || [])[0] && ('http://' + health.lan_addresses[0] + ':' + (health.http_port || 5001) + '/video_feed');
+                setText('hostUrlText', bestHostUrl || 'No LAN URL reported');
+                setText('streamUrlText', stream.url || health.stream_url || '/video_feed');
+            }).catch(() => {
+                $('healthDot').className = 'dot error';
+                setText('streamSummary', 'Stream: unavailable');
+                setText('deviceStateChip', 'Unavailable');
+            });
+        }
+
+        function toggleRecord() {
+            fetch(isRecording ? '/api/stop_record' : '/api/start_record', {method: isRecording ? 'POST' : 'GET'});
+            setTimeout(updateStatus, 500);
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            fetch('/api/toggle_audio', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({enabled: audioEnabled})
+            }).then(r => r.json()).then(d => {
+                audioEnabled = d.audio_enabled;
+                updateStatus();
+            });
+        }
+
+        function capturePhoto() {
+            fetch('/api/capture_photo').then(() => {
+                setTimeout(loadMedia, 1000);
+            });
+        }
+
+        function copyDownloadLink(filename) {
+            const downloadUrl = window.location.origin + '/api/download/' + filename;
+            navigator.clipboard.writeText(downloadUrl).then(() => {
+                $('copyNotification').className = 'copy-notification show';
+                setTimeout(() => {$('copyNotification').className = 'copy-notification';}, 2000);
+            }).catch(() => {
+                alert('Download link: ' + downloadUrl);
+            });
+        }
+
+        function showRenameModal(filename, type = 'single', base = null) {
+            currentRenameFile = filename;
+            currentRenameType = type;
+            currentRenameBase = base;
+            if (type === 'batch') {
+                setText('renameTitle', 'Rename Video Session');
+                $('renameInput').value = base.replace('video_', '').replace(/_/g, ' ');
+            } else {
+                setText('renameTitle', 'Rename Video');
+                $('renameInput').value = filename.replace('video_', '').replace('.mp4', '').replace(/_/g, ' ');
+            }
+            $('renameModal').className = 'rename-modal active';
+            $('renameInput').focus();
+        }
+
+        function closeRenameModal() {
+            $('renameModal').className = 'rename-modal';
+            currentRenameFile = null;
+            currentRenameType = null;
+            currentRenameBase = null;
+        }
+
+        function saveRename() {
+            const newName = $('renameInput').value.trim();
+            if (!newName) {
+                alert('Please enter a name');
+                return;
+            }
+
+            const endpoint = currentRenameType === 'batch' ? '/api/rename_batch' : '/api/rename_file';
+            const payload = currentRenameType === 'batch'
+                ? {base: currentRenameBase, new_name: newName}
+                : {old_name: currentRenameFile, new_name: newName};
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(d => {
+                if (d.success) {
+                    closeRenameModal();
+                    loadMedia();
+                } else {
+                    alert('Failed: ' + (d.error || 'Unknown'));
+                }
+            });
+        }
+
+        function loadMedia() {
+            fetch('/api/list_media')
+                .then(r => r.json())
+                .then(data => {
+                    const mediaList = $('mediaList');
+                    setText('mediaCountChip', data.length + ' item' + (data.length === 1 ? '' : 's'));
+
+                    if (data.length === 0 && currentRecordingFiles.length === 0) {
+                        mediaList.innerHTML = '<div class="empty-state">No media files yet</div>';
+                        return;
+                    }
+
+                    let html = '';
+                    if (currentRecordingFiles.length > 0) {
+                        html += '<div class="recording-session-card">';
+                        html += '<div class="recording-session-header"><div class="recording-icon"></div><div class="recording-session-title">Recording in progress</div></div>';
+                        html += '<div class="recording-session-info">Started: ' + htmlEscape(currentRecordingFiles[0]?.started || '') + '</div>';
+                        html += '<div class="recording-chunks-list">';
+                        for (let chunk of currentRecordingFiles) {
+                            html += '<div class="recording-chunk-item">';
+                            html += '<div class="recording-chunk-name">' + htmlEscape(chunk.name) + '</div>';
+                            html += '<div class="recording-chunk-size">' + htmlEscape(chunk.size) + ' MB</div>';
+                            html += '</div>';
+                        }
+                        html += '</div></div>';
+                    }
+
+                    for (let item of data) {
+                        html += item.type === 'batch' ? renderBatchGroup(item) : renderMediaItem(item);
+                    }
+                    mediaList.innerHTML = html;
+                });
+        }
+
+        function renderBatchGroup(batch) {
+            let html = '<div class="batch-group">';
+            html += '<div class="batch-header"><div><div class="batch-title">Video Session (' + htmlEscape(batch.chunk_count) + ' chunks)</div><div class="batch-info">' + htmlEscape(batch.base) + '</div></div></div>';
+            html += '<div class="batch-stats">';
+            html += '<div class="batch-stat">' + htmlEscape(Number(batch.total_size || 0).toFixed(2)) + ' MB</div>';
+            if (batch.uploaded_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.uploaded_count) + ' uploaded</div>';
+            if (batch.failed_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.failed_count) + ' failed</div>';
+            if (batch.converting_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.converting_count) + ' converting</div>';
+            if (batch.incomplete_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.incomplete_count) + ' incomplete</div>';
+            html += '</div><div class="batch-actions">';
+            if (batch.uploaded_count < batch.chunk_count && batch.incomplete_count === 0) {
+                html += '<button class="batch-btn batch-btn-upload" onclick="batchUpload(' + jsArg(batch.base) + ')">Upload All</button>';
+            }
+            html += '<button class="batch-btn batch-btn-rename" onclick="showRenameModal(' + jsArg(batch.base) + ', \'batch\', ' + jsArg(batch.base) + ')">Rename</button>';
+            html += '<button class="batch-btn batch-btn-delete" onclick="deleteBatch(' + jsArg(batch.base) + ')">Delete</button>';
+            html += '</div><div class="chunk-list">';
+
+            for (let chunk of batch.chunks) {
+                const canUpload = !chunk.uploaded && !chunk.converting && !chunk.incomplete;
+                html += '<div class="chunk-item" onclick="showPreview(' + jsArg(chunk.name) + ')">';
+                html += '<div class="chunk-name">' + htmlEscape(chunk.name) + '</div>';
+                html += '<div class="chunk-info"><span class="chunk-size">' + htmlEscape(chunk.size) + ' MB</span>' + renderChunkStatus(chunk) + '</div>';
+                if (canUpload) {
+                    html += '<div class="chunk-actions"><button class="chunk-btn chunk-btn-upload" onclick="event.stopPropagation(); uploadFile(' + jsArg(chunk.name) + ')">Upload</button></div>';
+                }
+                html += '</div>';
+            }
+            html += '</div></div>';
+            return html;
+        }
+
+        function renderChunkStatus(item) {
+            if (item.uploaded) return '<span class="chunk-status uploaded">Uploaded</span>';
+            if (item.failed) return '<span class="chunk-status failed">Failed</span>';
+            if (item.converting) return '<span class="chunk-status converting">Converting</span>';
+            if (item.incomplete) return '<span class="chunk-status incomplete">Incomplete</span>';
+            if (item.upload_status && item.upload_status.status === 'uploading') return '<span class="chunk-status uploading">Uploading</span>';
+            return '';
+        }
+
+        function renderMediaItem(item) {
+            let classes = 'media-item';
+            if (item.uploaded) classes += ' uploaded';
+            if (item.failed) classes += ' failed';
+            if (item.incomplete) classes += ' incomplete';
+
+            const statusBadge = renderStatusBadge(item);
+            const clickHandler = item.type === 'image' ? 'showPhotoModal(' + jsArg(item.name) + ')' : 'showPreview(' + jsArg(item.name) + ')';
+            let html = '<div class="' + classes + '">';
+            html += statusBadge;
+            html += '<div class="media-header" onclick="' + clickHandler + '">';
+            html += '<div class="media-name">' + (item.type === 'image' ? 'Photo ' : 'Video ') + htmlEscape(item.name) + '</div>';
+            html += '<div class="media-size">' + htmlEscape(item.size) + ' MB</div>';
+            html += '</div><div class="media-actions">';
+            html += '<button class="action-btn btn-copy-link" onclick="event.stopPropagation(); copyDownloadLink(' + jsArg(item.name) + ')">Copy Link</button>';
+            if (item.type === 'video' && !item.uploaded && !item.converting && !item.incomplete) {
+                html += '<button class="action-btn btn-upload" onclick="event.stopPropagation(); uploadFile(' + jsArg(item.name) + ')">Upload</button>';
+            }
+            if (item.type === 'image' && !item.uploaded) {
+                html += '<button class="action-btn btn-upload" onclick="event.stopPropagation(); uploadImage(' + jsArg(item.name) + ')">Upload</button>';
+            }
+            if (item.type === 'video' && !item.converting) {
+                html += '<button class="action-btn btn-rename" onclick="event.stopPropagation(); showRenameModal(' + jsArg(item.name) + ')">Rename</button>';
+            }
+            html += '<button class="action-btn btn-delete" onclick="event.stopPropagation(); deleteFile(' + jsArg(item.name) + ')">Delete</button>';
+            html += '</div></div>';
+            return html;
+        }
+
+        function renderStatusBadge(item) {
+            if (item.uploaded) return '<div class="status-badge uploaded">Uploaded</div>';
+            if (item.failed) return '<div class="status-badge failed">Failed</div>';
+            if (item.converting) return '<div class="status-badge converting">Converting</div>';
+            if (item.incomplete) return '<div class="status-badge incomplete">Incomplete</div>';
+            if (item.upload_status && item.upload_status.status === 'uploading') return '<div class="status-badge uploading">Uploading</div>';
+            return '';
+        }
+
+        function showPreview(filename) {
+            setText('modalTitle', filename);
+            $('previewVideo').src = '/data/' + filename;
+            $('previewModal').className = 'modal active';
+            loadGPSForVideo(filename);
+        }
+
+        function loadGPSForVideo(filename) {
+            $('mapLoading').style.display = 'block';
+            setText('mapLoading', 'Loading GPS');
+            fetch('/api/get_gps_data/' + filename)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        setText('mapLoading', 'No GPS data');
+                        $('mapInfo').innerHTML = '<div class="empty-state">No GPS data available</div>';
+                        return;
+                    }
+
+                    gpsPoints = data.points || [];
+                    if (!gpsPoints.length) {
+                        setText('mapLoading', 'No GPS points');
+                        return;
+                    }
+
+                    $('mapLoading').style.display = 'none';
+                    if (!previewMap) {
+                        previewMap = L.map('map').setView([gpsPoints[0].lat, gpsPoints[0].lon], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: 'OpenStreetMap'
+                        }).addTo(previewMap);
+                    } else {
+                        previewMap.setView([gpsPoints[0].lat, gpsPoints[0].lon], 15);
+                    }
+
+                    previewMap.eachLayer(layer => {
+                        if (layer instanceof L.Polyline || layer instanceof L.Marker || layer instanceof L.CircleMarker) {
+                            previewMap.removeLayer(layer);
+                        }
+                    });
+
+                    const coords = gpsPoints.map(p => [p.lat, p.lon]);
+                    const polyline = L.polyline(coords, {color: '#34d399', weight: 4}).addTo(previewMap);
+                    L.marker([gpsPoints[0].lat, gpsPoints[0].lon]).addTo(previewMap);
+                    L.marker([gpsPoints[gpsPoints.length - 1].lat, gpsPoints[gpsPoints.length - 1].lon]).addTo(previewMap);
+                    previewMap.fitBounds(polyline.getBounds());
+                    setTimeout(() => previewMap.invalidateSize(), 100);
+
+                    const video = $('previewVideo');
+                    video.ontimeupdate = function() {
+                        const videoDuration = video.duration;
+                        if (gpsPoints.length > 0 && videoDuration > 0) {
+                            const index = Math.floor((video.currentTime / videoDuration) * (gpsPoints.length - 1));
+                            const point = gpsPoints[index];
+                            if (currentMarker) previewMap.removeLayer(currentMarker);
+                            currentMarker = L.circleMarker([point.lat, point.lon], {
+                                radius: 8,
+                                color: '#ef4444',
+                                fillColor: '#ef4444',
+                                fillOpacity: 1
+                            }).addTo(previewMap);
+                        }
+                    };
+
+                    $('mapInfo').innerHTML =
+                        '<div class="map-info-row"><div class="map-label">Total Points</div><div class="map-value">' + gpsPoints.length + '</div></div>' +
+                        '<div class="map-info-row"><div class="map-label">Start</div><div class="map-value">' + data.start.lat.toFixed(5) + ', ' + data.start.lon.toFixed(5) + '</div></div>' +
+                        '<div class="map-info-row"><div class="map-label">End</div><div class="map-value">' + data.end.lat.toFixed(5) + ', ' + data.end.lon.toFixed(5) + '</div></div>';
+                })
+                .catch(() => {
+                    setText('mapLoading', 'Error loading GPS');
+                });
+        }
+
+        function closePreview() {
+            $('previewModal').className = 'modal';
+            $('previewVideo').src = '';
+            gpsPoints = [];
+            if (currentMarker && previewMap) {
+                previewMap.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+        }
+
+        function showPhotoModal(filename) {
+            setText('photoTitle', filename);
+            $('photoPreview').src = '/data/' + filename;
+            $('photoModal').className = 'modal active';
+        }
+
+        function closePhotoModal() {
+            $('photoModal').className = 'modal';
+            $('photoPreview').src = '';
+        }
+
+        function uploadFile(filename) {
+            if (!confirm('Upload ' + filename + ' to cloud?')) return;
+            fetch('/api/upload_cloud', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({filename: filename})
+            }).then(() => setTimeout(loadMedia, 500));
+        }
+
+        function uploadImage(filename) {
+            if (!confirm('Upload ' + filename + ' to cloud?')) return;
+            fetch('/api/upload_image', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({filename: filename})
+            }).then(() => setTimeout(loadMedia, 500));
+        }
+
+        function batchUpload(base) {
+            if (!confirm('Upload all chunks in this session?')) return;
+            fetch('/api/batch_upload', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({base: base})
+            }).then(() => setTimeout(loadMedia, 500));
+        }
+
+        function deleteFile(filename) {
+            if (!confirm('Delete ' + filename + '?')) return;
+            fetch('/api/delete_file', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({filename: filename})
+            }).then(loadMedia);
+        }
+
+        function deleteBatch(base) {
+            if (!confirm('Delete entire video session?')) return;
+            fetch('/api/delete_batch', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({base: base})
+            }).then(loadMedia);
+        }
+
+        function shutdownDevice() {
+            if (!confirm('Power off the device now?')) return;
+            const btn = $('btnShutdown');
+            btn.disabled = true;
+            btn.textContent = 'SHUTTING DOWN';
+            fetch('/api/shutdown', {method: 'POST'})
+                .then(r => r.json())
+                .then(d => {
+                    if (d && d.success) alert('Shutdown initiated. The device will power off shortly.');
+                    else alert('Failed to initiate shutdown: ' + (d.error || 'Unknown'));
+                })
+                .catch(() => alert('Failed to initiate shutdown'))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = 'SHUTDOWN';
+                });
+        }
+
+        requestWakeLock();
+        document.addEventListener('click', requestWakeLock);
+        startGPS();
+        updateStatus();
+        updateRuntimeHealth();
+        loadMedia();
+        setInterval(updateGpsAge, 3000);
+        setInterval(updateStatus, 2000);
+        setInterval(updateRuntimeHealth, 3000);
+        setInterval(loadMedia, 3000);
+    </script>
+</body>
+</html>

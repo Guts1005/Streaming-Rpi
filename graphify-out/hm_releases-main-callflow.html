@@ -1,0 +1,2376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hm_releases-main — Complete Call Flow &amp; Architecture Documentation</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+:root {
+  --bg: #0f172a; --surface: #1e293b; --border: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+  --warn: #fbbf24; --err: #f87171; --ok: #34d399;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+.container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+h1 { font-size: 2.4rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--accent), #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.7rem; margin: 48px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+h3 { font-size: 1.25rem; margin: 32px 0 12px; color: var(--accent); }
+h4 { font-size: 1.05rem; margin: 20px 0 8px; color: var(--warn); }
+p { margin: 8px 0; color: var(--muted); }
+.subtitle { color: var(--muted); font-size: 1.1rem; margin-bottom: 32px; }
+.mermaid { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 20px 0; overflow-x: auto; position: relative; }
+.mermaid.is-enhanced { padding: 0; overflow: hidden; min-height: 260px; }
+.mermaid-viewport { padding: 54px 24px 24px; overflow: hidden; cursor: grab; touch-action: none; min-height: 260px; }
+.mermaid-viewport.is-dragging { cursor: grabbing; }
+.mermaid-viewport svg { max-width: none !important; height: auto; transform-origin: 0 0; transition: transform 120ms ease; }
+.mermaid-toolbar { position: absolute; top: 10px; right: 10px; z-index: 3; display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(15,23,42,0.92); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.28); }
+.mermaid-toolbar button, .mermaid-toolbar .zoom-level { height: 28px; min-width: 32px; border: 1px solid var(--border); border-radius: 6px; background: #1e293b; color: var(--text); font: 600 0.78rem system-ui, sans-serif; display: inline-flex; align-items: center; justify-content: center; }
+.mermaid-toolbar button { cursor: pointer; }
+.mermaid-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
+.mermaid-toolbar .zoom-level { min-width: 52px; color: var(--muted); background: transparent; }
+.call-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.92rem; }
+.call-table th { background: #1a2744; color: var(--accent); text-align: left; padding: 10px 14px; border: 1px solid var(--border); }
+.call-table td { padding: 8px 14px; border: 1px solid var(--border); vertical-align: top; }
+.call-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600; }
+.tag-async { background: #7c3aed33; color: #a78bfa; }
+.tag-class { background: #05966933; color: var(--ok); }
+.tag-func { background: #2563eb33; color: var(--accent); }
+.tag-cmd { background: #d9770633; color: var(--warn); }
+.tag-endpoint { background: #dc262633; color: var(--err); }
+.tag-hook { background: #db277733; color: #f472b6; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 16px 0; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; margin: 16px 0; }
+.arrow-chain { font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--accent); padding: 10px; background: rgba(56,189,248,0.06); border-radius: 6px; }
+code { font-family: 'Fira Code', 'Cascadia Code', monospace; background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+ul, ol { margin: 8px 0 8px 24px; color: var(--muted); }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+.nav { position: sticky; top: 0; background: var(--bg); z-index: 10; padding: 12px 0; border-bottom: 1px solid var(--border); display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.9rem; }
+.nav a { text-decoration: none; }
+.nav a:hover { text-decoration: underline; }
+@media (max-width: 768px) { .container { padding: 16px; } h1 { font-size: 1.8rem; } }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>hm_releases-main — Complete Call Flow &amp; Architecture Documentation</h1>
+<p class="subtitle">Generated from graphify knowledge graph: 222 nodes, 272 edges, 18 communities. Commit: unknown</p>
+
+<div class="nav">
+    <a href="#overview">Architecture Overview</a>
+    <a href="#extract-pipeline">Extraction Pipeline</a>
+    <a href="#cli-skills">CLI &amp; Skill Installers</a>
+    <a href="#ingest-cache-update">Ingestion &amp; Updates</a>
+    <a href="#serve-api">Serving API</a>
+    <a href="#tests-fixtures">Tests &amp; Fixtures</a>
+    <a href="#community-10">Community 10</a>
+    <a href="#community-11">Community 11</a>
+    <a href="#community-15">Community 15</a>
+    <a href="#community-16">Community 16</a>
+    <a href="#community-14">Community 14</a>
+    <a href="#community-17">Community 17</a>
+</div>
+
+<!-- ====== Architecture Overview ====== -->
+<h2 id="overview">1. Architecture Overview</h2>
+
+<div class="mermaid">
+
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>27 nodes</small>")
+    class EXTRACT_PIPELINE_5F350230 module;
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>40 nodes</small>")
+    class CLI_SKILLS_9964CBB8 module;
+    INGEST_CACHE_UPDATE_FF457338("Ingestion &amp; Updates<br/><small>89 nodes</small>")
+    class INGEST_CACHE_UPDATE_FF457338 module;
+    SERVE_API_35EC8E86("Serving API<br/><small>32 nodes</small>")
+    class SERVE_API_35EC8E86 module;
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>11 nodes</small>")
+    class TESTS_FIXTURES_B84B1DCC module;
+    COMMUNITY_10_48432F59("Community 10<br/><small>5 nodes</small>")
+    class COMMUNITY_10_48432F59 module;
+    COMMUNITY_11_DE018FC2("Community 11<br/><small>5 nodes</small>")
+    class COMMUNITY_11_DE018FC2 module;
+    COMMUNITY_15_4BECAAD7("Community 15<br/><small>5 nodes</small>")
+    class COMMUNITY_15_4BECAAD7 module;
+    COMMUNITY_16_BD3EE841("Community 16<br/><small>4 nodes</small>")
+    class COMMUNITY_16_BD3EE841 module;
+    COMMUNITY_14_21BC55C3("Community 14<br/><small>2 nodes</small>")
+    class COMMUNITY_14_21BC55C3 module;
+    COMMUNITY_17_648F8D7C("Community 17<br/><small>2 nodes</small>")
+    class COMMUNITY_17_648F8D7C module;
+    EXTRACT_PIPELINE_5F350230 -.-> CLI_SKILLS_9964CBB8
+    CLI_SKILLS_9964CBB8 -.-> INGEST_CACHE_UPDATE_FF457338
+    INGEST_CACHE_UPDATE_FF457338 -.-> SERVE_API_35EC8E86
+    SERVE_API_35EC8E86 -.-> TESTS_FIXTURES_B84B1DCC
+    TESTS_FIXTURES_B84B1DCC -.-> COMMUNITY_10_48432F59
+    COMMUNITY_10_48432F59 -.-> COMMUNITY_11_DE018FC2
+    COMMUNITY_11_DE018FC2 -.-> COMMUNITY_15_4BECAAD7
+    COMMUNITY_15_4BECAAD7 -.-> COMMUNITY_16_BD3EE841
+    COMMUNITY_16_BD3EE841 -.-> COMMUNITY_14_21BC55C3
+    COMMUNITY_14_21BC55C3 -.-> COMMUNITY_17_648F8D7C
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h4>Architecture Layers</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
+      <tr><td>Extraction Pipeline</td><td>27</td><td><code>7, 9</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>40</td><td><code>2, 6</code></td></tr><tr><td>Ingestion &amp; Updates</td><td>89</td><td><code>1, 3, 4, 5, 13</code></td></tr><tr><td>Serving API</td><td>32</td><td><code>0</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>11</td><td><code>8, 12</code></td></tr><tr><td>Community 10</td><td>5</td><td><code>10</code></td></tr><tr><td>Community 11</td><td>5</td><td><code>11</code></td></tr><tr><td>Community 15</td><td>5</td><td><code>15</code></td></tr><tr><td>Community 16</td><td>4</td><td><code>16</code></td></tr><tr><td>Community 14</td><td>2</td><td><code>14</code></td></tr><tr><td>Community 17</td><td>2</td><td><code>17</code></td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Core Flow</h4>
+    <div class="arrow-chain">Extraction Pipeline -&gt; CLI &amp; Skill Installers -&gt; Ingestion &amp; Updates -&gt; Serving API -&gt; Tests &amp; Fixtures -&gt; Community 10 -&gt; Community 11</div>
+  </div>
+</div>
+<div class="grid">
+  <div class="card">
+    <h4>Graph Report Highlights</h4>
+    <ul>
+      <li>222 nodes · 272 edges · 18 communities (12 shown, 6 thin omitted)</li>
+      <li>Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS</li>
+      <li>Token cost: 0 input · 0 output</li>
+      <li>1. `main()` - 14 edges</li>
+      <li>2. `Camera` - 12 edges</li>
+      <li>3. `Smart Helmet Interface Handoff For Codex` - 10 edges</li>
+    </ul>
+  </div>
+</div>
+<hr>
+<!-- ====== 2. Extraction Pipeline ====== -->
+<h2 id="extract-pipeline">2. Extraction Pipeline</h2>
+<p>Extraction Pipeline groups implementation around streaming, planmd, progressmd, codebash, mostly in V1_STREAMING_PLAN.md, V1_PROGRESS.md. This section covers 27 nodes and 25 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Extraction Pipeline (27 nodes, 25 edges)
+    subgraph extract_pipeline_V1_PROGRESS_md_5c487f6e["V1_PROGRESS.md"]
+        hm_releases_main_v1_progress_commands_to_run_on_38d3ab12("Commands To Run On The Raspberry Pi<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0("Prototype V1 Progress<br/><small>V1_PROGRESS.md</small>")
+        v1_progress_md_05aa84c1("V1_PROGRESS.md")
+        hm_releases_main_v1_progress_commands_run_locall_b15d11d0("Commands Run Locally<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_what_is_complete_lo_116ccdad("What Is Complete Locally<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_codeblock_2_80ce3610("code:bash (python -m py_compile init.py...<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_codeblock_5_794be78f("code:bash (python tools/host_mjpeg_view...<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_codeblock_3_d96b50ce("code:bash (python3 init.py)<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_codeblock_4_93a92080("code:bash (python3 tools/pi_smoke_check...<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_codeblock_1_c82bd291("code:text (Local implementation progres...<br/><small>V1_PROGRESS.md</small>")
+        hm_releases_main_v1_progress_codeblock_6_461a250f("code:text (http://&lt;pi-ip&gt;:5001/)<br/><small>V1_PROGRESS.md</small>")
+    end
+    subgraph extract_pipeline_V1_STREAMING_PLAN_md_ea0502a3["V1_STREAMING_PLAN.md"]
+        hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d("Prototype V1 Streaming Plan<br/><small>V1_STREAMING_PLAN.md</small>")
+        hm_releases_main_v1_streaming_plan_phase_1_valid_8ebf0359("Phase 1: Validate Existing MJPEG Stream<br/><small>V1_STREAMING_PLAN.md</small>")
+        hm_releases_main_v1_streaming_plan_phase_2_add_r_e5e35e1f("Phase 2: Add RTSP/H.264 For Low Latency<br/><small>V1_STREAMING_PLAN.md</small>")
+        hm_releases_main_v1_streaming_plan_expected_perf_dada29fc("Expected Performance<br/><small>V1_STREAMING_PLAN.md</small>")
+        hm_releases_main_v1_streaming_plan_notes_ca22b58d("Notes<br/><small>V1_STREAMING_PLAN.md</small>")
+        hm_releases_main_v1_streaming_plan_ports_57992cc6("Ports<br/><small>V1_STREAMING_PLAN.md</small>")
+        hm_releases_main_v1_streaming_plan_responsibilit_3240306a("Responsibility Split<br/><small>V1_STREAMING_PLAN.md</small>")
+    end
+    v1_progress_md_05aa84c1 -->|contains| hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0
+    hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0 -->|contains| hm_releases_main_v1_progress_codeblock_1_c82bd291
+    hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0 -->|contains| hm_releases_main_v1_progress_what_is_complete_lo_116ccdad
+    hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0 -->|contains| hm_releases_main_v1_progress_commands_run_locall_b15d11d0
+    hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0 -->|contains| hm_releases_main_v1_progress_commands_to_run_on_38d3ab12
+    hm_releases_main_v1_progress_commands_run_locall_b15d11d0 -->|contains| hm_releases_main_v1_progress_codeblock_2_80ce3610
+    hm_releases_main_v1_progress_commands_to_run_on_38d3ab12 -->|contains| hm_releases_main_v1_progress_codeblock_3_d96b50ce
+    hm_releases_main_v1_progress_commands_to_run_on_38d3ab12 -->|contains| hm_releases_main_v1_progress_codeblock_4_93a92080
+    hm_releases_main_v1_progress_commands_to_run_on_38d3ab12 -->|contains| hm_releases_main_v1_progress_codeblock_5_794be78f
+    hm_releases_main_v1_progress_commands_to_run_on_38d3ab12 -->|contains| hm_releases_main_v1_progress_codeblock_6_461a250f
+    hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d -->|contains| hm_releases_main_v1_streaming_plan_phase_1_valid_8ebf0359
+    hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d -->|contains| hm_releases_main_v1_streaming_plan_phase_2_add_r_e5e35e1f
+    hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d -->|contains| hm_releases_main_v1_streaming_plan_responsibilit_3240306a
+    hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d -->|contains| hm_releases_main_v1_streaming_plan_ports_57992cc6
+    hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d -->|contains| hm_releases_main_v1_streaming_plan_expected_perf_dada29fc
+    hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d -->|contains| hm_releases_main_v1_streaming_plan_notes_ca22b58d
+    %% Omitted for readability: 9 nodes, 0 edges
+    class hm_releases_main_v1_progress_commands_to_run_on_38d3ab12 concept;
+    class hm_releases_main_v1_progress_prototype_v1_progre_d522f8d0 concept;
+    class v1_progress_md_05aa84c1 concept;
+    class hm_releases_main_v1_progress_commands_run_locall_b15d11d0 concept;
+    class hm_releases_main_v1_progress_what_is_complete_lo_116ccdad concept;
+    class hm_releases_main_v1_progress_codeblock_2_80ce3610 concept;
+    class hm_releases_main_v1_progress_codeblock_5_794be78f concept;
+    class hm_releases_main_v1_progress_codeblock_3_d96b50ce concept;
+    class hm_releases_main_v1_progress_codeblock_4_93a92080 concept;
+    class hm_releases_main_v1_progress_codeblock_1_c82bd291 concept;
+    class hm_releases_main_v1_progress_codeblock_6_461a250f concept;
+    class hm_releases_main_v1_streaming_plan_prototype_v1_f4208c0d concept;
+    class hm_releases_main_v1_streaming_plan_phase_1_valid_8ebf0359 concept;
+    class hm_releases_main_v1_streaming_plan_phase_2_add_r_e5e35e1f concept;
+    class hm_releases_main_v1_streaming_plan_expected_perf_dada29fc concept;
+    class hm_releases_main_v1_streaming_plan_notes_ca22b58d concept;
+    class hm_releases_main_v1_streaming_plan_ports_57992cc6 concept;
+    class hm_releases_main_v1_streaming_plan_responsibilit_3240306a concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>V1_STREAMING_PLAN.md</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing V1_STREAMING_PLAN.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Prototype V1 Streaming Plan</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Prototype V1 Streaming Plan.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Phase 1: Validate Existing MJPEG Stream</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Phase 1: Validate Existing MJPEG Stream.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>code:bash (python3 main.py)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python3 main.py).</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>code:bash (pip install -r requirements-host.txt)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (pip install -r requirements-host.txt).</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>code:bash (python tools/host_mjpeg_viewer.py --discover)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python tools/host_mjpeg_viewer.py --discover).</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001).</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Phase 2: Add RTSP/H.264 For Low Latency</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Phase 2: Add RTSP/H.264 For Low Latency.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>code:bash (sudo apt update)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (sudo apt update).</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>code:bash (RTSP_URL=rtsp://127.0.0.1:8554/pi-cam tools/start_rtsp_strea)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (RTSP_URL=rtsp://127.0.0.1:8554/pi-cam tools/start_rtsp_strea).</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>code:bash (ffplay rtsp://&lt;pi-ip&gt;:8554/pi-cam)</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (ffplay rtsp://&lt;pi-ip&gt;:8554/pi-cam).</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>code:python (cap = cv2.VideoCapture(&quot;rtsp://&lt;pi-ip&gt;:8554/pi-cam&quot;))</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:python (cap = cv2.VideoCapture(&quot;rtsp://&lt;pi-ip&gt;:8554/pi-cam&quot;)).</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>Responsibility Split</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Responsibility Split.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Ports</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Ports.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>Expected Performance</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Expected Performance.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Notes</code><br><small style="color:var(--muted)">V1_STREAMING_PLAN.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Notes.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>V1_PROGRESS.md</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing V1_PROGRESS.md.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Prototype V1 Progress</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Prototype V1 Progress.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>code:text (Local implementation progress: 100%)</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:text (Local implementation progress: 100%).</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>What Is Complete Locally</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing What Is Complete Locally.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>Commands Run Locally</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Commands Run Locally.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>code:bash (python -m py_compile init.py uploader.py tools/host_mjpeg_vi)</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python -m py_compile init.py uploader.py tools/host_mjpeg_vi).</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>Commands To Run On The Raspberry Pi</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Commands To Run On The Raspberry Pi.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>code:bash (python3 init.py)</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python3 init.py).</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001)</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001).</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>code:bash (python tools/host_mjpeg_viewer.py --url http://&lt;pi-ip&gt;:5001/)</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python tools/host_mjpeg_viewer.py --url http://&lt;pi-ip&gt;:5001/).</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>code:text (http://&lt;pi-ip&gt;:5001/)</code><br><small style="color:var(--muted)">V1_PROGRESS.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:text (http://&lt;pi-ip&gt;:5001/).</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>V1_STREAMING_PLAN.md</code></td><td>16 nodes</td></tr>
+<tr><td><code>V1_PROGRESS.md</code></td><td>11 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x25. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 3. CLI & Skill Installers ====== -->
+<h2 id="cli-skills">3. CLI &amp; Skill Installers</h2>
+<p>CLI &amp; Skill Installers groups implementation around interface, mainpy, team, handoffmd, mostly in main.py, TEAM_INTERFACE_HANDOFF.md. This section covers 40 nodes and 57 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: CLI &amp; Skill Installers (40 nodes, 57 edges)
+    hm_releases_main_main_ledcontroller_81896c84("LedController<br/><small>main.py</small>")
+    hm_releases_main_main_run_5b3ab2b4("run()<br/><small>main.py</small>")
+    hm_releases_main_main_get_current_ssid_84a075fc("get_current_ssid()<br/><small>main.py</small>")
+    hm_releases_main_main_countdown_1c8447d3("countdown()<br/><small>main.py</small>")
+    hm_releases_main_main_draw_overlay_2644c64f("draw_overlay()<br/><small>main.py</small>")
+    hm_releases_main_main_init_camera_like_main_ecfceb09("init_camera_like_main()<br/><small>main.py</small>")
+    hm_releases_main_main_ledcontroller_init_5f81c328("__init__()<br/><small>main.py</small>")
+    hm_releases_main_main_ledcontroller_set_mode_8636fa01("set_mode()<br/><small>main.py</small>")
+    hm_releases_main_main_ledcontroller_stop_03b73389("stop()<br/><small>main.py</small>")
+    hm_releases_main_main_ledcontroller_run_b2d6f214("_run()<br/><small>main.py</small>")
+    hm_releases_main_main_main_4c0423c5("main()<br/><small>main.py</small>")
+    hm_releases_main_main_has_ipv4_3ab87829("has_ipv4()<br/><small>main.py</small>")
+    hm_releases_main_main_nmcli_disconnect_a1b169b4("nmcli_disconnect()<br/><small>main.py</small>")
+    hm_releases_main_main_nmcli_connect_64fa8c2c("nmcli_connect()<br/><small>main.py</small>")
+    hm_releases_main_main_which_a03c1abb("which()<br/><small>main.py</small>")
+    hm_releases_main_main_verify_connected_c0ce9377("verify_connected()<br/><small>main.py</small>")
+    hm_releases_main_main_parse_wifi_qr_6d945eef("parse_wifi_qr()<br/><small>main.py</small>")
+    hm_releases_main_main_launch_main_py_f2a53ad4("launch_main_py()<br/><small>main.py</small>")
+    hm_releases_main_main_ledcontroller_81896c84 -->|method| hm_releases_main_main_ledcontroller_init_5f81c328
+    hm_releases_main_main_ledcontroller_81896c84 -->|method| hm_releases_main_main_ledcontroller_set_mode_8636fa01
+    hm_releases_main_main_ledcontroller_81896c84 -->|method| hm_releases_main_main_ledcontroller_stop_03b73389
+    hm_releases_main_main_ledcontroller_81896c84 -->|method| hm_releases_main_main_ledcontroller_run_b2d6f214
+    hm_releases_main_main_ledcontroller_81896c84 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_ledcontroller_set_mode_8636fa01 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_ledcontroller_stop_03b73389 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_run_5b3ab2b4 -->|calls| hm_releases_main_main_get_current_ssid_84a075fc
+    hm_releases_main_main_run_5b3ab2b4 -->|calls| hm_releases_main_main_has_ipv4_3ab87829
+    hm_releases_main_main_run_5b3ab2b4 -->|calls| hm_releases_main_main_nmcli_disconnect_a1b169b4
+    hm_releases_main_main_run_5b3ab2b4 -->|calls| hm_releases_main_main_nmcli_connect_64fa8c2c
+    hm_releases_main_main_which_a03c1abb -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_get_current_ssid_84a075fc -->|calls| hm_releases_main_main_verify_connected_c0ce9377
+    hm_releases_main_main_get_current_ssid_84a075fc -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_has_ipv4_3ab87829 -->|calls| hm_releases_main_main_verify_connected_c0ce9377
+    hm_releases_main_main_verify_connected_c0ce9377 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_parse_wifi_qr_6d945eef -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_nmcli_disconnect_a1b169b4 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_nmcli_connect_64fa8c2c -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_countdown_1c8447d3 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_launch_main_py_f2a53ad4 -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_draw_overlay_2644c64f -->|calls| hm_releases_main_main_main_4c0423c5
+    hm_releases_main_main_init_camera_like_main_ecfceb09 -->|calls| hm_releases_main_main_main_4c0423c5
+    %% Omitted for readability: 22 nodes, 0 edges
+    class hm_releases_main_main_ledcontroller_81896c84 klass;
+    class hm_releases_main_main_run_5b3ab2b4 function;
+    class hm_releases_main_main_get_current_ssid_84a075fc function;
+    class hm_releases_main_main_countdown_1c8447d3 function;
+    class hm_releases_main_main_draw_overlay_2644c64f function;
+    class hm_releases_main_main_init_camera_like_main_ecfceb09 function;
+    class hm_releases_main_main_ledcontroller_init_5f81c328 function;
+    class hm_releases_main_main_ledcontroller_set_mode_8636fa01 function;
+    class hm_releases_main_main_ledcontroller_stop_03b73389 function;
+    class hm_releases_main_main_ledcontroller_run_b2d6f214 function;
+    class hm_releases_main_main_main_4c0423c5 function;
+    class hm_releases_main_main_has_ipv4_3ab87829 function;
+    class hm_releases_main_main_nmcli_disconnect_a1b169b4 entry;
+    class hm_releases_main_main_nmcli_connect_64fa8c2c entry;
+    class hm_releases_main_main_which_a03c1abb function;
+    class hm_releases_main_main_verify_connected_c0ce9377 function;
+    class hm_releases_main_main_parse_wifi_qr_6d945eef function;
+    class hm_releases_main_main_launch_main_py_f2a53ad4 function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>main.py</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in main.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>LedController</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>__init__()</code><br><small style="color:var(--muted)">main.py</small><br><code>_run()</code><br><small style="color:var(--muted)">main.py</small><br><code>main()</code><br><small style="color:var(--muted)">main.py</small><br>+2 more</td>
+  <td>LedController node in main.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>.__init__()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>LedController</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.__init__() node in main.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>.set_mode()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>LedController</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>.set_mode() node in main.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>.stop()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>LedController</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>.stop() node in main.py.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>._run()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>LedController</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>._run() node in main.py.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>run()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>get_current_ssid()</code><br><small style="color:var(--muted)">main.py</small><br><code>has_ipv4()</code><br><small style="color:var(--muted)">main.py</small><br><code>nmcli_connect()</code><br><small style="color:var(--muted)">main.py</small><br>+1 more</td>
+  <td>run() node in main.py.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>which()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>which() node in main.py.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>get_current_ssid()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>run()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small><br><code>verify_connected()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>get_current_ssid() node in main.py.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>has_ipv4()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>run()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>verify_connected()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>has_ipv4() node in main.py.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>verify_connected()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>get_current_ssid()</code><br><small style="color:var(--muted)">main.py</small><br><code>has_ipv4()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>verify_connected() node in main.py.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>parse_wifi_qr()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>parse_wifi_qr() node in main.py.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>nmcli_disconnect()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-cmd">Entry</span></td>
+  <td><code>run()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>nmcli_disconnect() node in main.py.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>nmcli_connect()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-cmd">Entry</span></td>
+  <td><code>run()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>nmcli_connect() node in main.py.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>countdown()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>countdown() node in main.py.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>launch_main_py()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>launch_main_py() node in main.py.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>draw_overlay()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>draw_overlay() node in main.py.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>init_camera_like_main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td>init_camera_like_main() node in main.py.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>countdown()</code><br><small style="color:var(--muted)">main.py</small><br><code>draw_overlay()</code><br><small style="color:var(--muted)">main.py</small><br><code>get_current_ssid()</code><br><small style="color:var(--muted)">main.py</small><br>+10 more</td>
+  <td>No direct outbound edge</td>
+  <td>main() node in main.py.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>Supported:     1) WIFI:T:WPA;S:MySSID;P:MyPass;;     2) {&quot;ssid&quot;:&quot;MySSID&quot;,&quot;pass</code><br><small style="color:var(--muted)">main.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Supported:     1) WIFI:T:WPA;S:MySSID;P:MyPass;;     2) {&quot;ssid&quot;:&quot;MySSID&quot;,&quot;pass.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>TEAM_INTERFACE_HANDOFF.md</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing TEAM_INTERFACE_HANDOFF.md.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>Smart Helmet Interface Handoff For Codex</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Smart Helmet Interface Handoff For Codex.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>Project Goal</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Project Goal.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>Current Repository Shape</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Current Repository Shape.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>What Has Already Been Done</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing What Has Already Been Done.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>Current Runtime Flow</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Current Runtime Flow.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>code:text (User starts main.py)</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:text (User starts main.py).</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>API Endpoints Useful For Interface Work</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing API Endpoints Useful For Interface Work.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>Interface Work Instructions For Codex</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Interface Work Instructions For Codex.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>How To Use Graphify With Codex</code><br><small style="color:var(--muted)">TEAM_INTERFACE_HANDOFF.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing How To Use Graphify With Codex.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>TEAM_INTERFACE_HANDOFF.md</code></td><td>20 nodes</td></tr>
+<tr><td><code>main.py</code></td><td>20 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x33, calls x19, method x4, explains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 4. Ingestion & Updates ====== -->
+<h2 id="ingest-cache-update">4. Ingestion &amp; Updates</h2>
+<p>Ingestion &amp; Updates groups implementation around initpy, unused, recorderpy, camerapy, mostly in init.py, Unused/recorder.py, Unused/camera.py. This section covers 89 nodes and 121 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Ingestion &amp; Updates (89 nodes, 121 edges)
+    subgraph ingest_cache_update_init_py_43381aa3["init.py"]
+        hm_releases_main_init_extract_timestamp_7e01e836("extract_timestamp()<br/><small>init.py</small>")
+        hm_releases_main_init_get_lan_addresses_3f4817df("get_lan_addresses()<br/><small>init.py</small>")
+        hm_releases_main_init_stream_info_c09f93af("stream_info()<br/><small>init.py</small>")
+        hm_releases_main_init_health_dad7a874("health()<br/><small>init.py</small>")
+        hm_releases_main_init_suppressedlogfilter_8ee51e75("SuppressedLogFilter<br/><small>init.py</small>")
+        hm_releases_main_init_suppressedlogfilter_filter_ed1ebc73("filter()<br/><small>init.py</small>")
+        hm_releases_main_init_rename_batch_dc0e6bdd("rename_batch()<br/><small>init.py</small>")
+        hm_releases_main_init_list_media_7ca20f6d("list_media()<br/><small>init.py</small>")
+        hm_releases_main_init_batch_upload_0b1f3a5d("batch_upload()<br/><small>init.py</small>")
+        hm_releases_main_init_delete_batch_8fe819d6("delete_batch()<br/><small>init.py</small>")
+        hm_releases_main_init_write_gps_json_file_9b3494d9("_write_gps_json_file()<br/><small>init.py</small>")
+        hm_releases_main_init_camera_worker_f57f6f18("camera_worker()<br/><small>init.py</small>")
+        hm_releases_main_init_load_gps_json_points_e04a5d4d("_load_gps_json_points()<br/><small>init.py</small>")
+    end
+    subgraph ingest_cache_update_Unused_camera_py_cf374ba0["Unused/camera.py"]
+        unused_camera_camera_ae41ba8d("Camera<br/><small>Unused/camera.py</small>")
+        unused_camera_camera_stop_if_running_cbf509c6("_stop_if_running()<br/><small>Unused/camera.py</small>")
+        unused_camera_camera_configure_preview_5acf8365("_configure_preview()<br/><small>Unused/camera.py</small>")
+    end
+    subgraph ingest_cache_update_Unused_recorder_py_83604361["Unused/recorder.py"]
+        unused_recorder_audiorecorder_292b5d3d("AudioRecorder<br/><small>Unused/recorder.py</small>")
+        unused_recorder_videorecorder_a9993e78("VideoRecorder<br/><small>Unused/recorder.py</small>")
+    end
+    hm_releases_main_init_get_lan_addresses_3f4817df -->|calls| hm_releases_main_init_stream_info_c09f93af
+    hm_releases_main_init_get_lan_addresses_3f4817df -->|calls| hm_releases_main_init_health_dad7a874
+    hm_releases_main_init_suppressedlogfilter_8ee51e75 -->|method| hm_releases_main_init_suppressedlogfilter_filter_ed1ebc73
+    hm_releases_main_init_extract_timestamp_7e01e836 -->|calls| hm_releases_main_init_rename_batch_dc0e6bdd
+    hm_releases_main_init_extract_timestamp_7e01e836 -->|calls| hm_releases_main_init_list_media_7ca20f6d
+    hm_releases_main_init_extract_timestamp_7e01e836 -->|calls| hm_releases_main_init_batch_upload_0b1f3a5d
+    hm_releases_main_init_extract_timestamp_7e01e836 -->|calls| hm_releases_main_init_delete_batch_8fe819d6
+    hm_releases_main_init_write_gps_json_file_9b3494d9 -->|calls| hm_releases_main_init_camera_worker_f57f6f18
+    unused_camera_camera_ae41ba8d -->|method| unused_camera_camera_stop_if_running_cbf509c6
+    unused_camera_camera_ae41ba8d -->|method| unused_camera_camera_configure_preview_5acf8365
+    %% Omitted for readability: 71 nodes, 0 edges
+    class hm_releases_main_init_extract_timestamp_7e01e836 function;
+    class hm_releases_main_init_get_lan_addresses_3f4817df async;
+    class hm_releases_main_init_stream_info_c09f93af async;
+    class hm_releases_main_init_health_dad7a874 function;
+    class hm_releases_main_init_suppressedlogfilter_8ee51e75 async;
+    class hm_releases_main_init_suppressedlogfilter_filter_ed1ebc73 function;
+    class hm_releases_main_init_rename_batch_dc0e6bdd function;
+    class hm_releases_main_init_list_media_7ca20f6d function;
+    class hm_releases_main_init_batch_upload_0b1f3a5d function;
+    class hm_releases_main_init_delete_batch_8fe819d6 function;
+    class hm_releases_main_init_write_gps_json_file_9b3494d9 function;
+    class hm_releases_main_init_camera_worker_f57f6f18 function;
+    class hm_releases_main_init_load_gps_json_points_e04a5d4d function;
+    class unused_camera_camera_ae41ba8d klass;
+    class unused_camera_camera_stop_if_running_cbf509c6 function;
+    class unused_camera_camera_configure_preview_5acf8365 function;
+    class unused_recorder_audiorecorder_292b5d3d klass;
+    class unused_recorder_videorecorder_a9993e78 klass;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>init.py</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>upload_image_to_cloud()</code><br><small style="color:var(--muted)">uploader.py</small><br><code>upload_to_cloud()</code><br><small style="color:var(--muted)">uploader.py</small></td>
+  <td>Module file in init.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>get_serial_number()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>get_serial_number() node in init.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>get_lan_addresses()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>health()</code><br><small style="color:var(--muted)">init.py</small><br><code>stream_info()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>get_lan_addresses() node in init.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>SuppressedLogFilter</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>filter()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>SuppressedLogFilter node in init.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>.filter()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>SuppressedLogFilter</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.filter() node in init.py.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>extract_timestamp()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>batch_upload()</code><br><small style="color:var(--muted)">init.py</small><br><code>delete_batch()</code><br><small style="color:var(--muted)">init.py</small><br><code>list_media()</code><br><small style="color:var(--muted)">init.py</small><br>+1 more</td>
+  <td>extract_timestamp() node in init.py.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>_write_gps_json_file()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>camera_worker()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>_write_gps_json_file() node in init.py.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>_load_gps_json_points()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>get_gps_data()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>_load_gps_json_points() node in init.py.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>_gps_json_variations_for_video()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>json for video()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>_gps_json_variations_for_video() node in init.py.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>_find_existing_gps_json_for_video()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>variations for video()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><code>_gps_payload_from_video()</code><br><small style="color:var(--muted)">init.py</small><br><code>get_gps_data()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>_find_existing_gps_json_for_video() node in init.py.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>recover_orphaned_files()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>recover_orphaned_files() node in init.py.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>generate_ssl_certificates()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>generate_ssl_certificates() node in init.py.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>start_audio_recording()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>camera_worker()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>start_audio_recording() node in init.py.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>stop_audio_recording()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>camera_worker()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>stop_audio_recording() node in init.py.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>convert_and_merge()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>convert_and_merge() node in init.py.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>camera_worker()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>_write_gps_json_file()</code><br><small style="color:var(--muted)">init.py</small><br><code>start_audio_recording()</code><br><small style="color:var(--muted)">init.py</small><br><code>stop_audio_recording()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>camera_worker() node in init.py.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>discovery_service()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>discovery_service() node in init.py.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>index()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>index() node in init.py.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>video_feed()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>video_feed() node in init.py.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>stream_info()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td><code>get_lan_addresses()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>stream_info() node in init.py.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>health()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>get_lan_addresses()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>health() node in init.py.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>start_record()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>start_record() node in init.py.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>stop_record()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>stop_record() node in init.py.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>toggle_audio()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>toggle_audio() node in init.py.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>capture_photo()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>capture_photo() node in init.py.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>update_gps()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>update_gps() node in init.py.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>get_status()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>get_status() node in init.py.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>rename_file()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>rename_file() node in init.py.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>rename_batch()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>extract_timestamp()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>rename_batch() node in init.py.</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>list_media()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>extract_timestamp()</code><br><small style="color:var(--muted)">init.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>list_media() node in init.py.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>init.py</code></td><td>42 nodes</td></tr>
+<tr><td><code>Unused/recorder.py</code></td><td>19 nodes</td></tr>
+<tr><td><code>Unused/camera.py</code></td><td>18 nodes</td></tr>
+<tr><td><code>uploader.py</code></td><td>7 nodes</td></tr>
+<tr><td><code>Unused/merger.py</code></td><td>3 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x47, calls x35, method x26, explains x11. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 5. Serving API ====== -->
+<h2 id="serve-api">5. Serving API</h2>
+<p>Serving API groups implementation around readmemd, codebash, upload, git, mostly in README.md. This section covers 32 nodes and 33 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Serving API (32 nodes, 33 edges)
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74("Smart Helmet Camera System v27.1<br/><small>README.md</small>")
+    hm_releases_main_readme_prototype_v1_livestream_e1870e01("Prototype V1 Livestream<br/><small>README.md</small>")
+    hm_releases_main_readme_features_eb58e591("Features<br/><small>README.md</small>")
+    hm_releases_main_readme_troubleshooting_5d75e92b("Troubleshooting<br/><small>README.md</small>")
+    hm_releases_main_readme_configuration_392237b9("Configuration<br/><small>README.md</small>")
+    hm_releases_main_readme_files_to_push_to_git_316dfe78("Files to Push to Git<br/><small>README.md</small>")
+    hm_releases_main_readme_installation_on_raspberr_211f385f("Installation on Raspberry Pi<br/><small>README.md</small>")
+    hm_releases_main_readme_web_interface_e0990a15("Web Interface<br/><small>README.md</small>")
+    hm_releases_main_readme_1_clone_pull_from_git_1d178f0c("1. Clone/Pull from Git<br/><small>README.md</small>")
+    hm_releases_main_readme_2_run_the_system_169b4ce6("2. Run the System<br/><small>README.md</small>")
+    hm_releases_main_readme_check_logs_13a4040a("Check Logs<br/><small>README.md</small>")
+    hm_releases_main_readme_controls_b5ca8879("Controls<br/><small>README.md</small>")
+    hm_releases_main_readme_data_sent_to_server_58a12a9e("Data Sent to Server<br/><small>README.md</small>")
+    hm_releases_main_readme_device_id_bd8a2117("Device ID<br/><small>README.md</small>")
+    hm_releases_main_readme_manual_certificate_gener_213e1c29("Manual Certificate Generation (optional)<br/><small>README.md</small>")
+    hm_releases_main_readme_media_list_b37dd23c("Media List<br/><small>README.md</small>")
+    hm_releases_main_readme_core_files_required_39894e21("Core Files (REQUIRED)<br/><small>README.md</small>")
+    hm_releases_main_readme_do_not_push_to_git_9bb111f4("DO NOT Push to Git<br/><small>README.md</small>")
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_files_to_push_to_git_316dfe78
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_installation_on_raspberr_211f385f
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_configuration_392237b9
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_features_eb58e591
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_troubleshooting_5d75e92b
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_web_interface_e0990a15
+    hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 -->|contains| hm_releases_main_readme_prototype_v1_livestream_e1870e01
+    hm_releases_main_readme_files_to_push_to_git_316dfe78 -->|contains| hm_releases_main_readme_core_files_required_39894e21
+    hm_releases_main_readme_files_to_push_to_git_316dfe78 -->|contains| hm_releases_main_readme_do_not_push_to_git_9bb111f4
+    hm_releases_main_readme_installation_on_raspberr_211f385f -->|contains| hm_releases_main_readme_1_clone_pull_from_git_1d178f0c
+    hm_releases_main_readme_installation_on_raspberr_211f385f -->|contains| hm_releases_main_readme_2_run_the_system_169b4ce6
+    hm_releases_main_readme_configuration_392237b9 -->|contains| hm_releases_main_readme_device_id_bd8a2117
+    hm_releases_main_readme_features_eb58e591 -->|contains| hm_releases_main_readme_data_sent_to_server_58a12a9e
+    hm_releases_main_readme_troubleshooting_5d75e92b -->|contains| hm_releases_main_readme_manual_certificate_gener_213e1c29
+    hm_releases_main_readme_troubleshooting_5d75e92b -->|contains| hm_releases_main_readme_check_logs_13a4040a
+    hm_releases_main_readme_web_interface_e0990a15 -->|contains| hm_releases_main_readme_controls_b5ca8879
+    hm_releases_main_readme_web_interface_e0990a15 -->|contains| hm_releases_main_readme_media_list_b37dd23c
+    hm_releases_main_readme_prototype_v1_livestream_e1870e01 -->|contains| hm_releases_main_readme_controls_b5ca8879
+    hm_releases_main_readme_prototype_v1_livestream_e1870e01 -->|contains| hm_releases_main_readme_media_list_b37dd23c
+    %% Omitted for readability: 14 nodes, 0 edges
+    class hm_releases_main_readme_smart_helmet_camera_syst_1b806a74 concept;
+    class hm_releases_main_readme_prototype_v1_livestream_e1870e01 concept;
+    class hm_releases_main_readme_features_eb58e591 concept;
+    class hm_releases_main_readme_troubleshooting_5d75e92b concept;
+    class hm_releases_main_readme_configuration_392237b9 concept;
+    class hm_releases_main_readme_files_to_push_to_git_316dfe78 concept;
+    class hm_releases_main_readme_installation_on_raspberr_211f385f concept;
+    class hm_releases_main_readme_web_interface_e0990a15 concept;
+    class hm_releases_main_readme_1_clone_pull_from_git_1d178f0c concept;
+    class hm_releases_main_readme_2_run_the_system_169b4ce6 concept;
+    class hm_releases_main_readme_check_logs_13a4040a concept;
+    class hm_releases_main_readme_controls_b5ca8879 concept;
+    class hm_releases_main_readme_data_sent_to_server_58a12a9e concept;
+    class hm_releases_main_readme_device_id_bd8a2117 concept;
+    class hm_releases_main_readme_manual_certificate_gener_213e1c29 concept;
+    class hm_releases_main_readme_media_list_b37dd23c concept;
+    class hm_releases_main_readme_core_files_required_39894e21 concept;
+    class hm_releases_main_readme_do_not_push_to_git_9bb111f4 concept;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>README.md</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing README.md.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>Smart Helmet Camera System v27.1</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Smart Helmet Camera System v27.1.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Files to Push to Git</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Files to Push to Git.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>Core Files (REQUIRED)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Core Files (REQUIRED).</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>DO NOT Push to Git</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing DO NOT Push to Git.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>Installation on Raspberry Pi</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Installation on Raspberry Pi.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>1. Clone/Pull from Git</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 1. Clone/Pull from Git.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>code:bash (cd ~/Desktop/Projects/hm_releases/)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (cd ~/Desktop/Projects/hm_releases/).</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>2. Run the System</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing 2. Run the System.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>code:bash (python3 main.py)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (python3 main.py).</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>Configuration</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Configuration.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>Device ID</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Device ID.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>code:python (DEVICE_ID = &quot;smart_hm_02&quot;  # Change to your device ID)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:python (DEVICE_ID = &quot;smart_hm_02&quot;  # Change to your device ID).</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Upload Settings</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Upload Settings.</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>Features</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Features.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Upload to Cloud</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Upload to Cloud.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>GPS Location Tracking</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing GPS Location Tracking.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Data Sent to Server</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Data Sent to Server.</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>code:block4 (POST: https://centrix.co.in/v_api/upload)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:block4 (POST: https://centrix.co.in/v_api/upload).</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>Troubleshooting</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Troubleshooting.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>SSL Certificate Issues</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing SSL Certificate Issues.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>Manual Certificate Generation (optional)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Manual Certificate Generation (optional).</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>code:bash (openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert).</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>Check Logs</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Check Logs.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>code:block6 ([UPLOAD] 📍 Start Location: 18.9234,73.5678)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:block6 ([UPLOAD] 📍 Start Location: 18.9234,73.5678).</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>Web Interface</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Web Interface.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>Prototype V1 Livestream</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Prototype V1 Livestream.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>code:bash (curl http://&lt;pi-ip&gt;:5001/api/health)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (curl http://&lt;pi-ip&gt;:5001/api/health).</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>code:bash (pip install -r requirements-host.txt)</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing code:bash (pip install -r requirements-host.txt).</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>Controls</code><br><small style="color:var(--muted)">README.md</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Documentation node describing Controls.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>README.md</code></td><td>32 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x33. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 6. Tests & Fixtures ====== -->
+<h2 id="tests-fixtures">6. Tests &amp; Fixtures</h2>
+<p>Tests &amp; Fixtures groups implementation around test, tests, uploaderpy, staticpy, mostly in tests/test_uploader.py, tests/test_v1_static.py. This section covers 11 nodes and 12 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Tests &amp; Fixtures (11 nodes, 12 edges)
+    subgraph tests_fixtures_tests_test_uploader_py_a0c4b57e["tests/test_uploader.py"]
+        tests_test_uploader_fakeresponse_87d13db6("FakeResponse<br/><small>tests/test_uploader.py</small>")
+        tests_test_uploader_fakeresponse_init_51593d10("__init__()<br/><small>tests/test_uploader.py</small>")
+        tests_test_uploader_fakeresponse_json_cf41cf4c("json()<br/><small>tests/test_uploader.py</small>")
+        tests_test_uploader_run_image_upload_test_4ed9ec37("run_image_upload_test()<br/><small>tests/test_uploader.py</small>")
+        tests_test_uploader_run_video_upload_test_998cf61a("run_video_upload_test()<br/><small>tests/test_uploader.py</small>")
+        tests_test_uploader_py_5e2abd63("test_uploader.py")
+    end
+    subgraph tests_fixtures_tests_test_v1_static_py_e5db7c72["tests/test_v1_static.py"]
+        tests_test_v1_static_read_a334f515("read()<br/><small>tests/test_v1_static.py</small>")
+        tests_test_v1_static_test_init_py_has_v1_stream_67d4abcb("stream health routes()<br/><small>tests/test_v1_static.py</small>")
+        tests_test_v1_static_test_stream_metadata_state_799292ef("state is tracked()<br/><small>tests/test_v1_static.py</small>")
+        tests_test_v1_static_test_host_and_rtsp_helpers_024f74d6("rtsp helpers exist()<br/><small>tests/test_v1_static.py</small>")
+        tests_test_v1_static_py_1db954c6("test_v1_static.py")
+    end
+    tests_test_uploader_fakeresponse_87d13db6 -->|method| tests_test_uploader_fakeresponse_init_51593d10
+    tests_test_uploader_fakeresponse_87d13db6 -->|method| tests_test_uploader_fakeresponse_json_cf41cf4c
+    tests_test_v1_static_read_a334f515 -->|calls| tests_test_v1_static_test_init_py_has_v1_stream_67d4abcb
+    tests_test_v1_static_read_a334f515 -->|calls| tests_test_v1_static_test_stream_metadata_state_799292ef
+    tests_test_v1_static_read_a334f515 -->|calls| tests_test_v1_static_test_host_and_rtsp_helpers_024f74d6
+    class tests_test_uploader_fakeresponse_87d13db6 test;
+    class tests_test_uploader_fakeresponse_init_51593d10 test;
+    class tests_test_uploader_fakeresponse_json_cf41cf4c test;
+    class tests_test_uploader_run_image_upload_test_4ed9ec37 test;
+    class tests_test_uploader_run_video_upload_test_998cf61a test;
+    class tests_test_uploader_py_5e2abd63 test;
+    class tests_test_v1_static_read_a334f515 test;
+    class tests_test_v1_static_test_init_py_has_v1_stream_67d4abcb test;
+    class tests_test_v1_static_test_stream_metadata_state_799292ef test;
+    class tests_test_v1_static_test_host_and_rtsp_helpers_024f74d6 test;
+    class tests_test_v1_static_py_1db954c6 test;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>test_uploader.py</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in tests/test_uploader.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>FakeResponse</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>__init__()</code><br><small style="color:var(--muted)">tests/test_uploader.py</small><br><code>json()</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td>FakeResponse node in tests/test_uploader.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>.__init__()</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>FakeResponse</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.__init__() node in tests/test_uploader.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>.json()</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>FakeResponse</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.json() node in tests/test_uploader.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>run_video_upload_test()</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>run_image_upload_test()</code><br><small style="color:var(--muted)">tests/test_uploader.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>test_v1_static.py</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in tests/test_v1_static.py.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>read()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>rtsp helpers exist()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small><br><code>state is tracked()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small><br><code>stream health routes()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td>read() node in tests/test_v1_static.py.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>test_init_py_has_v1_stream_health_routes()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>read()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>test_stream_metadata_state_is_tracked()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>read()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>test_host_and_rtsp_helpers_exist()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td><span class="tag tag-func">Test</span></td>
+  <td><code>read()</code><br><small style="color:var(--muted)">tests/test_v1_static.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>Verifies imports, entry points, or version behavior.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>tests/test_uploader.py</code></td><td>6 nodes</td></tr>
+<tr><td><code>tests/test_v1_static.py</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x7, calls x3, method x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 7. Community 10 ====== -->
+<h2 id="community-10">7. Community 10</h2>
+<p>Community 10 groups implementation around gpio, handlerpy, unused, gpiohandler, mostly in Unused/gpio_handler.py. This section covers 5 nodes and 4 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 10 (5 nodes, 4 edges)
+    unused_gpio_handler_gpiohandler_4aab8573("GPIOHandler<br/><small>Unused/gpio_handler.py</small>")
+    unused_gpio_handler_gpiohandler_init_77fd88ee("__init__()<br/><small>Unused/gpio_handler.py</small>")
+    unused_gpio_handler_gpiohandler_poll_gpio_a11570c1("poll_gpio()<br/><small>Unused/gpio_handler.py</small>")
+    unused_gpio_handler_gpiohandler_cleanup_3eba0a9f("cleanup()<br/><small>Unused/gpio_handler.py</small>")
+    unused_gpio_handler_py_672427b8("gpio_handler.py")
+    unused_gpio_handler_gpiohandler_4aab8573 -->|method| unused_gpio_handler_gpiohandler_init_77fd88ee
+    unused_gpio_handler_gpiohandler_4aab8573 -->|method| unused_gpio_handler_gpiohandler_poll_gpio_a11570c1
+    unused_gpio_handler_gpiohandler_4aab8573 -->|method| unused_gpio_handler_gpiohandler_cleanup_3eba0a9f
+    class unused_gpio_handler_gpiohandler_4aab8573 klass;
+    class unused_gpio_handler_gpiohandler_init_77fd88ee function;
+    class unused_gpio_handler_gpiohandler_poll_gpio_a11570c1 function;
+    class unused_gpio_handler_gpiohandler_cleanup_3eba0a9f function;
+    class unused_gpio_handler_py_672427b8 module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>gpio_handler.py</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in Unused/gpio_handler.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>GPIOHandler</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>__init__()</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small><br><code>cleanup()</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small><br><code>poll_gpio()</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td>GPIOHandler node in Unused/gpio_handler.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>.__init__()</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>GPIOHandler</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.__init__() node in Unused/gpio_handler.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>.poll_gpio()</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>GPIOHandler</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.poll_gpio() node in Unused/gpio_handler.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>.cleanup()</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>GPIOHandler</code><br><small style="color:var(--muted)">Unused/gpio_handler.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.cleanup() node in Unused/gpio_handler.py.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>Unused/gpio_handler.py</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: method x3, contains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 8. Community 11 ====== -->
+<h2 id="community-11">8. Community 11</h2>
+<p>Community 11 groups implementation around utilspy, unused, get, filename, mostly in Unused/utils.py. This section covers 5 nodes and 5 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 11 (5 nodes, 5 edges)
+    unused_utils_format_timestamp_c99e50c2("format_timestamp()<br/><small>Unused/utils.py</small>")
+    unused_utils_get_image_filename_bce7d2c6("get_image_filename()<br/><small>Unused/utils.py</small>")
+    unused_utils_get_rpi_serial_b6b17ee3("get_rpi_serial()<br/><small>Unused/utils.py</small>")
+    unused_utils_get_video_filename_5bc8bd95("get_video_filename()<br/><small>Unused/utils.py</small>")
+    unused_utils_py_ce5e79cc("utils.py")
+    unused_utils_format_timestamp_c99e50c2 -->|calls| unused_utils_get_image_filename_bce7d2c6
+    class unused_utils_format_timestamp_c99e50c2 function;
+    class unused_utils_get_image_filename_bce7d2c6 function;
+    class unused_utils_get_rpi_serial_b6b17ee3 function;
+    class unused_utils_get_video_filename_5bc8bd95 function;
+    class unused_utils_py_ce5e79cc module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>utils.py</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in Unused/utils.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>format_timestamp()</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>get_image_filename()</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td>format_timestamp() node in Unused/utils.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>get_image_filename()</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>format_timestamp()</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>get_image_filename() node in Unused/utils.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>get_video_filename()</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>get_video_filename() node in Unused/utils.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>get_rpi_serial()</code><br><small style="color:var(--muted)">Unused/utils.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>get_rpi_serial() node in Unused/utils.py.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>Unused/utils.py</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x4, calls x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 9. Community 15 ====== -->
+<h2 id="community-15">9. Community 15</h2>
+<p>Community 15 groups implementation around smoke, checkpy, tools, read, mostly in tools/pi_smoke_check.py. This section covers 5 nodes and 8 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 15 (5 nodes, 8 edges)
+    tools_pi_smoke_check_read_url_dfa2bc53("read_url()<br/><small>tools/pi_smoke_check.py</small>")
+    tools_pi_smoke_check_check_mjpeg_556ed67a("check_mjpeg()<br/><small>tools/pi_smoke_check.py</small>")
+    tools_pi_smoke_check_read_json_f6416abf("read_json()<br/><small>tools/pi_smoke_check.py</small>")
+    tools_pi_smoke_check_main_48b61809("main()<br/><small>tools/pi_smoke_check.py</small>")
+    tools_pi_smoke_check_py_32600993("pi_smoke_check.py")
+    tools_pi_smoke_check_read_url_dfa2bc53 -->|calls| tools_pi_smoke_check_read_json_f6416abf
+    tools_pi_smoke_check_read_url_dfa2bc53 -->|calls| tools_pi_smoke_check_check_mjpeg_556ed67a
+    tools_pi_smoke_check_read_json_f6416abf -->|calls| tools_pi_smoke_check_main_48b61809
+    tools_pi_smoke_check_check_mjpeg_556ed67a -->|calls| tools_pi_smoke_check_main_48b61809
+    class tools_pi_smoke_check_read_url_dfa2bc53 function;
+    class tools_pi_smoke_check_check_mjpeg_556ed67a function;
+    class tools_pi_smoke_check_read_json_f6416abf function;
+    class tools_pi_smoke_check_main_48b61809 function;
+    class tools_pi_smoke_check_py_32600993 module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>pi_smoke_check.py</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in tools/pi_smoke_check.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>read_url()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>check_mjpeg()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small><br><code>read_json()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td>read_url() node in tools/pi_smoke_check.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>read_json()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>read_url()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td>read_json() node in tools/pi_smoke_check.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>check_mjpeg()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>read_url()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><code>main()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td>check_mjpeg() node in tools/pi_smoke_check.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>check_mjpeg()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small><br><code>read_json()</code><br><small style="color:var(--muted)">tools/pi_smoke_check.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>main() node in tools/pi_smoke_check.py.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>tools/pi_smoke_check.py</code></td><td>5 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x4, calls x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 10. Community 16 ====== -->
+<h2 id="community-16">10. Community 16</h2>
+<p>Community 16 groups implementation around host, mjpeg, viewerpy, tools, mostly in tools/host_mjpeg_viewer.py. This section covers 4 nodes and 5 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 16 (4 nodes, 5 edges)
+    tools_host_mjpeg_viewer_discover_25e56248("discover()<br/><small>tools/host_mjpeg_viewer.py</small>")
+    tools_host_mjpeg_viewer_open_stream_55a14206("open_stream()<br/><small>tools/host_mjpeg_viewer.py</small>")
+    tools_host_mjpeg_viewer_main_f6a56e4b("main()<br/><small>tools/host_mjpeg_viewer.py</small>")
+    tools_host_mjpeg_viewer_py_b9b27d99("host_mjpeg_viewer.py")
+    tools_host_mjpeg_viewer_discover_25e56248 -->|calls| tools_host_mjpeg_viewer_main_f6a56e4b
+    tools_host_mjpeg_viewer_open_stream_55a14206 -->|calls| tools_host_mjpeg_viewer_main_f6a56e4b
+    class tools_host_mjpeg_viewer_discover_25e56248 function;
+    class tools_host_mjpeg_viewer_open_stream_55a14206 async;
+    class tools_host_mjpeg_viewer_main_f6a56e4b function;
+    class tools_host_mjpeg_viewer_py_b9b27d99 module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>host_mjpeg_viewer.py</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in tools/host_mjpeg_viewer.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>discover()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td>discover() node in tools/host_mjpeg_viewer.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>open_stream()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td>open_stream() node in tools/host_mjpeg_viewer.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>discover()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small><br><code>open_stream()</code><br><small style="color:var(--muted)">tools/host_mjpeg_viewer.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>main() node in tools/host_mjpeg_viewer.py.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>tools/host_mjpeg_viewer.py</code></td><td>4 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x3, calls x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 11. Community 14 ====== -->
+<h2 id="community-14">11. Community 14</h2>
+<p>Community 14 groups implementation around generate, certssh, script, mostly in generate_certs.sh. This section covers 2 nodes and 1 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 14 (2 nodes, 1 edges)
+    generate_certs_sh_a5952caf("generate_certs.sh")
+    c_users_sharv_downloads_hm_releases_main_latest_e984c0d3("generate_certs.sh script<br/><small>generate_certs.sh</small>")
+    generate_certs_sh_a5952caf -->|contains| c_users_sharv_downloads_hm_releases_main_latest_e984c0d3
+    class generate_certs_sh_a5952caf function;
+    class c_users_sharv_downloads_hm_releases_main_latest_e984c0d3 function;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>generate_certs.sh</code><br><small style="color:var(--muted)">generate_certs.sh</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>generate_certs.sh node in generate_certs.sh.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>generate_certs.sh script</code><br><small style="color:var(--muted)">generate_certs.sh</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>generate_certs.sh script node in generate_certs.sh.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>generate_certs.sh</code></td><td>2 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 12. Community 17 ====== -->
+<h2 id="community-17">12. Community 17</h2>
+<p>Community 17 groups implementation around start, rtsp, streamsh, tools, mostly in tools/start_rtsp_stream.sh. This section covers 2 nodes and 1 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Community 17 (2 nodes, 1 edges)
+    tools_start_rtsp_stream_sh_270c23c8("start_rtsp_stream.sh")
+    c_users_sharv_downloads_hm_releases_main_latest_5d3e6293("start_rtsp_stream.sh script<br/><small>tools/start_rtsp_stream.sh</small>")
+    tools_start_rtsp_stream_sh_270c23c8 -->|contains| c_users_sharv_downloads_hm_releases_main_latest_5d3e6293
+    class tools_start_rtsp_stream_sh_270c23c8 async;
+    class c_users_sharv_downloads_hm_releases_main_latest_5d3e6293 async;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>start_rtsp_stream.sh</code><br><small style="color:var(--muted)">tools/start_rtsp_stream.sh</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>start_rtsp_stream.sh node in tools/start_rtsp_stream.sh.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>start_rtsp_stream.sh script</code><br><small style="color:var(--muted)">tools/start_rtsp_stream.sh</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>start_rtsp_stream.sh script node in tools/start_rtsp_stream.sh.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>tools/start_rtsp_stream.sh</code></td><td>2 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<h2 id="stats">Project Statistics</h2>
+
+<div class="grid">
+  <div class="card">
+    <h4>Graph</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>Nodes</td><td>222</td></tr>
+      <tr><td>Edges</td><td>272</td></tr>
+      <tr><td>Hyperedges</td><td>0</td></tr>
+      <tr><td>Communities</td><td>18</td></tr>
+      <tr><td>Documented Sections</td><td>11</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Edge Confidence</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><td>EXTRACTED</td><td>272</td></tr>
+      <tr><td>INFERRED</td><td>0</td></tr>
+      <tr><td>AMBIGUOUS</td><td>0</td></tr>
+    </table>
+  </div>
+</div>
+
+<div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
+  <p>hm_releases-main — Architecture Documentation</p>
+  <p>Generated: 2026-05-25 20:10 UTC · graphify callflow-html</p>
+</div>
+
+</div><!-- .container -->
+
+<script>
+(function () {
+  const mermaidConfig = {
+    startOnLoad: false,
+    theme: 'dark',
+    securityLevel: 'loose',
+    flowchart: { htmlLabels: true, useMaxWidth: true },
+    themeVariables: {
+      primaryColor: '#1e293b',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#38bdf8',
+      secondaryColor: '#0f172a',
+      tertiaryColor: '#334155',
+      lineColor: '#64748b',
+      textColor: '#e2e8f0',
+    }
+  };
+
+  mermaid.initialize(mermaidConfig);
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function enhanceMermaidDiagrams() {
+    document.querySelectorAll('.mermaid').forEach((container) => {
+      if (container.dataset.zoomReady === 'true') return;
+      const svg = container.querySelector('svg');
+      if (!svg) return;
+
+      container.dataset.zoomReady = 'true';
+      container.classList.add('is-enhanced');
+
+      const viewport = document.createElement('div');
+      viewport.className = 'mermaid-viewport';
+      svg.parentNode.insertBefore(viewport, svg);
+      viewport.appendChild(svg);
+
+      const toolbar = document.createElement('div');
+      toolbar.className = 'mermaid-toolbar';
+      toolbar.innerHTML = [
+        '<button type="button" data-action="zoom-out" title="Zoom out">-</button>',
+        '<span class="zoom-level" data-role="level">100%</span>',
+        '<button type="button" data-action="zoom-in" title="Zoom in">+</button>',
+        '<button type="button" data-action="fit" title="Fit width">Fit</button>',
+        '<button type="button" data-action="reset" title="Reset view">Reset</button>'
+      ].join('');
+      container.insertBefore(toolbar, viewport);
+
+      const state = { scale: 1, x: 0, y: 0, dragging: false, startX: 0, startY: 0, originX: 0, originY: 0 };
+      const level = toolbar.querySelector('[data-role="level"]');
+
+      function applyTransform() {
+        svg.style.transform = `translate(${state.x}px, ${state.y}px) scale(${state.scale})`;
+        level.textContent = `${Math.round(state.scale * 100)}%`;
+      }
+
+      function zoomBy(delta) {
+        state.scale = clamp(state.scale + delta, 0.25, 3);
+        applyTransform();
+      }
+
+      function reset() {
+        state.scale = 1;
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      function fitWidth() {
+        const rawWidth = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width
+          ? svg.viewBox.baseVal.width
+          : svg.getBoundingClientRect().width / state.scale;
+        if (!rawWidth) {
+          reset();
+          return;
+        }
+        state.scale = clamp((viewport.clientWidth - 48) / rawWidth, 0.25, 1.4);
+        state.x = 0;
+        state.y = 0;
+        applyTransform();
+      }
+
+      toolbar.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        if (action === 'zoom-in') zoomBy(0.15);
+        if (action === 'zoom-out') zoomBy(-0.15);
+        if (action === 'fit') fitWidth();
+        if (action === 'reset') reset();
+      });
+
+      viewport.addEventListener('wheel', (event) => {
+        if (!event.ctrlKey && !event.metaKey) return;
+        event.preventDefault();
+        zoomBy(event.deltaY < 0 ? 0.1 : -0.1);
+      }, { passive: false });
+
+      viewport.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        state.dragging = true;
+        state.startX = event.clientX;
+        state.startY = event.clientY;
+        state.originX = state.x;
+        state.originY = state.y;
+        viewport.classList.add('is-dragging');
+        viewport.setPointerCapture(event.pointerId);
+      });
+
+      viewport.addEventListener('pointermove', (event) => {
+        if (!state.dragging) return;
+        state.x = state.originX + event.clientX - state.startX;
+        state.y = state.originY + event.clientY - state.startY;
+        applyTransform();
+      });
+
+      function endDrag(event) {
+        if (!state.dragging) return;
+        state.dragging = false;
+        viewport.classList.remove('is-dragging');
+        if (viewport.hasPointerCapture(event.pointerId)) {
+          viewport.releasePointerCapture(event.pointerId);
+        }
+      }
+
+      viewport.addEventListener('pointerup', endDrag);
+      viewport.addEventListener('pointercancel', endDrag);
+      applyTransform();
+    });
+  }
+
+  function renderMermaid() {
+    const result = mermaid.run
+      ? mermaid.run({ querySelector: '.mermaid' })
+      : Promise.resolve();
+    Promise.resolve(result)
+      .then(enhanceMermaidDiagrams)
+      .catch((error) => {
+        console.error('Mermaid render failed:', error);
+        enhanceMermaidDiagrams();
+      });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', renderMermaid);
+  } else {
+    renderMermaid();
+  }
+})();
+</script>
+
+</body>
+</html>

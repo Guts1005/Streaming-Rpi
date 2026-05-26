@@ -1,0 +1,38 @@
+# SSL Certificates (auto-generated)
+cert.pem
+key.pem
+*.pem
+
+# Runtime output
+recordings/
+logs/
+*.mp4
+*.h264
+*.csv
+*.jpg
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Environments
+.env
+venv/
+env/
+.venv/
+
+# Graphify generated cache internals
+graphify-out/cache/
+graphify-out/.graphify_python
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

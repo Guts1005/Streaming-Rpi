@@ -1,0 +1,4810 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "generate_certs.sh",
+      "file_type": "code",
+      "source_file": "generate_certs.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "id": "generate_certs_sh",
+      "community": 14,
+      "norm_label": "generate_certs.sh"
+    },
+    {
+      "label": "generate_certs.sh script",
+      "file_type": "code",
+      "source_file": "generate_certs.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "id": "c_users_sharv_downloads_hm_releases_main_latest_hm_releases_main_generate_certs_sh__entry",
+      "community": 14,
+      "norm_label": "generate_certs.sh script"
+    },
+    {
+      "label": "init.py",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1",
+      "id": "init_py",
+      "community": 1,
+      "norm_label": "init.py"
+    },
+    {
+      "label": "get_serial_number()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L52",
+      "id": "hm_releases_main_init_get_serial_number",
+      "community": 1,
+      "norm_label": "get_serial_number()"
+    },
+    {
+      "label": "get_lan_addresses()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L64",
+      "id": "hm_releases_main_init_get_lan_addresses",
+      "community": 1,
+      "norm_label": "get_lan_addresses()"
+    },
+    {
+      "label": "SuppressedLogFilter",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L97",
+      "id": "hm_releases_main_init_suppressedlogfilter",
+      "community": 1,
+      "norm_label": "suppressedlogfilter"
+    },
+    {
+      "label": ".filter()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L98",
+      "id": "hm_releases_main_init_suppressedlogfilter_filter",
+      "community": 1,
+      "norm_label": ".filter()"
+    },
+    {
+      "label": "extract_timestamp()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L150",
+      "id": "hm_releases_main_init_extract_timestamp",
+      "community": 1,
+      "norm_label": "extract_timestamp()"
+    },
+    {
+      "label": "_write_gps_json_file()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L154",
+      "id": "hm_releases_main_init_write_gps_json_file",
+      "community": 1,
+      "norm_label": "_write_gps_json_file()"
+    },
+    {
+      "label": "_load_gps_json_points()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L162",
+      "id": "hm_releases_main_init_load_gps_json_points",
+      "community": 1,
+      "norm_label": "_load_gps_json_points()"
+    },
+    {
+      "label": "_gps_json_variations_for_video()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L183",
+      "id": "hm_releases_main_init_gps_json_variations_for_video",
+      "community": 1,
+      "norm_label": "_gps_json_variations_for_video()"
+    },
+    {
+      "label": "_find_existing_gps_json_for_video()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L192",
+      "id": "hm_releases_main_init_find_existing_gps_json_for_video",
+      "community": 1,
+      "norm_label": "_find_existing_gps_json_for_video()"
+    },
+    {
+      "label": "recover_orphaned_files()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L199",
+      "id": "hm_releases_main_init_recover_orphaned_files",
+      "community": 1,
+      "norm_label": "recover_orphaned_files()"
+    },
+    {
+      "label": "generate_ssl_certificates()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L246",
+      "id": "hm_releases_main_init_generate_ssl_certificates",
+      "community": 1,
+      "norm_label": "generate_ssl_certificates()"
+    },
+    {
+      "label": "start_audio_recording()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L273",
+      "id": "hm_releases_main_init_start_audio_recording",
+      "community": 1,
+      "norm_label": "start_audio_recording()"
+    },
+    {
+      "label": "stop_audio_recording()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L300",
+      "id": "hm_releases_main_init_stop_audio_recording",
+      "community": 1,
+      "norm_label": "stop_audio_recording()"
+    },
+    {
+      "label": "convert_and_merge()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L314",
+      "id": "hm_releases_main_init_convert_and_merge",
+      "community": 1,
+      "norm_label": "convert_and_merge()"
+    },
+    {
+      "label": "camera_worker()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L367",
+      "id": "hm_releases_main_init_camera_worker",
+      "community": 1,
+      "norm_label": "camera_worker()"
+    },
+    {
+      "label": "discovery_service()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L568",
+      "id": "hm_releases_main_init_discovery_service",
+      "community": 1,
+      "norm_label": "discovery_service()"
+    },
+    {
+      "label": "index()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L589",
+      "id": "hm_releases_main_init_index",
+      "community": 1,
+      "norm_label": "index()"
+    },
+    {
+      "label": "video_feed()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L593",
+      "id": "hm_releases_main_init_video_feed",
+      "community": 1,
+      "norm_label": "video_feed()"
+    },
+    {
+      "label": "stream_info()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L610",
+      "id": "hm_releases_main_init_stream_info",
+      "community": 1,
+      "norm_label": "stream_info()"
+    },
+    {
+      "label": "health()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L634",
+      "id": "hm_releases_main_init_health",
+      "community": 1,
+      "norm_label": "health()"
+    },
+    {
+      "label": "start_record()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L656",
+      "id": "hm_releases_main_init_start_record",
+      "community": 1,
+      "norm_label": "start_record()"
+    },
+    {
+      "label": "stop_record()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L663",
+      "id": "hm_releases_main_init_stop_record",
+      "community": 1,
+      "norm_label": "stop_record()"
+    },
+    {
+      "label": "toggle_audio()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L670",
+      "id": "hm_releases_main_init_toggle_audio",
+      "community": 1,
+      "norm_label": "toggle_audio()"
+    },
+    {
+      "label": "capture_photo()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L677",
+      "id": "hm_releases_main_init_capture_photo",
+      "community": 1,
+      "norm_label": "capture_photo()"
+    },
+    {
+      "label": "update_gps()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L698",
+      "id": "hm_releases_main_init_update_gps",
+      "community": 1,
+      "norm_label": "update_gps()"
+    },
+    {
+      "label": "get_status()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L705",
+      "id": "hm_releases_main_init_get_status",
+      "community": 1,
+      "norm_label": "get_status()"
+    },
+    {
+      "label": "rename_file()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L741",
+      "id": "hm_releases_main_init_rename_file",
+      "community": 1,
+      "norm_label": "rename_file()"
+    },
+    {
+      "label": "rename_batch()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L785",
+      "id": "hm_releases_main_init_rename_batch",
+      "community": 1,
+      "norm_label": "rename_batch()"
+    },
+    {
+      "label": "list_media()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L889",
+      "id": "hm_releases_main_init_list_media",
+      "community": 1,
+      "norm_label": "list_media()"
+    },
+    {
+      "label": "get_gps_data()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L985",
+      "id": "hm_releases_main_init_get_gps_data",
+      "community": 1,
+      "norm_label": "get_gps_data()"
+    },
+    {
+      "label": "_gps_payload_from_video()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1044",
+      "id": "hm_releases_main_init_gps_payload_from_video",
+      "community": 1,
+      "norm_label": "_gps_payload_from_video()"
+    },
+    {
+      "label": "api_upload_cloud()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1080",
+      "id": "hm_releases_main_init_api_upload_cloud",
+      "community": 1,
+      "norm_label": "api_upload_cloud()"
+    },
+    {
+      "label": "api_upload_image()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1149",
+      "id": "hm_releases_main_init_api_upload_image",
+      "community": 1,
+      "norm_label": "api_upload_image()"
+    },
+    {
+      "label": "batch_upload()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1208",
+      "id": "hm_releases_main_init_batch_upload",
+      "community": 1,
+      "norm_label": "batch_upload()"
+    },
+    {
+      "label": "download()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1285",
+      "id": "hm_releases_main_init_download",
+      "community": 1,
+      "norm_label": "download()"
+    },
+    {
+      "label": "delete_file()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1289",
+      "id": "hm_releases_main_init_delete_file",
+      "community": 1,
+      "norm_label": "delete_file()"
+    },
+    {
+      "label": "delete_batch()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1316",
+      "id": "hm_releases_main_init_delete_batch",
+      "community": 1,
+      "norm_label": "delete_batch()"
+    },
+    {
+      "label": "serve()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1344",
+      "id": "hm_releases_main_init_serve",
+      "community": 1,
+      "norm_label": "serve()"
+    },
+    {
+      "label": "shutdown()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1348",
+      "id": "hm_releases_main_init_shutdown",
+      "community": 1,
+      "norm_label": "shutdown()"
+    },
+    {
+      "label": "list_logs()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1364",
+      "id": "hm_releases_main_init_list_logs",
+      "community": 1,
+      "norm_label": "list_logs()"
+    },
+    {
+      "label": "download_log()",
+      "file_type": "code",
+      "source_file": "init.py",
+      "source_location": "L1385",
+      "id": "hm_releases_main_init_download_log",
+      "community": 1,
+      "norm_label": "download_log()"
+    },
+    {
+      "label": "main.py",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L1",
+      "id": "main_py",
+      "community": 2,
+      "norm_label": "main.py"
+    },
+    {
+      "label": "LedController",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L42",
+      "id": "hm_releases_main_main_ledcontroller",
+      "community": 2,
+      "norm_label": "ledcontroller"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L43",
+      "id": "hm_releases_main_main_ledcontroller_init",
+      "community": 2,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".set_mode()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L57",
+      "id": "hm_releases_main_main_ledcontroller_set_mode",
+      "community": 2,
+      "norm_label": ".set_mode()"
+    },
+    {
+      "label": ".stop()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L61",
+      "id": "hm_releases_main_main_ledcontroller_stop",
+      "community": 2,
+      "norm_label": ".stop()"
+    },
+    {
+      "label": "._run()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L76",
+      "id": "hm_releases_main_main_ledcontroller_run",
+      "community": 2,
+      "norm_label": "._run()"
+    },
+    {
+      "label": "run()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L109",
+      "id": "hm_releases_main_main_run",
+      "community": 2,
+      "norm_label": "run()"
+    },
+    {
+      "label": "which()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L113",
+      "id": "hm_releases_main_main_which",
+      "community": 2,
+      "norm_label": "which()"
+    },
+    {
+      "label": "get_current_ssid()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L121",
+      "id": "hm_releases_main_main_get_current_ssid",
+      "community": 2,
+      "norm_label": "get_current_ssid()"
+    },
+    {
+      "label": "has_ipv4()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L130",
+      "id": "hm_releases_main_main_has_ipv4",
+      "community": 2,
+      "norm_label": "has_ipv4()"
+    },
+    {
+      "label": "verify_connected()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L138",
+      "id": "hm_releases_main_main_verify_connected",
+      "community": 2,
+      "norm_label": "verify_connected()"
+    },
+    {
+      "label": "parse_wifi_qr()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L149",
+      "id": "hm_releases_main_main_parse_wifi_qr",
+      "community": 2,
+      "norm_label": "parse_wifi_qr()"
+    },
+    {
+      "label": "nmcli_disconnect()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L202",
+      "id": "hm_releases_main_main_nmcli_disconnect",
+      "community": 2,
+      "norm_label": "nmcli_disconnect()"
+    },
+    {
+      "label": "nmcli_connect()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L209",
+      "id": "hm_releases_main_main_nmcli_connect",
+      "community": 2,
+      "norm_label": "nmcli_connect()"
+    },
+    {
+      "label": "countdown()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L221",
+      "id": "hm_releases_main_main_countdown",
+      "community": 2,
+      "norm_label": "countdown()"
+    },
+    {
+      "label": "launch_main_py()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L227",
+      "id": "hm_releases_main_main_launch_main_py",
+      "community": 2,
+      "norm_label": "launch_main_py()"
+    },
+    {
+      "label": "draw_overlay()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L232",
+      "id": "hm_releases_main_main_draw_overlay",
+      "community": 2,
+      "norm_label": "draw_overlay()"
+    },
+    {
+      "label": "init_camera_like_main()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L247",
+      "id": "hm_releases_main_main_init_camera_like_main",
+      "community": 2,
+      "norm_label": "init_camera_like_main()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "main.py",
+      "source_location": "L264",
+      "id": "hm_releases_main_main_main",
+      "community": 2,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Supported:     1) WIFI:T:WPA;S:MySSID;P:MyPass;;     2) {\"ssid\":\"MySSID\",\"pass",
+      "file_type": "rationale",
+      "source_file": "main.py",
+      "source_location": "L150",
+      "id": "hm_releases_main_main_rationale_150",
+      "community": 2,
+      "norm_label": "supported:     1) wifi:t:wpa;s:myssid;p:mypass;;     2) {\"ssid\":\"myssid\",\"pass"
+    },
+    {
+      "label": "uploader.py",
+      "file_type": "code",
+      "source_file": "uploader.py",
+      "source_location": "L1",
+      "id": "uploader_py",
+      "community": 5,
+      "norm_label": "uploader.py"
+    },
+    {
+      "label": "_extract_times_from_filename()",
+      "file_type": "code",
+      "source_file": "uploader.py",
+      "source_location": "L16",
+      "id": "hm_releases_main_uploader_extract_times_from_filename",
+      "community": 5,
+      "norm_label": "_extract_times_from_filename()"
+    },
+    {
+      "label": "upload_to_cloud()",
+      "file_type": "code",
+      "source_file": "uploader.py",
+      "source_location": "L40",
+      "id": "hm_releases_main_uploader_upload_to_cloud",
+      "community": 5,
+      "norm_label": "upload_to_cloud()"
+    },
+    {
+      "label": "upload_image_to_cloud()",
+      "file_type": "code",
+      "source_file": "uploader.py",
+      "source_location": "L132",
+      "id": "hm_releases_main_uploader_upload_image_to_cloud",
+      "community": 5,
+      "norm_label": "upload_image_to_cloud()"
+    },
+    {
+      "label": "Cloud Upload Module for Smart Helmet Uploads: video file + start_location + stop",
+      "file_type": "rationale",
+      "source_file": "uploader.py",
+      "source_location": "L1",
+      "id": "hm_releases_main_uploader_rationale_1",
+      "community": 5,
+      "norm_label": "cloud upload module for smart helmet uploads: video file + start_location + stop"
+    },
+    {
+      "label": "Extract start/end time from names like:       video_20251225_211046_chunk000.mp4",
+      "file_type": "rationale",
+      "source_file": "uploader.py",
+      "source_location": "L17",
+      "id": "hm_releases_main_uploader_rationale_17",
+      "community": 5,
+      "norm_label": "extract start/end time from names like:       video_20251225_211046_chunk000.mp4"
+    },
+    {
+      "label": "Upload video and location payload to cloud.      Args:       video_path: absolut",
+      "file_type": "rationale",
+      "source_file": "uploader.py",
+      "source_location": "L48",
+      "id": "hm_releases_main_uploader_rationale_48",
+      "community": 5,
+      "norm_label": "upload video and location payload to cloud.      args:       video_path: absolut"
+    },
+    {
+      "label": "test_uploader.py",
+      "file_type": "code",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L1",
+      "id": "tests_test_uploader_py",
+      "community": 8,
+      "norm_label": "test_uploader.py"
+    },
+    {
+      "label": "FakeResponse",
+      "file_type": "code",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L23",
+      "id": "tests_test_uploader_fakeresponse",
+      "community": 8,
+      "norm_label": "fakeresponse"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L24",
+      "id": "tests_test_uploader_fakeresponse_init",
+      "community": 8,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".json()",
+      "file_type": "code",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L29",
+      "id": "tests_test_uploader_fakeresponse_json",
+      "community": 8,
+      "norm_label": ".json()"
+    },
+    {
+      "label": "run_video_upload_test()",
+      "file_type": "code",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L33",
+      "id": "tests_test_uploader_run_video_upload_test",
+      "community": 8,
+      "norm_label": "run_video_upload_test()"
+    },
+    {
+      "label": "run_image_upload_test()",
+      "file_type": "code",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L75",
+      "id": "tests_test_uploader_run_image_upload_test",
+      "community": 8,
+      "norm_label": "run_image_upload_test()"
+    },
+    {
+      "label": "test_v1_static.py",
+      "file_type": "code",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L1",
+      "id": "tests_test_v1_static_py",
+      "community": 12,
+      "norm_label": "test_v1_static.py"
+    },
+    {
+      "label": "read()",
+      "file_type": "code",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L8",
+      "id": "tests_test_v1_static_read",
+      "community": 12,
+      "norm_label": "read()"
+    },
+    {
+      "label": "test_init_py_has_v1_stream_health_routes()",
+      "file_type": "code",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L12",
+      "id": "tests_test_v1_static_test_init_py_has_v1_stream_health_routes",
+      "community": 12,
+      "norm_label": "test_init_py_has_v1_stream_health_routes()"
+    },
+    {
+      "label": "test_stream_metadata_state_is_tracked()",
+      "file_type": "code",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L35",
+      "id": "tests_test_v1_static_test_stream_metadata_state_is_tracked",
+      "community": 12,
+      "norm_label": "test_stream_metadata_state_is_tracked()"
+    },
+    {
+      "label": "test_host_and_rtsp_helpers_exist()",
+      "file_type": "code",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L45",
+      "id": "tests_test_v1_static_test_host_and_rtsp_helpers_exist",
+      "community": 12,
+      "norm_label": "test_host_and_rtsp_helpers_exist()"
+    },
+    {
+      "label": "host_mjpeg_viewer.py",
+      "file_type": "code",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L1",
+      "id": "tools_host_mjpeg_viewer_py",
+      "community": 16,
+      "norm_label": "host_mjpeg_viewer.py"
+    },
+    {
+      "label": "discover()",
+      "file_type": "code",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L21",
+      "id": "tools_host_mjpeg_viewer_discover",
+      "community": 16,
+      "norm_label": "discover()"
+    },
+    {
+      "label": "open_stream()",
+      "file_type": "code",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L39",
+      "id": "tools_host_mjpeg_viewer_open_stream",
+      "community": 16,
+      "norm_label": "open_stream()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L70",
+      "id": "tools_host_mjpeg_viewer_main",
+      "community": 16,
+      "norm_label": "main()"
+    },
+    {
+      "label": "pi_smoke_check.py",
+      "file_type": "code",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L1",
+      "id": "tools_pi_smoke_check_py",
+      "community": 15,
+      "norm_label": "pi_smoke_check.py"
+    },
+    {
+      "label": "read_url()",
+      "file_type": "code",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L16",
+      "id": "tools_pi_smoke_check_read_url",
+      "community": 15,
+      "norm_label": "read_url()"
+    },
+    {
+      "label": "read_json()",
+      "file_type": "code",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L21",
+      "id": "tools_pi_smoke_check_read_json",
+      "community": 15,
+      "norm_label": "read_json()"
+    },
+    {
+      "label": "check_mjpeg()",
+      "file_type": "code",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L28",
+      "id": "tools_pi_smoke_check_check_mjpeg",
+      "community": 15,
+      "norm_label": "check_mjpeg()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L39",
+      "id": "tools_pi_smoke_check_main",
+      "community": 15,
+      "norm_label": "main()"
+    },
+    {
+      "label": "start_rtsp_stream.sh",
+      "file_type": "code",
+      "source_file": "tools/start_rtsp_stream.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "id": "tools_start_rtsp_stream_sh",
+      "community": 17,
+      "norm_label": "start_rtsp_stream.sh"
+    },
+    {
+      "label": "start_rtsp_stream.sh script",
+      "file_type": "code",
+      "source_file": "tools/start_rtsp_stream.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "id": "c_users_sharv_downloads_hm_releases_main_latest_hm_releases_main_tools_start_rtsp_stream_sh__entry",
+      "community": 17,
+      "norm_label": "start_rtsp_stream.sh script"
+    },
+    {
+      "label": "camera.py",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L1",
+      "id": "unused_camera_py",
+      "community": 4,
+      "norm_label": "camera.py"
+    },
+    {
+      "label": "Camera",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L9",
+      "id": "unused_camera_camera",
+      "community": 4,
+      "norm_label": "camera"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L10",
+      "id": "unused_camera_camera_init",
+      "community": 4,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": "._stop_if_running()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L20",
+      "id": "unused_camera_camera_stop_if_running",
+      "community": 4,
+      "norm_label": "._stop_if_running()"
+    },
+    {
+      "label": "._configure_preview()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L26",
+      "id": "unused_camera_camera_configure_preview",
+      "community": 4,
+      "norm_label": "._configure_preview()"
+    },
+    {
+      "label": "._configure_still()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L33",
+      "id": "unused_camera_camera_configure_still",
+      "community": 4,
+      "norm_label": "._configure_still()"
+    },
+    {
+      "label": "._configure_video()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L37",
+      "id": "unused_camera_camera_configure_video",
+      "community": 4,
+      "norm_label": "._configure_video()"
+    },
+    {
+      "label": ".start_preview()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L44",
+      "id": "unused_camera_camera_start_preview",
+      "community": 4,
+      "norm_label": ".start_preview()"
+    },
+    {
+      "label": ".stop_preview()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L61",
+      "id": "unused_camera_camera_stop_preview",
+      "community": 4,
+      "norm_label": ".stop_preview()"
+    },
+    {
+      "label": ".capture_image()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L69",
+      "id": "unused_camera_camera_capture_image",
+      "community": 4,
+      "norm_label": ".capture_image()"
+    },
+    {
+      "label": ".prepare_video_mode()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L103",
+      "id": "unused_camera_camera_prepare_video_mode",
+      "community": 4,
+      "norm_label": ".prepare_video_mode()"
+    },
+    {
+      "label": ".restore_preview()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L111",
+      "id": "unused_camera_camera_restore_preview",
+      "community": 4,
+      "norm_label": ".restore_preview()"
+    },
+    {
+      "label": ".update_controls()",
+      "file_type": "code",
+      "source_file": "Unused/camera.py",
+      "source_location": "L120",
+      "id": "unused_camera_camera_update_controls",
+      "community": 4,
+      "norm_label": ".update_controls()"
+    },
+    {
+      "label": "Starts the preview with a 180-degree rotated image.",
+      "file_type": "rationale",
+      "source_file": "Unused/camera.py",
+      "source_location": "L45",
+      "id": "unused_camera_rationale_45",
+      "community": 4,
+      "norm_label": "starts the preview with a 180-degree rotated image."
+    },
+    {
+      "label": "Capture still image with rotation and restore preview afterwards.",
+      "file_type": "rationale",
+      "source_file": "Unused/camera.py",
+      "source_location": "L70",
+      "id": "unused_camera_rationale_70",
+      "community": 4,
+      "norm_label": "capture still image with rotation and restore preview afterwards."
+    },
+    {
+      "label": "Ensure the pipeline is in video mode with rotation and running.",
+      "file_type": "rationale",
+      "source_file": "Unused/camera.py",
+      "source_location": "L104",
+      "id": "unused_camera_rationale_104",
+      "community": 4,
+      "norm_label": "ensure the pipeline is in video mode with rotation and running."
+    },
+    {
+      "label": "Restore the preview mode after any capture/recording.",
+      "file_type": "rationale",
+      "source_file": "Unused/camera.py",
+      "source_location": "L112",
+      "id": "unused_camera_rationale_112",
+      "community": 4,
+      "norm_label": "restore the preview mode after any capture/recording."
+    },
+    {
+      "label": "Update camera controls in real-time.         Maps slider values (0\u2013100) \u2192 (0.0\u20131",
+      "file_type": "rationale",
+      "source_file": "Unused/camera.py",
+      "source_location": "L121",
+      "id": "unused_camera_rationale_121",
+      "community": 4,
+      "norm_label": "update camera controls in real-time.         maps slider values (0\u2013100) \u2192 (0.0\u20131"
+    },
+    {
+      "label": "gpio_handler.py",
+      "file_type": "code",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L1",
+      "id": "unused_gpio_handler_py",
+      "community": 10,
+      "norm_label": "gpio_handler.py"
+    },
+    {
+      "label": "GPIOHandler",
+      "file_type": "code",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L6",
+      "id": "unused_gpio_handler_gpiohandler",
+      "community": 10,
+      "norm_label": "gpiohandler"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L7",
+      "id": "unused_gpio_handler_gpiohandler_init",
+      "community": 10,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".poll_gpio()",
+      "file_type": "code",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L35",
+      "id": "unused_gpio_handler_gpiohandler_poll_gpio",
+      "community": 10,
+      "norm_label": ".poll_gpio()"
+    },
+    {
+      "label": ".cleanup()",
+      "file_type": "code",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L73",
+      "id": "unused_gpio_handler_gpiohandler_cleanup",
+      "community": 10,
+      "norm_label": ".cleanup()"
+    },
+    {
+      "label": "merger.py",
+      "file_type": "code",
+      "source_file": "Unused/merger.py",
+      "source_location": "L1",
+      "id": "unused_merger_py",
+      "community": 13,
+      "norm_label": "merger.py"
+    },
+    {
+      "label": "merge_audio_video()",
+      "file_type": "code",
+      "source_file": "Unused/merger.py",
+      "source_location": "L4",
+      "id": "unused_merger_merge_audio_video",
+      "community": 13,
+      "norm_label": "merge_audio_video()"
+    },
+    {
+      "label": "Merges the given video file and audio file into a single output file using ffmpe",
+      "file_type": "rationale",
+      "source_file": "Unused/merger.py",
+      "source_location": "L5",
+      "id": "unused_merger_rationale_5",
+      "community": 13,
+      "norm_label": "merges the given video file and audio file into a single output file using ffmpe"
+    },
+    {
+      "label": "recorder.py",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L1",
+      "id": "unused_recorder_py",
+      "community": 3,
+      "norm_label": "recorder.py"
+    },
+    {
+      "label": "AudioRecorder",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L18",
+      "id": "unused_recorder_audiorecorder",
+      "community": 3,
+      "norm_label": "audiorecorder"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L19",
+      "id": "unused_recorder_audiorecorder_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".start_recording()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L32",
+      "id": "unused_recorder_audiorecorder_start_recording",
+      "community": 3,
+      "norm_label": ".start_recording()"
+    },
+    {
+      "label": ".record_audio()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L40",
+      "id": "unused_recorder_audiorecorder_record_audio",
+      "community": 3,
+      "norm_label": ".record_audio()"
+    },
+    {
+      "label": ".stop_recording()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L62",
+      "id": "unused_recorder_audiorecorder_stop_recording",
+      "community": 3,
+      "norm_label": ".stop_recording()"
+    },
+    {
+      "label": ".start_segmented_recording()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L82",
+      "id": "unused_recorder_audiorecorder_start_segmented_recording",
+      "community": 3,
+      "norm_label": ".start_segmented_recording()"
+    },
+    {
+      "label": ".record_segment_audio()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L89",
+      "id": "unused_recorder_audiorecorder_record_segment_audio",
+      "community": 3,
+      "norm_label": ".record_segment_audio()"
+    },
+    {
+      "label": ".stop_segmented_recording()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L111",
+      "id": "unused_recorder_audiorecorder_stop_segmented_recording",
+      "community": 3,
+      "norm_label": ".stop_segmented_recording()"
+    },
+    {
+      "label": "VideoRecorder",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L127",
+      "id": "unused_recorder_videorecorder",
+      "community": 3,
+      "norm_label": "videorecorder"
+    },
+    {
+      "label": ".__init__()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L128",
+      "id": "unused_recorder_videorecorder_init",
+      "community": 3,
+      "norm_label": ".__init__()"
+    },
+    {
+      "label": ".generate_video_filename()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L144",
+      "id": "unused_recorder_videorecorder_generate_video_filename",
+      "community": 3,
+      "norm_label": ".generate_video_filename()"
+    },
+    {
+      "label": ".start_recording()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L150",
+      "id": "unused_recorder_videorecorder_start_recording",
+      "community": 3,
+      "norm_label": ".start_recording()"
+    },
+    {
+      "label": ".monitor_video_size()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L177",
+      "id": "unused_recorder_videorecorder_monitor_video_size",
+      "community": 3,
+      "norm_label": ".monitor_video_size()"
+    },
+    {
+      "label": "._record_with_segmentation()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L207",
+      "id": "unused_recorder_videorecorder_record_with_segmentation",
+      "community": 3,
+      "norm_label": "._record_with_segmentation()"
+    },
+    {
+      "label": ".merge_video_audio()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L262",
+      "id": "unused_recorder_videorecorder_merge_video_audio",
+      "community": 3,
+      "norm_label": ".merge_video_audio()"
+    },
+    {
+      "label": ".stop_recording()",
+      "file_type": "code",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L288",
+      "id": "unused_recorder_videorecorder_stop_recording",
+      "community": 3,
+      "norm_label": ".stop_recording()"
+    },
+    {
+      "label": "Segmentation loop for \"with audio\" scenario. Each chunk is recorded         unti",
+      "file_type": "rationale",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L208",
+      "id": "unused_recorder_rationale_208",
+      "community": 3,
+      "norm_label": "segmentation loop for \"with audio\" scenario. each chunk is recorded         unti"
+    },
+    {
+      "label": "Stop recording. If any partial segment is still open, close it out,         reco",
+      "file_type": "rationale",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L289",
+      "id": "unused_recorder_rationale_289",
+      "community": 3,
+      "norm_label": "stop recording. if any partial segment is still open, close it out,         reco"
+    },
+    {
+      "label": "utils.py",
+      "file_type": "code",
+      "source_file": "Unused/utils.py",
+      "source_location": "L1",
+      "id": "unused_utils_py",
+      "community": 11,
+      "norm_label": "utils.py"
+    },
+    {
+      "label": "format_timestamp()",
+      "file_type": "code",
+      "source_file": "Unused/utils.py",
+      "source_location": "L24",
+      "id": "unused_utils_format_timestamp",
+      "community": 11,
+      "norm_label": "format_timestamp()"
+    },
+    {
+      "label": "get_image_filename()",
+      "file_type": "code",
+      "source_file": "Unused/utils.py",
+      "source_location": "L27",
+      "id": "unused_utils_get_image_filename",
+      "community": 11,
+      "norm_label": "get_image_filename()"
+    },
+    {
+      "label": "get_video_filename()",
+      "file_type": "code",
+      "source_file": "Unused/utils.py",
+      "source_location": "L32",
+      "id": "unused_utils_get_video_filename",
+      "community": 11,
+      "norm_label": "get_video_filename()"
+    },
+    {
+      "label": "get_rpi_serial()",
+      "file_type": "code",
+      "source_file": "Unused/utils.py",
+      "source_location": "L37",
+      "id": "unused_utils_get_rpi_serial",
+      "community": 11,
+      "norm_label": "get_rpi_serial()"
+    },
+    {
+      "label": "README.md",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "id": "readme_md",
+      "community": 0,
+      "norm_label": "readme.md"
+    },
+    {
+      "label": "Smart Helmet Camera System v27.1",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "id": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "community": 0,
+      "norm_label": "smart helmet camera system v27.1"
+    },
+    {
+      "label": "Files to Push to Git",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L5",
+      "id": "hm_releases_main_readme_files_to_push_to_git",
+      "community": 0,
+      "norm_label": "files to push to git"
+    },
+    {
+      "label": "Core Files (REQUIRED)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L7",
+      "id": "hm_releases_main_readme_core_files_required",
+      "community": 0,
+      "norm_label": "core files (required)"
+    },
+    {
+      "label": "DO NOT Push to Git",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L13",
+      "id": "hm_releases_main_readme_do_not_push_to_git",
+      "community": 0,
+      "norm_label": "do not push to git"
+    },
+    {
+      "label": "Installation on Raspberry Pi",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L19",
+      "id": "hm_releases_main_readme_installation_on_raspberry_pi",
+      "community": 0,
+      "norm_label": "installation on raspberry pi"
+    },
+    {
+      "label": "1. Clone/Pull from Git",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L21",
+      "id": "hm_releases_main_readme_1_clone_pull_from_git",
+      "community": 0,
+      "norm_label": "1. clone/pull from git"
+    },
+    {
+      "label": "code:bash (cd ~/Desktop/Projects/hm_releases/)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L22",
+      "id": "hm_releases_main_readme_codeblock_1",
+      "community": 0,
+      "norm_label": "code:bash (cd ~/desktop/projects/hm_releases/)"
+    },
+    {
+      "label": "2. Run the System",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L27",
+      "id": "hm_releases_main_readme_2_run_the_system",
+      "community": 0,
+      "norm_label": "2. run the system"
+    },
+    {
+      "label": "code:bash (python3 main.py)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L28",
+      "id": "hm_releases_main_readme_codeblock_2",
+      "community": 0,
+      "norm_label": "code:bash (python3 main.py)"
+    },
+    {
+      "label": "Configuration",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L37",
+      "id": "hm_releases_main_readme_configuration",
+      "community": 0,
+      "norm_label": "configuration"
+    },
+    {
+      "label": "Device ID",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L39",
+      "id": "hm_releases_main_readme_device_id",
+      "community": 0,
+      "norm_label": "device id"
+    },
+    {
+      "label": "code:python (DEVICE_ID = \"smart_hm_02\"  # Change to your device ID)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L41",
+      "id": "hm_releases_main_readme_codeblock_3",
+      "community": 0,
+      "norm_label": "code:python (device_id = \"smart_hm_02\"  # change to your device id)"
+    },
+    {
+      "label": "Upload Settings",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L45",
+      "id": "hm_releases_main_readme_upload_settings",
+      "community": 0,
+      "norm_label": "upload settings"
+    },
+    {
+      "label": "Features",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L51",
+      "id": "hm_releases_main_readme_features",
+      "community": 0,
+      "norm_label": "features"
+    },
+    {
+      "label": "Upload to Cloud",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L53",
+      "id": "hm_releases_main_readme_upload_to_cloud",
+      "community": 0,
+      "norm_label": "upload to cloud"
+    },
+    {
+      "label": "GPS Location Tracking",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L59",
+      "id": "hm_releases_main_readme_gps_location_tracking",
+      "community": 0,
+      "norm_label": "gps location tracking"
+    },
+    {
+      "label": "Data Sent to Server",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L64",
+      "id": "hm_releases_main_readme_data_sent_to_server",
+      "community": 0,
+      "norm_label": "data sent to server"
+    },
+    {
+      "label": "code:block4 (POST: https://centrix.co.in/v_api/upload)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L65",
+      "id": "hm_releases_main_readme_codeblock_4",
+      "community": 0,
+      "norm_label": "code:block4 (post: https://centrix.co.in/v_api/upload)"
+    },
+    {
+      "label": "Troubleshooting",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L77",
+      "id": "hm_releases_main_readme_troubleshooting",
+      "community": 0,
+      "norm_label": "troubleshooting"
+    },
+    {
+      "label": "SSL Certificate Issues",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L79",
+      "id": "hm_releases_main_readme_ssl_certificate_issues",
+      "community": 0,
+      "norm_label": "ssl certificate issues"
+    },
+    {
+      "label": "Manual Certificate Generation (optional)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L85",
+      "id": "hm_releases_main_readme_manual_certificate_generation_optional",
+      "community": 0,
+      "norm_label": "manual certificate generation (optional)"
+    },
+    {
+      "label": "code:bash (openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L86",
+      "id": "hm_releases_main_readme_codeblock_5",
+      "community": 0,
+      "norm_label": "code:bash (openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert)"
+    },
+    {
+      "label": "Check Logs",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L91",
+      "id": "hm_releases_main_readme_check_logs",
+      "community": 0,
+      "norm_label": "check logs"
+    },
+    {
+      "label": "code:block6 ([UPLOAD] \ud83d\udccd Start Location: 18.9234,73.5678)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L93",
+      "id": "hm_releases_main_readme_codeblock_6",
+      "community": 0,
+      "norm_label": "code:block6 ([upload] \ud83d\udccd start location: 18.9234,73.5678)"
+    },
+    {
+      "label": "Web Interface",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L99",
+      "id": "hm_releases_main_readme_web_interface",
+      "community": 0,
+      "norm_label": "web interface"
+    },
+    {
+      "label": "Prototype V1 Livestream",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L103",
+      "id": "hm_releases_main_readme_prototype_v1_livestream",
+      "community": 0,
+      "norm_label": "prototype v1 livestream"
+    },
+    {
+      "label": "code:bash (curl http://<pi-ip>:5001/api/health)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L109",
+      "id": "hm_releases_main_readme_codeblock_7",
+      "community": 0,
+      "norm_label": "code:bash (curl http://<pi-ip>:5001/api/health)"
+    },
+    {
+      "label": "code:bash (pip install -r requirements-host.txt)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L116",
+      "id": "hm_releases_main_readme_codeblock_8",
+      "community": 0,
+      "norm_label": "code:bash (pip install -r requirements-host.txt)"
+    },
+    {
+      "label": "Controls",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L121",
+      "id": "hm_releases_main_readme_controls",
+      "community": 0,
+      "norm_label": "controls"
+    },
+    {
+      "label": "Media List",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L126",
+      "id": "hm_releases_main_readme_media_list",
+      "community": 0,
+      "norm_label": "media list"
+    },
+    {
+      "label": "Security Notes",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "L132",
+      "id": "hm_releases_main_readme_security_notes",
+      "community": 0,
+      "norm_label": "security notes"
+    },
+    {
+      "label": "TEAM_INTERFACE_HANDOFF.md",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L1",
+      "id": "team_interface_handoff_md",
+      "community": 6,
+      "norm_label": "team_interface_handoff.md"
+    },
+    {
+      "label": "Smart Helmet Interface Handoff For Codex",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L1",
+      "id": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "community": 6,
+      "norm_label": "smart helmet interface handoff for codex"
+    },
+    {
+      "label": "Project Goal",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L5",
+      "id": "hm_releases_main_team_interface_handoff_project_goal",
+      "community": 6,
+      "norm_label": "project goal"
+    },
+    {
+      "label": "Current Repository Shape",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L29",
+      "id": "hm_releases_main_team_interface_handoff_current_repository_shape",
+      "community": 6,
+      "norm_label": "current repository shape"
+    },
+    {
+      "label": "What Has Already Been Done",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L54",
+      "id": "hm_releases_main_team_interface_handoff_what_has_already_been_done",
+      "community": 6,
+      "norm_label": "what has already been done"
+    },
+    {
+      "label": "Current Runtime Flow",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L81",
+      "id": "hm_releases_main_team_interface_handoff_current_runtime_flow",
+      "community": 6,
+      "norm_label": "current runtime flow"
+    },
+    {
+      "label": "code:text (User starts main.py)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L83",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_1",
+      "community": 6,
+      "norm_label": "code:text (user starts main.py)"
+    },
+    {
+      "label": "API Endpoints Useful For Interface Work",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L102",
+      "id": "hm_releases_main_team_interface_handoff_api_endpoints_useful_for_interface_work",
+      "community": 6,
+      "norm_label": "api endpoints useful for interface work"
+    },
+    {
+      "label": "Interface Work Instructions For Codex",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L133",
+      "id": "hm_releases_main_team_interface_handoff_interface_work_instructions_for_codex",
+      "community": 6,
+      "norm_label": "interface work instructions for codex"
+    },
+    {
+      "label": "How To Use Graphify With Codex",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L208",
+      "id": "hm_releases_main_team_interface_handoff_how_to_use_graphify_with_codex",
+      "community": 6,
+      "norm_label": "how to use graphify with codex"
+    },
+    {
+      "label": "code:text (graphify-out/GRAPH_REPORT.md)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L212",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_2",
+      "community": 6,
+      "norm_label": "code:text (graphify-out/graph_report.md)"
+    },
+    {
+      "label": "code:text (Read TEAM_INTERFACE_HANDOFF.md first.)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L223",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_3",
+      "community": 6,
+      "norm_label": "code:text (read team_interface_handoff.md first.)"
+    },
+    {
+      "label": "code:text (/graphify query \"interface stream health media controls GPS\")",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L236",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_4",
+      "community": 6,
+      "norm_label": "code:text (/graphify query \"interface stream health media controls gps\")"
+    },
+    {
+      "label": "code:bash (graphify query \"interface stream health media controls GPS\" )",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L246",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_5",
+      "community": 6,
+      "norm_label": "code:bash (graphify query \"interface stream health media controls gps\" )"
+    },
+    {
+      "label": "Practical Local Testing",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L255",
+      "id": "hm_releases_main_team_interface_handoff_practical_local_testing",
+      "community": 6,
+      "norm_label": "practical local testing"
+    },
+    {
+      "label": "code:bash (python3 main.py)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L259",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_6",
+      "community": 6,
+      "norm_label": "code:bash (python3 main.py)"
+    },
+    {
+      "label": "code:bash (python3 init.py)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L265",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_7",
+      "community": 6,
+      "norm_label": "code:bash (python3 init.py)"
+    },
+    {
+      "label": "code:bash (pip install -r requirements-host.txt)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L271",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_8",
+      "community": 6,
+      "norm_label": "code:bash (pip install -r requirements-host.txt)"
+    },
+    {
+      "label": "code:bash (curl http://<pi-ip>:5001/api/health)",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L278",
+      "id": "hm_releases_main_team_interface_handoff_codeblock_9",
+      "community": 6,
+      "norm_label": "code:bash (curl http://<pi-ip>:5001/api/health)"
+    },
+    {
+      "label": "Guardrails",
+      "file_type": "document",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L283",
+      "id": "hm_releases_main_team_interface_handoff_guardrails",
+      "community": 6,
+      "norm_label": "guardrails"
+    },
+    {
+      "label": "V1_PROGRESS.md",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L1",
+      "id": "v1_progress_md",
+      "community": 9,
+      "norm_label": "v1_progress.md"
+    },
+    {
+      "label": "Prototype V1 Progress",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L1",
+      "id": "hm_releases_main_v1_progress_prototype_v1_progress",
+      "community": 9,
+      "norm_label": "prototype v1 progress"
+    },
+    {
+      "label": "code:text (Local implementation progress: 100%)",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L5",
+      "id": "hm_releases_main_v1_progress_codeblock_1",
+      "community": 9,
+      "norm_label": "code:text (local implementation progress: 100%)"
+    },
+    {
+      "label": "What Is Complete Locally",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L24",
+      "id": "hm_releases_main_v1_progress_what_is_complete_locally",
+      "community": 9,
+      "norm_label": "what is complete locally"
+    },
+    {
+      "label": "Commands Run Locally",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L35",
+      "id": "hm_releases_main_v1_progress_commands_run_locally",
+      "community": 9,
+      "norm_label": "commands run locally"
+    },
+    {
+      "label": "code:bash (python -m py_compile init.py uploader.py tools/host_mjpeg_vi)",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L37",
+      "id": "hm_releases_main_v1_progress_codeblock_2",
+      "community": 9,
+      "norm_label": "code:bash (python -m py_compile init.py uploader.py tools/host_mjpeg_vi)"
+    },
+    {
+      "label": "Commands To Run On The Raspberry Pi",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L43",
+      "id": "hm_releases_main_v1_progress_commands_to_run_on_the_raspberry_pi",
+      "community": 9,
+      "norm_label": "commands to run on the raspberry pi"
+    },
+    {
+      "label": "code:bash (python3 init.py)",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L47",
+      "id": "hm_releases_main_v1_progress_codeblock_3",
+      "community": 9,
+      "norm_label": "code:bash (python3 init.py)"
+    },
+    {
+      "label": "code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001)",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L53",
+      "id": "hm_releases_main_v1_progress_codeblock_4",
+      "community": 9,
+      "norm_label": "code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001)"
+    },
+    {
+      "label": "code:bash (python tools/host_mjpeg_viewer.py --url http://<pi-ip>:5001/)",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L59",
+      "id": "hm_releases_main_v1_progress_codeblock_5",
+      "community": 9,
+      "norm_label": "code:bash (python tools/host_mjpeg_viewer.py --url http://<pi-ip>:5001/)"
+    },
+    {
+      "label": "code:text (http://<pi-ip>:5001/)",
+      "file_type": "document",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L65",
+      "id": "hm_releases_main_v1_progress_codeblock_6",
+      "community": 9,
+      "norm_label": "code:text (http://<pi-ip>:5001/)"
+    },
+    {
+      "label": "V1_STREAMING_PLAN.md",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L1",
+      "id": "v1_streaming_plan_md",
+      "community": 7,
+      "norm_label": "v1_streaming_plan.md"
+    },
+    {
+      "label": "Prototype V1 Streaming Plan",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L1",
+      "id": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "community": 7,
+      "norm_label": "prototype v1 streaming plan"
+    },
+    {
+      "label": "Phase 1: Validate Existing MJPEG Stream",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L5",
+      "id": "hm_releases_main_v1_streaming_plan_phase_1_validate_existing_mjpeg_stream",
+      "community": 7,
+      "norm_label": "phase 1: validate existing mjpeg stream"
+    },
+    {
+      "label": "code:bash (python3 main.py)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L9",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_1",
+      "community": 7,
+      "norm_label": "code:bash (python3 main.py)"
+    },
+    {
+      "label": "code:bash (pip install -r requirements-host.txt)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L24",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_2",
+      "community": 7,
+      "norm_label": "code:bash (pip install -r requirements-host.txt)"
+    },
+    {
+      "label": "code:bash (python tools/host_mjpeg_viewer.py --discover)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L31",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_3",
+      "community": 7,
+      "norm_label": "code:bash (python tools/host_mjpeg_viewer.py --discover)"
+    },
+    {
+      "label": "code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L37",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_4",
+      "community": 7,
+      "norm_label": "code:bash (python3 tools/pi_smoke_check.py --base http://127.0.0.1:5001)"
+    },
+    {
+      "label": "Phase 2: Add RTSP/H.264 For Low Latency",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L41",
+      "id": "hm_releases_main_v1_streaming_plan_phase_2_add_rtsp_h_264_for_low_latency",
+      "community": 7,
+      "norm_label": "phase 2: add rtsp/h.264 for low latency"
+    },
+    {
+      "label": "code:bash (sudo apt update)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L47",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_5",
+      "community": 7,
+      "norm_label": "code:bash (sudo apt update)"
+    },
+    {
+      "label": "code:bash (RTSP_URL=rtsp://127.0.0.1:8554/pi-cam tools/start_rtsp_strea)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L54",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_6",
+      "community": 7,
+      "norm_label": "code:bash (rtsp_url=rtsp://127.0.0.1:8554/pi-cam tools/start_rtsp_strea)"
+    },
+    {
+      "label": "code:bash (ffplay rtsp://<pi-ip>:8554/pi-cam)",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L60",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_7",
+      "community": 7,
+      "norm_label": "code:bash (ffplay rtsp://<pi-ip>:8554/pi-cam)"
+    },
+    {
+      "label": "code:python (cap = cv2.VideoCapture(\"rtsp://<pi-ip>:8554/pi-cam\"))",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L66",
+      "id": "hm_releases_main_v1_streaming_plan_codeblock_8",
+      "community": 7,
+      "norm_label": "code:python (cap = cv2.videocapture(\"rtsp://<pi-ip>:8554/pi-cam\"))"
+    },
+    {
+      "label": "Responsibility Split",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L70",
+      "id": "hm_releases_main_v1_streaming_plan_responsibility_split",
+      "community": 7,
+      "norm_label": "responsibility split"
+    },
+    {
+      "label": "Ports",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L94",
+      "id": "hm_releases_main_v1_streaming_plan_ports",
+      "community": 7,
+      "norm_label": "ports"
+    },
+    {
+      "label": "Expected Performance",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L100",
+      "id": "hm_releases_main_v1_streaming_plan_expected_performance",
+      "community": 7,
+      "norm_label": "expected performance"
+    },
+    {
+      "label": "Notes",
+      "file_type": "document",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L106",
+      "id": "hm_releases_main_v1_streaming_plan_notes",
+      "community": 7,
+      "norm_label": "notes"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "generate_certs.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "generate_certs_sh",
+      "target": "c_users_sharv_downloads_hm_releases_main_latest_hm_releases_main_generate_certs_sh__entry"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_get_serial_number"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_get_lan_addresses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L73",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_suppressedlogfilter"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L123",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_extract_timestamp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L127",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_write_gps_json_file"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L135",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_load_gps_json_points"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L156",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_gps_json_variations_for_video"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L165",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_find_existing_gps_json_for_video"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L172",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_recover_orphaned_files"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L219",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_generate_ssl_certificates"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L246",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_start_audio_recording"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L273",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_stop_audio_recording"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L287",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_convert_and_merge"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L340",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_camera_worker"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L535",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_discovery_service"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L556",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_index"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L560",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_video_feed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L610",
+      "weight": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_stream_info",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L634",
+      "weight": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_health",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L574",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_start_record"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L581",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_stop_record"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L588",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_toggle_audio"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L595",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_capture_photo"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L616",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_update_gps"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L623",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_get_status"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L659",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_rename_file"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L703",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_rename_batch"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L807",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_list_media"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L903",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_get_gps_data"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L962",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_gps_payload_from_video"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L998",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_api_upload_cloud"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1067",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_api_upload_image"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1126",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_batch_upload"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1203",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_download"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1207",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_delete_file"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1234",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_delete_batch"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1262",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_serve"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1266",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_shutdown"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1282",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_list_logs"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1303",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_init_download_log"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_uploader_upload_to_cloud"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "init_py",
+      "target": "hm_releases_main_uploader_upload_image_to_cloud"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L621",
+      "weight": 1.0,
+      "source": "hm_releases_main_init_stream_info",
+      "target": "hm_releases_main_init_get_lan_addresses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L644",
+      "weight": 1.0,
+      "source": "hm_releases_main_init_health",
+      "target": "hm_releases_main_init_get_lan_addresses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_suppressedlogfilter",
+      "target": "hm_releases_main_init_suppressedlogfilter_filter"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L715",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_rename_batch",
+      "target": "hm_releases_main_init_extract_timestamp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L862",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_list_media",
+      "target": "hm_releases_main_init_extract_timestamp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1133",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_batch_upload",
+      "target": "hm_releases_main_init_extract_timestamp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1241",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_delete_batch",
+      "target": "hm_releases_main_init_extract_timestamp"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L391",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_camera_worker",
+      "target": "hm_releases_main_init_write_gps_json_file"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L906",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_get_gps_data",
+      "target": "hm_releases_main_init_load_gps_json_points"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L166",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_find_existing_gps_json_for_video",
+      "target": "hm_releases_main_init_gps_json_variations_for_video"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L904",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_get_gps_data",
+      "target": "hm_releases_main_init_find_existing_gps_json_for_video"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L963",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_gps_payload_from_video",
+      "target": "hm_releases_main_init_find_existing_gps_json_for_video"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L396",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_camera_worker",
+      "target": "hm_releases_main_init_start_audio_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L419",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_camera_worker",
+      "target": "hm_releases_main_init_stop_audio_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "init.py",
+      "source_location": "L1010",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_init_api_upload_cloud",
+      "target": "hm_releases_main_init_gps_payload_from_video"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_ledcontroller"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L109",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_run"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L113",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_which"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L121",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_get_current_ssid"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L130",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_has_ipv4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L138",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_verify_connected"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L149",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_parse_wifi_qr"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L202",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_nmcli_disconnect"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L209",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_nmcli_connect"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L221",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_countdown"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L227",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_launch_main_py"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L232",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_draw_overlay"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L247",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_init_camera_like_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L264",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "main_py",
+      "target": "hm_releases_main_main_main"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_ledcontroller",
+      "target": "hm_releases_main_main_ledcontroller_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_ledcontroller",
+      "target": "hm_releases_main_main_ledcontroller_set_mode"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L61",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_ledcontroller",
+      "target": "hm_releases_main_main_ledcontroller_stop"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_ledcontroller",
+      "target": "hm_releases_main_main_ledcontroller_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L273",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_ledcontroller"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L285",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_ledcontroller_set_mode"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L364",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_ledcontroller_stop"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L123",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_get_current_ssid",
+      "target": "hm_releases_main_main_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L132",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_has_ipv4",
+      "target": "hm_releases_main_main_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L203",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_nmcli_disconnect",
+      "target": "hm_releases_main_main_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L210",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_nmcli_connect",
+      "target": "hm_releases_main_main_run"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L265",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_which"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L139",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_verify_connected",
+      "target": "hm_releases_main_main_get_current_ssid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L281",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_get_current_ssid"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_verify_connected",
+      "target": "hm_releases_main_main_has_ipv4"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L345",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_verify_connected"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L319",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_parse_wifi_qr"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L150",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_rationale_150",
+      "target": "hm_releases_main_main_parse_wifi_qr"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L333",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_nmcli_disconnect"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L336",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_nmcli_connect"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L331",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_countdown"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L288",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_launch_main_py"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L306",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_draw_overlay"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "main.py",
+      "source_location": "L275",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_main_main",
+      "target": "hm_releases_main_main_init_camera_like_main"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "uploader_py",
+      "target": "hm_releases_main_uploader_extract_times_from_filename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "uploader_py",
+      "target": "hm_releases_main_uploader_upload_to_cloud"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L132",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "uploader_py",
+      "target": "hm_releases_main_uploader_upload_image_to_cloud"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_uploader_rationale_1",
+      "target": "uploader_py"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L66",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_uploader_upload_to_cloud",
+      "target": "hm_releases_main_uploader_extract_times_from_filename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_uploader_upload_image_to_cloud",
+      "target": "hm_releases_main_uploader_extract_times_from_filename"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_uploader_rationale_17",
+      "target": "hm_releases_main_uploader_extract_times_from_filename"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "uploader.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_uploader_rationale_48",
+      "target": "hm_releases_main_uploader_upload_to_cloud"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_uploader_py",
+      "target": "tests_test_uploader_fakeresponse"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_uploader_py",
+      "target": "tests_test_uploader_run_video_upload_test"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L62",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_uploader_py",
+      "target": "tests_test_uploader_run_image_upload_test"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_uploader_fakeresponse",
+      "target": "tests_test_uploader_fakeresponse_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_uploader.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "tests_test_uploader_fakeresponse",
+      "target": "tests_test_uploader_fakeresponse_json"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_py",
+      "target": "tests_test_v1_static_read",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_py",
+      "target": "tests_test_v1_static_test_init_py_has_v1_stream_health_routes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_py",
+      "target": "tests_test_v1_static_test_stream_metadata_state_is_tracked",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_py",
+      "target": "tests_test_v1_static_test_host_and_rtsp_helpers_exist",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_test_init_py_has_v1_stream_health_routes",
+      "target": "tests_test_v1_static_read",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L36",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_test_stream_metadata_state_is_tracked",
+      "target": "tests_test_v1_static_read",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tests/test_v1_static.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "tests_test_v1_static_test_host_and_rtsp_helpers_exist",
+      "target": "tests_test_v1_static_read",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "tools_host_mjpeg_viewer_py",
+      "target": "tools_host_mjpeg_viewer_discover",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "tools_host_mjpeg_viewer_py",
+      "target": "tools_host_mjpeg_viewer_open_stream",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "tools_host_mjpeg_viewer_py",
+      "target": "tools_host_mjpeg_viewer_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L78",
+      "weight": 1.0,
+      "source": "tools_host_mjpeg_viewer_main",
+      "target": "tools_host_mjpeg_viewer_discover",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/host_mjpeg_viewer.py",
+      "source_location": "L86",
+      "weight": 1.0,
+      "source": "tools_host_mjpeg_viewer_main",
+      "target": "tools_host_mjpeg_viewer_open_stream",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_py",
+      "target": "tools_pi_smoke_check_read_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_py",
+      "target": "tools_pi_smoke_check_read_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_py",
+      "target": "tools_pi_smoke_check_check_mjpeg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_py",
+      "target": "tools_pi_smoke_check_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_read_json",
+      "target": "tools_pi_smoke_check_read_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_check_mjpeg",
+      "target": "tools_pi_smoke_check_read_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_main",
+      "target": "tools_pi_smoke_check_read_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/pi_smoke_check.py",
+      "source_location": "L46",
+      "weight": 1.0,
+      "source": "tools_pi_smoke_check_main",
+      "target": "tools_pi_smoke_check_check_mjpeg",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "tools/start_rtsp_stream.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "tools_start_rtsp_stream_sh",
+      "target": "c_users_sharv_downloads_hm_releases_main_latest_hm_releases_main_tools_start_rtsp_stream_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_py",
+      "target": "unused_camera_camera"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_stop_if_running"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_configure_preview"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_configure_still"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_configure_video"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L44",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_start_preview"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L61",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_stop_preview"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_capture_image"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L103",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_prepare_video_mode"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_restore_preview"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L120",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera",
+      "target": "unused_camera_camera_update_controls"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L52",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_start_preview",
+      "target": "unused_camera_camera_stop_if_running"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_capture_image",
+      "target": "unused_camera_camera_stop_if_running"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L107",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_prepare_video_mode",
+      "target": "unused_camera_camera_stop_if_running"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L115",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_restore_preview",
+      "target": "unused_camera_camera_stop_if_running"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_start_preview",
+      "target": "unused_camera_camera_configure_preview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L96",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_capture_image",
+      "target": "unused_camera_camera_configure_preview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L116",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_restore_preview",
+      "target": "unused_camera_camera_configure_preview"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_capture_image",
+      "target": "unused_camera_camera_configure_still"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L108",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_camera_prepare_video_mode",
+      "target": "unused_camera_camera_configure_video"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_rationale_45",
+      "target": "unused_camera_camera_start_preview"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_rationale_70",
+      "target": "unused_camera_camera_capture_image"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_rationale_104",
+      "target": "unused_camera_camera_prepare_video_mode"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L112",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_rationale_112",
+      "target": "unused_camera_camera_restore_preview"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/camera.py",
+      "source_location": "L121",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_camera_rationale_121",
+      "target": "unused_camera_camera_update_controls"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_gpio_handler_py",
+      "target": "unused_gpio_handler_gpiohandler"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_gpio_handler_gpiohandler",
+      "target": "unused_gpio_handler_gpiohandler_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_gpio_handler_gpiohandler",
+      "target": "unused_gpio_handler_gpiohandler_poll_gpio"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/gpio_handler.py",
+      "source_location": "L73",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_gpio_handler_gpiohandler",
+      "target": "unused_gpio_handler_gpiohandler_cleanup"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/merger.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_merger_py",
+      "target": "unused_merger_merge_audio_video"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/merger.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_merger_rationale_5",
+      "target": "unused_merger_merge_audio_video"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_py",
+      "target": "unused_recorder_audiorecorder"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L127",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_py",
+      "target": "unused_recorder_videorecorder"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_start_recording"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_record_audio"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L62",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_stop_recording"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L82",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_start_segmented_recording"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_record_segment_audio"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L111",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_audiorecorder",
+      "target": "unused_recorder_audiorecorder_stop_segmented_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L221",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_record_with_segmentation",
+      "target": "unused_recorder_audiorecorder_start_segmented_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L235",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_record_with_segmentation",
+      "target": "unused_recorder_audiorecorder_stop_segmented_recording"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L128",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_init"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L144",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_generate_video_filename"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L150",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_start_recording"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L177",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_monitor_video_size"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L207",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_record_with_segmentation"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L262",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_merge_video_audio"
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L288",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder",
+      "target": "unused_recorder_videorecorder_stop_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L168",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_start_recording",
+      "target": "unused_recorder_videorecorder_generate_video_filename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L198",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_monitor_video_size",
+      "target": "unused_recorder_videorecorder_generate_video_filename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L216",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_record_with_segmentation",
+      "target": "unused_recorder_videorecorder_generate_video_filename"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L201",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_monitor_video_size",
+      "target": "unused_recorder_videorecorder_start_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L220",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_record_with_segmentation",
+      "target": "unused_recorder_videorecorder_start_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L184",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_monitor_video_size",
+      "target": "unused_recorder_videorecorder_stop_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L231",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_record_with_segmentation",
+      "target": "unused_recorder_videorecorder_stop_recording"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L237",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_videorecorder_record_with_segmentation",
+      "target": "unused_recorder_videorecorder_merge_video_audio"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L208",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_rationale_208",
+      "target": "unused_recorder_videorecorder_record_with_segmentation"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/recorder.py",
+      "source_location": "L289",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_recorder_rationale_289",
+      "target": "unused_recorder_videorecorder_stop_recording"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/utils.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_utils_py",
+      "target": "unused_utils_format_timestamp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/utils.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_utils_py",
+      "target": "unused_utils_get_image_filename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/utils.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_utils_py",
+      "target": "unused_utils_get_video_filename"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/utils.py",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_utils_py",
+      "target": "unused_utils_get_rpi_serial"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "Unused/utils.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "unused_utils_get_image_filename",
+      "target": "unused_utils_format_timestamp"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "readme_md",
+      "target": "hm_releases_main_readme_smart_helmet_camera_system_v27_1"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_files_to_push_to_git"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L19",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_installation_on_raspberry_pi"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_configuration"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_features"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L77",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_troubleshooting"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L99",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_web_interface"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_prototype_v1_livestream",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L114",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_smart_helmet_camera_system_v27_1",
+      "target": "hm_releases_main_readme_security_notes"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_files_to_push_to_git",
+      "target": "hm_releases_main_readme_core_files_required"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L13",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_files_to_push_to_git",
+      "target": "hm_releases_main_readme_do_not_push_to_git"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_installation_on_raspberry_pi",
+      "target": "hm_releases_main_readme_1_clone_pull_from_git"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L27",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_installation_on_raspberry_pi",
+      "target": "hm_releases_main_readme_2_run_the_system"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_1_clone_pull_from_git",
+      "target": "hm_releases_main_readme_codeblock_1"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L28",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_2_run_the_system",
+      "target": "hm_releases_main_readme_codeblock_2"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L39",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_configuration",
+      "target": "hm_releases_main_readme_device_id"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L45",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_configuration",
+      "target": "hm_releases_main_readme_upload_settings"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_device_id",
+      "target": "hm_releases_main_readme_codeblock_3"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_features",
+      "target": "hm_releases_main_readme_upload_to_cloud"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_features",
+      "target": "hm_releases_main_readme_gps_location_tracking"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L64",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_features",
+      "target": "hm_releases_main_readme_data_sent_to_server"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_data_sent_to_server",
+      "target": "hm_releases_main_readme_codeblock_4"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L79",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_troubleshooting",
+      "target": "hm_releases_main_readme_ssl_certificate_issues"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L85",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_troubleshooting",
+      "target": "hm_releases_main_readme_manual_certificate_generation_optional"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L91",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_troubleshooting",
+      "target": "hm_releases_main_readme_check_logs"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L86",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_manual_certificate_generation_optional",
+      "target": "hm_releases_main_readme_codeblock_5"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L93",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_check_logs",
+      "target": "hm_releases_main_readme_codeblock_6"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L103",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_web_interface",
+      "target": "hm_releases_main_readme_controls"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L108",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "hm_releases_main_readme_web_interface",
+      "target": "hm_releases_main_readme_media_list"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L109",
+      "weight": 1.0,
+      "source": "hm_releases_main_readme_prototype_v1_livestream",
+      "target": "hm_releases_main_readme_codeblock_7",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "hm_releases_main_readme_prototype_v1_livestream",
+      "target": "hm_releases_main_readme_codeblock_8",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L121",
+      "weight": 1.0,
+      "source": "hm_releases_main_readme_prototype_v1_livestream",
+      "target": "hm_releases_main_readme_controls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "README.md",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "hm_releases_main_readme_prototype_v1_livestream",
+      "target": "hm_releases_main_readme_media_list",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "team_interface_handoff_md",
+      "target": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_project_goal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_current_repository_shape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_what_has_already_been_done",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_current_runtime_flow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_api_endpoints_useful_for_interface_work",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_interface_work_instructions_for_codex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L208",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_how_to_use_graphify_with_codex",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L255",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_practical_local_testing",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L283",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_smart_helmet_interface_handoff_for_codex",
+      "target": "hm_releases_main_team_interface_handoff_guardrails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L83",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_current_runtime_flow",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L212",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_how_to_use_graphify_with_codex",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L223",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_how_to_use_graphify_with_codex",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_how_to_use_graphify_with_codex",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L246",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_how_to_use_graphify_with_codex",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L259",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_practical_local_testing",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L265",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_practical_local_testing",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_7",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L271",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_practical_local_testing",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_8",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "TEAM_INTERFACE_HANDOFF.md",
+      "source_location": "L278",
+      "weight": 1.0,
+      "source": "hm_releases_main_team_interface_handoff_practical_local_testing",
+      "target": "hm_releases_main_team_interface_handoff_codeblock_9",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "v1_progress_md",
+      "target": "hm_releases_main_v1_progress_prototype_v1_progress",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_prototype_v1_progress",
+      "target": "hm_releases_main_v1_progress_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_prototype_v1_progress",
+      "target": "hm_releases_main_v1_progress_what_is_complete_locally",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_prototype_v1_progress",
+      "target": "hm_releases_main_v1_progress_commands_run_locally",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_prototype_v1_progress",
+      "target": "hm_releases_main_v1_progress_commands_to_run_on_the_raspberry_pi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_commands_run_locally",
+      "target": "hm_releases_main_v1_progress_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_commands_to_run_on_the_raspberry_pi",
+      "target": "hm_releases_main_v1_progress_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_commands_to_run_on_the_raspberry_pi",
+      "target": "hm_releases_main_v1_progress_codeblock_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_commands_to_run_on_the_raspberry_pi",
+      "target": "hm_releases_main_v1_progress_codeblock_5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_PROGRESS.md",
+      "source_location": "L65",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_progress_commands_to_run_on_the_raspberry_pi",
+      "target": "hm_releases_main_v1_progress_codeblock_6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "v1_streaming_plan_md",
+      "target": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "target": "hm_releases_main_v1_streaming_plan_phase_1_validate_existing_mjpeg_stream",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "target": "hm_releases_main_v1_streaming_plan_phase_2_add_rtsp_h_264_for_low_latency",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "target": "hm_releases_main_v1_streaming_plan_responsibility_split",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L94",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "target": "hm_releases_main_v1_streaming_plan_ports",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "target": "hm_releases_main_v1_streaming_plan_expected_performance",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_prototype_v1_streaming_plan",
+      "target": "hm_releases_main_v1_streaming_plan_notes",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_1_validate_existing_mjpeg_stream",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_1",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_1_validate_existing_mjpeg_stream",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_2",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_1_validate_existing_mjpeg_stream",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_3",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_1_validate_existing_mjpeg_stream",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_4",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L47",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_2_add_rtsp_h_264_for_low_latency",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_5",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L54",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_2_add_rtsp_h_264_for_low_latency",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_6",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L60",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_2_add_rtsp_h_264_for_low_latency",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_7",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "V1_STREAMING_PLAN.md",
+      "source_location": "L66",
+      "weight": 1.0,
+      "source": "hm_releases_main_v1_streaming_plan_phase_2_add_rtsp_h_264_for_low_latency",
+      "target": "hm_releases_main_v1_streaming_plan_codeblock_8",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": []
+}
