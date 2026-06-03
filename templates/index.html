@@ -3,1173 +3,1177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Helmet {{ version }}</title>
+    <title>Aspire Smart Helmet {{ version }}</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <style>
         :root {
-            --bg: #090b0f;
-            --panel: #121721;
-            --panel-2: #171d28;
-            --line: #283140;
-            --text: #f4f7fb;
-            --muted: #98a4b5;
-            --green: #34d399;
-            --blue: #38bdf8;
-            --amber: #f59e0b;
+            --bg: #060b14;
+            --bg2: #0b1424;
+            --panel: rgba(17, 27, 44, 0.78);
+            --panel2: rgba(22, 35, 57, 0.82);
+            --line: rgba(255, 255, 255, 0.09);
+            --line2: rgba(255, 255, 255, 0.16);
+            --text: #f7f9ff;
+            --muted: #8e9bb0;
+            --muted2: #bdc7d8;
+            --blue: #4c73ff;
+            --cyan: #22d3ee;
+            --green: #22c55e;
+            --yellow: #eab308;
             --red: #ef4444;
-            --violet: #a78bfa;
+            --purple: #8b5cf6;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
         }
 
         * { box-sizing: border-box; }
-
+        html { scroll-behavior: smooth; }
         body {
             margin: 0;
-            background: var(--bg);
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(76, 115, 255, 0.14), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.08), transparent 30%),
+                var(--bg);
             color: var(--text);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
             letter-spacing: 0;
         }
 
-        button, input { font: inherit; }
+        button, input, select { font: inherit; }
+        button { border: 0; color: inherit; cursor: pointer; }
+        button:disabled { cursor: wait; opacity: 0.62; }
+        a { color: inherit; text-decoration: none; }
 
-        button {
-            border: 0;
-            cursor: pointer;
-            min-height: 44px;
+        .app {
+            display: grid;
+            grid-template-columns: 270px minmax(0, 1fr);
+            min-height: 100vh;
         }
 
-        button:disabled {
-            cursor: wait;
-            opacity: 0.7;
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--line);
+            background: rgba(7, 13, 24, 0.92);
+            backdrop-filter: blur(18px);
+            padding: 22px 18px;
         }
 
-        .app-shell {
-            width: min(1240px, 100%);
-            margin: 0 auto;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 46px;
+            margin-bottom: 28px;
+            font-size: 16px;
+            font-weight: 900;
         }
 
+        .brand-mark {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            border-radius: 50%;
+            flex: 0 0 auto;
+        }
+        .brand-mark::before,
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            height: 2px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.82);
+        }
+        .brand-mark::before { width: 21px; left: 6px; top: 15px; transform: rotate(18deg); }
+        .brand-mark::after { width: 12px; right: 5px; top: 22px; }
+
+        .nav { display: grid; gap: 8px; }
+        .nav-btn {
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr);
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            border-radius: 8px;
+            background: transparent;
+            padding: 10px 12px;
+            color: #dbe4f3;
+            text-align: left;
+            transition: transform 0.16s ease, background 0.16s ease;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.06); transform: translateX(2px); }
+        .nav-btn.active { background: linear-gradient(135deg, #3158ff, #4c77ff); color: #fff; }
+
+        .icon {
+            display: inline-grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--line2);
+            border-radius: 8px;
+            color: var(--muted2);
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .nav-btn.active .icon { border-color: rgba(255,255,255,0.42); color: #fff; }
+
+        .device-card {
+            margin-top: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            padding: 15px;
+        }
+        .device-card h3 { margin: 0 0 12px; font-size: 13px; }
+        .mini-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        .mini-row strong { color: #fff; font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+        .bar {
+            overflow: hidden;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
+        }
+        .bar span {
+            display: block;
+            width: 24%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--blue), #8eb0ff);
+        }
+
+        .main { min-width: 0; }
         .topbar {
             position: sticky;
             top: 0;
-            z-index: 100;
-            display: grid;
-            gap: 10px;
-            padding: 12px;
-            background: rgba(9, 11, 15, 0.94);
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 82px;
             border-bottom: 1px solid var(--line);
-            backdrop-filter: blur(10px);
+            background: rgba(7, 13, 24, 0.78);
+            backdrop-filter: blur(18px);
+            padding: 16px 24px;
+        }
+        h1 { margin: 0; font-size: 22px; line-height: 1.1; }
+        .subtitle { margin-top: 5px; color: var(--muted); font-size: 13px; }
+        .top-actions { display: flex; align-items: center; gap: 12px; }
+        .circle {
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 50%;
+            background: var(--panel);
+            color: var(--muted2);
+            font-weight: 900;
+        }
+        .avatar {
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #eef4ff, #c9d7ed);
+            color: #0b1424;
+            font-weight: 900;
         }
 
-        .brand-row {
+        .page { display: none; padding: 20px 24px 28px; }
+        .page.active { display: block; }
+
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(380px, 0.95fr);
+            gap: 18px;
+        }
+        .left-stack, .right-stack { display: grid; gap: 16px; align-content: start; min-width: 0; }
+
+        .panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+        }
+        .panel-pad { padding: 16px; }
+        .panel-head {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            margin-bottom: 14px;
         }
+        .panel-title { margin: 0; font-size: 15px; font-weight: 900; }
+        .panel-sub { color: var(--muted); font-size: 12px; }
 
-        h1 {
-            margin: 0;
-            font-size: 17px;
-            font-weight: 800;
-        }
-
-        .version {
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .status-strip {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
-        }
-
-        .status-pill, .metric, .chip {
-            min-width: 0;
-            border: 1px solid var(--line);
-            background: var(--panel);
-            border-radius: 8px;
-        }
-
-        .status-pill {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-height: 38px;
-            padding: 8px 10px;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 999px;
-            background: var(--muted);
-            flex: 0 0 auto;
-        }
-
-        .dot.ok { background: var(--green); box-shadow: 0 0 12px rgba(52, 211, 153, 0.7); }
-        .dot.warn { background: var(--amber); }
-        .dot.error { background: var(--red); }
-
-        .dashboard {
-            display: grid;
-            gap: 12px;
-            padding: 12px;
-        }
-
-        .live-panel {
-            display: grid;
-            gap: 10px;
-        }
-
-        .feed-container {
-            position: relative;
-            overflow: hidden;
-            background: #000;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            aspect-ratio: 4 / 3;
-        }
-
-        .feed-container img {
+        .stream-card { overflow: hidden; position: relative; min-height: 535px; background: #02050b; }
+        .stream-stage { position: relative; min-height: 535px; aspect-ratio: 16 / 10; background: #02050b; }
+        #videoFeed {
             display: block;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            background: #000;
+            min-height: 535px;
+            object-fit: cover;
+            background: #02050b;
         }
+        #streamCanvas { display: none; }
+        .overlay { position: absolute; inset: 0; pointer-events: none; }
 
-        .feed-overlay {
+        .top-overlay {
             position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-
-        .rec-indicator {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 10px;
-            border-radius: 999px;
-            background: rgba(239, 68, 68, 0.92);
-            color: #fff;
-            font-size: 13px;
-            font-weight: 900;
-        }
-
-        .rec-indicator.active { display: flex; animation: pulse 1.4s infinite; }
-
-        .audio-indicator {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            display: none;
-            padding: 8px 10px;
-            border-radius: 999px;
-            background: rgba(52, 211, 153, 0.9);
-            color: #04100b;
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .audio-indicator.active { display: block; }
-        .audio-indicator.muted { display: block; background: rgba(239, 68, 68, 0.9); color: #fff; }
-
-        .ai-overlay-hook {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.72; }
-        }
-
-        .control-bar {
-            display: grid;
-            grid-template-columns: 1fr 52px 1fr;
-            gap: 8px;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px 10px;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 900;
-            transition: transform 0.16s ease, filter 0.16s ease;
-        }
-
-        .btn:active { transform: scale(0.98); }
-        .btn:hover { filter: brightness(1.08); }
-
-        .btn-record { background: var(--red); }
-        .btn-record.recording { background: #525866; }
-        .btn-photo { background: var(--blue); color: #06111a; }
-        .btn-shutdown { background: #8f1d1d; }
-
-        .btn-audio-toggle {
-            width: 52px;
-            border: 1px solid rgba(52, 211, 153, 0.7);
-            border-radius: 8px;
-            background: rgba(52, 211, 153, 0.14);
-            color: var(--green);
-            font-size: 18px;
-            font-weight: 900;
-        }
-
-        .btn-audio-toggle.muted {
-            border-color: rgba(239, 68, 68, 0.75);
-            background: rgba(239, 68, 68, 0.14);
-            color: var(--red);
-        }
-
-        .stream-grid, .side-grid {
-            display: grid;
-            gap: 8px;
-        }
-
-        .stream-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .metric {
-            padding: 10px;
-        }
-
-        .metric-label {
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .metric-value {
-            margin-top: 5px;
-            overflow-wrap: anywhere;
-            color: var(--text);
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .metric-value.good { color: var(--green); }
-        .metric-value.warn { color: var(--amber); }
-        .metric-value.bad { color: var(--red); }
-
-        .panel {
-            border-top: 1px solid var(--line);
-            padding-top: 12px;
-        }
-
-        .panel-header {
+            top: 16px;
+            left: 16px;
+            right: 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 10px;
         }
-
-        .panel-title {
-            margin: 0;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        .chip {
+        .badge-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+        .badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            min-height: 28px;
-            padding: 5px 8px;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .media-list {
-            display: grid;
-            gap: 10px;
-            padding-bottom: 40px;
-        }
-
-        .media-item, .batch-group, .recording-session-card {
-            position: relative;
-            border: 1px solid var(--line);
+            gap: 7px;
+            min-height: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 8px;
-            background: var(--panel);
-            padding: 12px;
+            background: rgba(0, 0, 0, 0.58);
+            padding: 6px 10px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            backdrop-filter: blur(12px);
         }
-
-        .recording-session-card {
-            border-color: rgba(239, 68, 68, 0.8);
-            background: rgba(127, 29, 29, 0.28);
+        .badge.live { background: rgba(239, 68, 68, 0.9); border-color: rgba(255, 255, 255, 0.14); }
+        .signal {
+            display: inline-grid;
+            grid-template-columns: repeat(4, 4px);
+            gap: 2px;
+            align-items: end;
+            height: 14px;
         }
+        .signal i { display: block; width: 4px; border-radius: 2px; background: var(--green); }
+        .signal i:nth-child(1) { height: 5px; }
+        .signal i:nth-child(2) { height: 8px; }
+        .signal i:nth-child(3) { height: 11px; }
+        .signal i:nth-child(4) { height: 14px; }
 
-        .recording-session-header {
-            display: flex;
+        .bottom-controls {
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 16px;
+            display: grid;
+            grid-template-columns: auto minmax(120px, 1fr) auto;
+            gap: 14px;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.62);
+            padding: 12px;
+            pointer-events: auto;
+            backdrop-filter: blur(14px);
         }
-
-        .recording-icon {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            background: var(--red);
-            animation: pulse 1.2s infinite;
-        }
-
-        .recording-session-title, .batch-title {
-            font-size: 14px;
+        .control-cluster { display: flex; align-items: center; gap: 8px; }
+        .player-btn {
+            display: inline-grid;
+            place-items: center;
+            width: 38px;
+            height: 38px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
+            color: #fff;
+            font-size: 12px;
             font-weight: 900;
         }
+        .player-btn:hover { border-color: var(--line2); background: rgba(255, 255, 255, 0.08); }
+        .volume {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 120px;
+        }
+        input[type="range"] { accent-color: var(--blue); width: 100%; }
+        .select {
+            min-height: 38px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            padding: 0 10px;
+        }
+        .select option { color: #111827; }
 
-        .recording-session-info, .batch-info {
+        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .action-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel2);
+            padding: 14px;
+        }
+        .action-card h3 { margin: 0 0 10px; font-size: 14px; }
+        .action-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+        .btn {
+            min-height: 38px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .btn:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.12); }
+        .btn.primary { background: linear-gradient(135deg, #3158ff, #4c77ff); }
+        .btn.green { background: rgba(34, 197, 94, 0.18); color: #80f5af; }
+        .btn.red { background: rgba(239, 68, 68, 0.18); color: #ff9aa7; }
+        .btn.yellow { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
+
+        .status-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
             color: var(--muted);
             font-size: 12px;
-            overflow-wrap: anywhere;
+            margin-top: 8px;
         }
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+            margin-right: 7px;
+        }
+        .dot.green { background: var(--green); box-shadow: 0 0 14px rgba(34, 197, 94, 0.6); }
+        .dot.red { background: var(--red); }
+        .dot.yellow { background: var(--yellow); }
 
-        .recording-chunks-list, .chunk-list {
-            display: grid;
-            gap: 6px;
+        .meter {
+            overflow: hidden;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
             margin-top: 10px;
         }
+        .meter span { display: block; width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width 0.25s ease; }
 
-        .recording-chunk-item, .chunk-item {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 8px;
-            align-items: center;
+        .talk-card { grid-column: 1 / -1; }
+        .talk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .field { display: grid; gap: 6px; }
+        .field label { color: var(--muted); font-size: 12px; font-weight: 800; }
+        .field input, .field select {
+            min-height: 40px;
+            border: 1px solid var(--line);
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            padding: 8px 10px;
         }
-
-        .chunk-item {
-            cursor: pointer;
+        .ptt {
+            width: 100%;
+            min-height: 58px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.86), rgba(248, 113, 113, 0.72));
+            font-size: 14px;
+            font-weight: 1000;
+            letter-spacing: 0.04em;
         }
+        .ptt.active { animation: pulse 0.9s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+        .voice-meter { display: grid; grid-template-columns: repeat(18, 1fr); gap: 3px; height: 26px; align-items: end; margin-top: 10px; }
+        .voice-meter span { height: 5px; border-radius: 4px; background: rgba(34, 197, 94, 0.25); transition: height 0.08s ease, background 0.08s ease; }
+        .voice-meter span.active { background: var(--green); }
 
-        .recording-chunk-name, .chunk-name {
+        .info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .info-row { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+        .info-row strong { color: #fff; text-align: right; overflow-wrap: anywhere; }
+
+        .recent-list, .media-list { display: grid; gap: 10px; }
+        .record-item, .media-item, .batch-group, .recording-session-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel2);
+            padding: 10px;
+        }
+        .record-item {
+            display: grid;
+            grid-template-columns: 68px minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: center;
+        }
+        .thumb {
+            display: grid;
+            place-items: center;
+            width: 68px;
+            height: 52px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(76, 115, 255, 0.34), rgba(34, 211, 238, 0.16));
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .file-name, .media-name, .chunk-name {
             overflow: hidden;
-            color: var(--text);
-            font-size: 12px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-
-        .recording-chunk-size, .chunk-size {
-            color: var(--green);
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .batch-group {
-            background: #111b2b;
-            border-color: #23405f;
-        }
-
-        .batch-header, .media-header {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .batch-stats, .batch-actions, .media-actions, .chunk-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-        .batch-stat, .chunk-status, .status-badge {
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            padding: 5px 8px;
-            color: var(--muted);
-            font-size: 11px;
-            font-weight: 800;
-        }
-
-        .chunk-status.uploaded, .status-badge.uploaded { background: rgba(52, 211, 153, 0.18); color: var(--green); }
-        .chunk-status.uploading, .status-badge.uploading { background: rgba(56, 189, 248, 0.18); color: var(--blue); }
-        .chunk-status.failed, .status-badge.failed { background: rgba(239, 68, 68, 0.18); color: var(--red); }
-        .chunk-status.converting, .status-badge.converting { background: rgba(245, 158, 11, 0.18); color: var(--amber); }
-        .chunk-status.incomplete, .status-badge.incomplete { background: rgba(167, 139, 250, 0.18); color: var(--violet); }
-
-        .media-item.uploaded { border-color: rgba(52, 211, 153, 0.7); }
-        .media-item.failed { border-color: rgba(239, 68, 68, 0.7); }
-        .media-item.incomplete { border-color: rgba(167, 139, 250, 0.7); }
-
-        .media-header {
-            cursor: pointer;
-            align-items: flex-start;
-        }
-
-        .media-name {
-            min-width: 0;
-            overflow-wrap: anywhere;
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .media-size {
-            flex: 0 0 auto;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 800;
-        }
-
-        .action-btn, .batch-btn, .chunk-btn {
-            flex: 1 1 86px;
-            min-width: 76px;
+        .file-meta, .media-meta, .chunk-meta { margin-top: 4px; color: var(--muted); font-size: 12px; }
+        .file-actions, .media-actions, .batch-actions, .chunk-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .file-actions { justify-content: flex-end; margin-top: 0; }
+        .mini-btn {
+            min-height: 34px;
             border-radius: 8px;
-            padding: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 7px 10px;
+            color: #fff;
             font-size: 11px;
             font-weight: 900;
         }
+        .mini-btn.red { color: #ff9aa7; background: rgba(239,68,68,0.16); }
+        .mini-btn.green { color: #80f5af; background: rgba(34,197,94,0.16); }
+        .mini-btn.blue { color: #9db4ff; background: rgba(76,115,255,0.16); }
+        .mini-btn.yellow { color: #fde68a; background: rgba(234,179,8,0.16); }
 
-        .btn-copy-link { background: var(--violet); color: #090b0f; }
-        .btn-upload, .batch-btn-upload, .chunk-btn-upload { background: var(--green); color: #04100b; }
-        .btn-delete, .batch-btn-delete { background: var(--red); color: #fff; }
-        .btn-rename, .batch-btn-rename { background: var(--amber); color: #111; }
-
-        .status-badge {
-            position: static;
-            display: inline-flex;
-            margin-bottom: 8px;
+        .system-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+        .sys {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel2);
+            padding: 12px;
+            min-height: 76px;
         }
+        .sys div { color: var(--muted); font-size: 12px; margin-top: 8px; }
+        .sys strong { font-size: 13px; }
+
+        .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .settings-card { display: grid; gap: 12px; }
+        .settings-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+        .status-badge, .chunk-status, .batch-stat {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            border-radius: 999px;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.08);
+            color: var(--muted2);
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .status-badge.uploaded, .chunk-status.uploaded { color: #80f5af; background: rgba(34,197,94,0.16); }
+        .status-badge.failed, .chunk-status.failed { color: #ff9aa7; background: rgba(239,68,68,0.16); }
+        .status-badge.converting, .chunk-status.converting { color: #fde68a; background: rgba(234,179,8,0.16); }
+        .status-badge.incomplete, .chunk-status.incomplete { color: #c4b5fd; background: rgba(139,92,246,0.16); }
+        .status-badge.uploading, .chunk-status.uploading { color: #9db4ff; background: rgba(76,115,255,0.16); }
 
         .empty-state {
-            border: 1px dashed var(--line);
+            border: 1px dashed var(--line2);
             border-radius: 8px;
-            padding: 28px 14px;
+            padding: 28px 16px;
             color: var(--muted);
             text-align: center;
         }
 
-        .copy-notification {
+        .toast {
             position: fixed;
             top: 18px;
             left: 50%;
             z-index: 3000;
             display: none;
+            max-width: min(520px, calc(100vw - 28px));
             transform: translateX(-50%);
+            border: 1px solid var(--line2);
             border-radius: 8px;
-            background: var(--green);
-            color: #04100b;
-            padding: 12px 16px;
+            background: rgba(13, 23, 38, 0.96);
+            box-shadow: var(--shadow);
+            padding: 12px 14px;
+            color: #fff;
             font-size: 13px;
             font-weight: 900;
         }
-
-        .copy-notification.show { display: block; }
+        .toast.show { display: block; }
+        .toast.good { border-color: rgba(34, 197, 94, 0.44); }
+        .toast.bad { border-color: rgba(239, 68, 68, 0.44); }
 
         .modal, .rename-modal {
             position: fixed;
             inset: 0;
-            z-index: 1000;
+            z-index: 2000;
             display: none;
             overflow-y: auto;
-            background: rgba(0, 0, 0, 0.94);
-        }
-
-        .modal.active { display: block; }
-        .rename-modal.active { display: flex; align-items: center; justify-content: center; padding: 16px; }
-
-        .modal-content {
-            width: min(960px, 100%);
-            margin: 0 auto;
-            padding: 14px;
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .modal-title {
-            min-width: 0;
-            overflow-wrap: anywhere;
-            color: var(--green);
-            font-size: 14px;
-            font-weight: 900;
-        }
-
-        .modal-close {
-            flex: 0 0 auto;
-            border-radius: 8px;
-            background: var(--red);
-            color: #fff;
-            padding: 10px 14px;
-            font-size: 12px;
-            font-weight: 900;
-        }
-
-        .modal-video, .photo-preview {
-            width: 100%;
-            border-radius: 8px;
-            background: #000;
-        }
-
-        .modal-video {
-            max-height: 42vh;
-            margin-bottom: 12px;
-        }
-
-        .modal-map {
-            position: relative;
-            overflow: hidden;
-            width: 100%;
-            height: 320px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--panel);
-        }
-
-        #map { width: 100%; height: 100%; }
-
-        .map-loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .map-info {
-            display: grid;
-            gap: 6px;
-            margin-top: 10px;
-        }
-
-        .map-info-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--panel);
-            padding: 9px;
-            font-size: 12px;
-        }
-
-        .map-label { color: var(--muted); font-weight: 800; }
-        .map-value { color: var(--text); text-align: right; overflow-wrap: anywhere; }
-
-        .rename-dialog {
-            width: min(420px, 100%);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--panel);
+            background: rgba(0, 0, 0, 0.92);
             padding: 18px;
         }
+        .modal.active { display: block; }
+        .rename-modal.active { display: grid; place-items: center; }
+        .modal-content { width: min(980px, 100%); margin: 0 auto; }
+        .modal-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 12px; }
+        .modal-title { font-weight: 900; overflow-wrap: anywhere; }
+        .modal-close { min-height: 40px; border-radius: 8px; background: rgba(239,68,68,0.18); color: #ff9aa7; padding: 8px 14px; font-weight: 900; }
+        .modal-video, .photo-preview { width: 100%; border-radius: 8px; background: #000; }
+        .modal-video { max-height: 44vh; margin-bottom: 12px; }
+        .modal-map { position: relative; overflow: hidden; width: 100%; height: 320px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+        #map { width: 100%; height: 100%; }
+        .map-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--muted); font-size: 13px; font-weight: 900; }
+        .map-info { display: grid; gap: 8px; margin-top: 10px; }
+        .map-info-row { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 10px; font-size: 12px; }
+        .map-label { color: var(--muted); font-weight: 900; }
+        .map-value { overflow-wrap: anywhere; text-align: right; }
+        .rename-dialog { width: min(420px, 100%); border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 18px; }
+        .rename-title { margin-bottom: 12px; font-weight: 900; }
+        .rename-input { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,0.06); color: #fff; padding: 10px 12px; }
+        .rename-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 
-        .rename-title {
-            margin-bottom: 12px;
-            color: var(--green);
-            font-size: 15px;
-            font-weight: 900;
+        @media (max-width: 1320px) {
+            .monitor-grid { grid-template-columns: 1fr; }
+            .right-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .talk-card { grid-column: auto; }
+            .system-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
-
-        .rename-input {
-            width: 100%;
-            margin-bottom: 12px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: #090b0f;
-            color: var(--text);
-            padding: 12px;
-        }
-
-        .rename-input:focus {
-            border-color: var(--green);
-            outline: 0;
-        }
-
-        .rename-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .rename-btn {
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 900;
-        }
-
-        .rename-btn-save { background: var(--green); color: #04100b; }
-        .rename-btn-cancel { background: #3b4351; color: #fff; }
-
-        @media (min-width: 860px) {
-            .topbar {
-                grid-template-columns: auto 1fr;
-                align-items: center;
-            }
-
-            .status-strip {
-                grid-template-columns: repeat(4, minmax(0, 1fr));
-            }
-
-            .dashboard {
-                grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.8fr);
-                align-items: start;
-            }
-
-            .media-panel {
-                grid-column: 1 / -1;
-            }
-
-            .feed-container {
-                min-height: 520px;
-            }
+        @media (max-width: 860px) {
+            .app { grid-template-columns: 1fr; }
+            .sidebar { position: static; height: auto; }
+            .monitor-grid, .right-stack, .quick-grid, .info-grid, .settings-grid, .talk-grid, .system-grid { grid-template-columns: 1fr; }
+            .topbar { align-items: flex-start; flex-direction: column; }
+            .stream-card, .stream-stage, #videoFeed { min-height: 340px; }
+            .bottom-controls { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div id="copyNotification" class="copy-notification">Download link copied</div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <canvas id="streamCanvas"></canvas>
 
-    <div class="app-shell">
-        <header class="topbar">
-            <div class="brand-row">
-                <h1>Smart Helmet</h1>
-                <div class="version">{{ version }}</div>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand"><span class="brand-mark"></span><span>Aspire Smart Helmet</span></div>
+            <nav class="nav" aria-label="Dashboard navigation">
+                <button class="nav-btn active" data-page="live"><span class="icon">LS</span><span>Live Stream</span></button>
+                <button class="nav-btn" data-page="dashboard"><span class="icon">DB</span><span>Dashboard</span></button>
+                <button class="nav-btn" data-page="recordings"><span class="icon">RC</span><span>Recordings</span></button>
+                <button class="nav-btn" data-page="local"><span class="icon">LF</span><span>Local Files</span></button>
+                <button class="nav-btn" data-page="server"><span class="icon">SF</span><span>Server Files</span></button>
+                <button class="nav-btn" data-page="settings"><span class="icon">ST</span><span>Settings</span></button>
+            </nav>
+
+            <div class="device-card">
+                <h3>Device Status</h3>
+                <div class="mini-row"><span>State</span><strong id="deviceOnline"><span class="dot yellow"></span>Checking</strong></div>
+                <div class="mini-row"><span>Device ID</span><strong id="deviceIdText">--</strong></div>
+                <div class="mini-row"><span>Storage</span><strong id="storageText">--</strong></div>
+                <div class="bar"><span id="storageFill"></span></div>
+                <div class="mini-row"><span>Connection</span><strong id="connectionText">--</strong></div>
+                <div class="mini-row"><span>Server Sync</span><strong id="syncText">Idle</strong></div>
             </div>
-            <div class="status-strip">
-                <div class="status-pill"><span id="healthDot" class="dot warn"></span><span id="statusText">STANDBY</span></div>
-                <div id="gpsStatus" class="status-pill gps-status"><span class="dot warn"></span><span>GPS: Initializing</span></div>
-                <div class="status-pill"><span class="dot ok"></span><span id="storageText">Storage: -- GB</span></div>
-                <div class="status-pill"><span class="dot warn"></span><span id="streamSummary">Stream: warming</span></div>
-            </div>
-        </header>
+        </aside>
 
-        <main class="dashboard">
-            <section class="live-panel" aria-label="Live view">
-                <div class="feed-container">
-                    <img id="videoFeed" src="/video_feed" alt="Live MJPEG feed">
-                    <div class="feed-overlay">
-                        <div id="recIndicator" class="rec-indicator"><span>REC</span><span id="recTimer">00:00</span></div>
-                        <div id="audioIndicator" class="audio-indicator">AUDIO</div>
-                        <div class="ai-overlay-hook" id="aiOverlay"></div>
-                    </div>
+        <main class="main">
+            <header class="topbar">
+                <div>
+                    <h1 id="pageTitle">Live Stream</h1>
+                    <div id="pageSubtitle" class="subtitle">Enterprise live monitoring from Aspire Smart Helmet</div>
                 </div>
-
-                <div class="stream-grid">
-                    <div class="metric">
-                        <div class="metric-label">Frame Age</div>
-                        <div id="frameAgeText" class="metric-value warn">--</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Frame Count</div>
-                        <div id="frameCountText" class="metric-value">--</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Stream URL</div>
-                        <div id="streamUrlText" class="metric-value">/video_feed</div>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Mode</div>
-                        <div id="streamModeText" class="metric-value">MJPEG V1</div>
-                    </div>
+                <div class="top-actions">
+                    <button class="circle" type="button" title="Notifications">N</button>
+                    <button class="circle" type="button" title="Settings" data-page-shortcut="settings">S</button>
+                    <span class="avatar">A</span>
+                    <strong>Admin</strong>
                 </div>
+            </header>
 
-                <div class="control-bar" aria-label="Primary controls">
-                    <button id="btnRecord" class="btn btn-record" onclick="toggleRecord()">REC VIDEO</button>
-                    <button id="btnAudio" class="btn-audio-toggle" onclick="toggleAudio()" title="Toggle audio">A</button>
-                    <button class="btn btn-photo" onclick="capturePhoto()">CAPTURE PHOTO</button>
+            <section id="page-live" class="page active">
+                <div class="monitor-grid">
+                    <div class="left-stack">
+                        <section class="panel stream-card">
+                            <div class="stream-stage" id="streamStage">
+                                <img id="videoFeed" src="/video_feed" alt="Live stream">
+                                <div class="overlay">
+                                    <div class="top-overlay">
+                                        <div class="badge-row">
+                                            <span class="badge live" id="liveBadge">LIVE</span>
+                                            <span class="badge" id="streamTimer">00:00:00</span>
+                                            <span class="badge" id="connectivityBadge"><span class="dot yellow"></span>Connecting</span>
+                                        </div>
+                                        <div class="badge-row">
+                                            <span class="badge" id="resolutionBadge">1080p</span>
+                                            <span class="badge"><span class="signal"><i></i><i></i><i></i><i></i></span><span id="signalText">Signal</span></span>
+                                        </div>
+                                    </div>
+                                    <div class="bottom-controls">
+                                        <div class="control-cluster">
+                                            <button class="player-btn" type="button" onclick="playStream()" title="Play">PLY</button>
+                                            <button class="player-btn" type="button" onclick="pauseStream()" title="Pause">PAU</button>
+                                            <button class="player-btn" type="button" onclick="stopStream()" title="Stop">STP</button>
+                                        </div>
+                                        <div class="volume">
+                                            <button id="muteBtn" class="player-btn" type="button" onclick="toggleMute()" title="Mute">MUT</button>
+                                            <input id="volumeSlider" type="range" min="0" max="100" value="72" aria-label="Volume">
+                                        </div>
+                                        <div class="control-cluster">
+                                            <button class="player-btn" type="button" onclick="captureSnapshot()" title="Screenshot">IMG</button>
+                                            <button class="player-btn" type="button" onclick="toggleFullscreen()" title="Fullscreen">FS</button>
+                                            <select id="qualitySelect" class="select" aria-label="Quality selector">
+                                                <option>1080p</option>
+                                                <option>720p</option>
+                                                <option>480p</option>
+                                                <option>Auto</option>
+                                            </select>
+                                            <button class="player-btn" type="button" data-page-shortcut="settings" title="Settings">SET</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="info-grid">
+                            <div class="panel panel-pad">
+                                <div class="panel-head"><h2 class="panel-title">Stream Information</h2></div>
+                                <div class="info-row"><span>Mode</span><strong id="streamModeText">MJPEG</strong></div>
+                                <div class="info-row"><span>Resolution</span><strong id="streamResolutionText">--</strong></div>
+                                <div class="info-row"><span>FPS</span><strong id="fpsText">--</strong></div>
+                                <div class="info-row"><span>Frame age</span><strong id="frameAgeText">--</strong></div>
+                            </div>
+                            <div class="panel panel-pad">
+                                <div class="panel-head"><h2 class="panel-title">System Status</h2></div>
+                                <div class="info-row"><span>Stream</span><strong id="sysStream"><span class="dot yellow"></span>Checking</strong></div>
+                                <div class="info-row"><span>Local Rec</span><strong id="sysLocalRec"><span class="dot yellow"></span>Idle</strong></div>
+                                <div class="info-row"><span>Desktop Rec</span><strong id="sysDesktopRec"><span class="dot yellow"></span>Idle</strong></div>
+                                <div class="info-row"><span>Live Talk</span><strong id="sysTalk"><span class="dot yellow"></span>Ready</strong></div>
+                            </div>
+                            <div class="panel panel-pad">
+                                <div class="panel-head"><h2 class="panel-title">Connection</h2></div>
+                                <div class="info-row"><span>Device</span><strong id="sysDevice"><span class="dot yellow"></span>Checking</strong></div>
+                                <div class="info-row"><span>Server Sync</span><strong id="sysSync"><span class="dot yellow"></span>Idle</strong></div>
+                                <div class="info-row"><span>Host URL</span><strong id="hostUrlText">--</strong></div>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-pad">
+                            <div class="panel-head"><h2 class="panel-title">Recent Recordings</h2><button class="btn" type="button" data-page-shortcut="recordings">View All Recordings</button></div>
+                            <div id="recentRecordings" class="recent-list"><div class="empty-state">Loading recordings</div></div>
+                        </section>
+                    </div>
+
+                    <aside class="right-stack">
+                        <section class="action-card">
+                            <h3>Local Recording</h3>
+                            <div class="status-line"><span>State</span><strong id="localRecState"><span class="dot yellow"></span>Idle</strong></div>
+                            <div class="status-line"><span>Duration</span><strong id="recTimer">00:00</strong></div>
+                            <div class="action-row">
+                                <button id="btnStartRecord" class="btn green" type="button" onclick="startLocalRecord()">Start recording</button>
+                                <button id="btnStopRecord" class="btn red" type="button" onclick="stopLocalRecord()">Stop recording</button>
+                            </div>
+                        </section>
+
+                        <section class="action-card">
+                            <h3>Desktop Recording</h3>
+                            <div class="status-line"><span>State</span><strong id="desktopRecState"><span class="dot yellow"></span>Idle</strong></div>
+                            <div class="status-line"><span>Duration</span><strong id="desktopTimer">00:00</strong></div>
+                            <div class="action-row">
+                                <button id="btnDesktopRecord" class="btn green" type="button" onclick="startDesktopRecording()">Record stream</button>
+                                <button id="btnDesktopStop" class="btn red" type="button" onclick="stopDesktopRecording()">Stop</button>
+                                <button id="btnDesktopDownload" class="btn primary" type="button" onclick="downloadDesktopRecording()">Download</button>
+                            </div>
+                        </section>
+
+                        <section class="action-card">
+                            <h3>Sync To Server</h3>
+                            <div class="status-line"><span>Progress</span><strong id="syncPercentText">0%</strong></div>
+                            <div class="meter"><span id="syncProgress"></span></div>
+                            <div class="action-row">
+                                <button class="btn green" type="button" onclick="syncRecordings()">Upload recordings</button>
+                                <button class="btn green" type="button" onclick="syncSnapshots()">Upload snapshots</button>
+                            </div>
+                        </section>
+
+                        <section class="action-card">
+                            <h3>Download Files</h3>
+                            <div class="action-row">
+                                <button class="btn primary" type="button" onclick="downloadLatest('video')">Download recordings</button>
+                                <button class="btn primary" type="button" onclick="downloadLatest('image')">Download snapshots</button>
+                                <button class="btn" type="button" onclick="showToast('Use /api/list_logs and /api/download_log from backend when log UI is wired.')">Download logs</button>
+                            </div>
+                        </section>
+
+                        <section class="action-card">
+                            <h3>Snapshot</h3>
+                            <div class="status-line"><span>Last capture</span><strong id="snapshotState">None</strong></div>
+                            <div class="action-row">
+                                <button class="btn primary" type="button" onclick="captureSnapshot()">Capture frame</button>
+                                <button class="btn" type="button" onclick="saveLocalSnapshot()">Save locally</button>
+                                <button class="btn" type="button" onclick="previewLastSnapshot()">Preview captured image</button>
+                            </div>
+                        </section>
+
+                        <section class="action-card talk-card">
+                            <h3>Live Talk</h3>
+                            <div class="talk-grid">
+                                <div class="field"><label for="micSelect">Microphone</label><select id="micSelect"></select></div>
+                                <div class="field"><label for="speakerSelect">Speaker</label><select id="speakerSelect"></select></div>
+                            </div>
+                            <div class="action-row">
+                                <button id="pttButton" class="ptt" type="button">HOLD TO TALK</button>
+                                <button id="talkMuteBtn" class="btn" type="button" onclick="toggleTalkMute()">Mute/unmute</button>
+                            </div>
+                            <div class="status-line"><span>Connection</span><strong id="talkStatus"><span class="dot yellow"></span>Ready</strong></div>
+                            <div class="voice-meter" id="voiceMeter"></div>
+                        </section>
+                    </aside>
                 </div>
             </section>
 
-            <aside class="side-grid" aria-label="Device status">
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Device</h2>
-                        <span id="deviceStateChip" class="chip"><span class="dot warn"></span> Checking</span>
+            <section id="page-dashboard" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">System Status</h2><span class="panel-sub">Live device and service indicators</span></div>
+                    <div class="system-grid">
+                        <div class="sys"><strong id="dashStream"><span class="dot yellow"></span>Stream</strong><div>Live feed health</div></div>
+                        <div class="sys"><strong id="dashLocalRec"><span class="dot yellow"></span>Local Recording</strong><div>Pi recording state</div></div>
+                        <div class="sys"><strong id="dashDesktopRec"><span class="dot yellow"></span>Desktop Recording</strong><div>Browser capture state</div></div>
+                        <div class="sys"><strong id="dashTalk"><span class="dot yellow"></span>Live Talk</strong><div>Audio channel</div></div>
+                        <div class="sys"><strong id="dashSync"><span class="dot yellow"></span>Server Sync</strong><div>Upload queue</div></div>
+                        <div class="sys"><strong id="dashDevice"><span class="dot yellow"></span>Device</strong><div>Helmet connection</div></div>
                     </div>
-                    <div class="stream-grid">
-                        <div class="metric">
-                            <div class="metric-label">Device ID</div>
-                            <div id="deviceIdText" class="metric-value">--</div>
+                </section>
+            </section>
+
+            <section id="page-recordings" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Recordings</h2><span id="mediaCountChip" class="panel-sub">Loading</span></div>
+                    <div id="mediaList" class="media-list"></div>
+                </section>
+            </section>
+
+            <section id="page-local" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Local Files</h2><span class="panel-sub">Client-side captures from this browser</span></div>
+                    <div id="localFiles" class="recent-list"><div class="empty-state">No local captures yet</div></div>
+                </section>
+            </section>
+
+            <section id="page-server" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Server Files</h2><span class="panel-sub">Files returned by device media API</span></div>
+                    <div id="serverFiles" class="recent-list"><div class="empty-state">Loading server files</div></div>
+                </section>
+            </section>
+
+            <section id="page-settings" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Settings</h2><span class="panel-sub">Stored locally for this browser until backend settings endpoints are added</span></div>
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Stream Settings</h3>
+                            <div class="field"><label>Resolution</label><select id="settingResolution"><option>1080p</option><option>720p</option><option>480p</option></select></div>
+                            <div class="field"><label>FPS</label><input id="settingFps" type="number" value="30"></div>
+                            <div class="field"><label>Bitrate</label><input id="settingBitrate" value="4.5 Mbps"></div>
+                            <div class="field"><label>Codec</label><select id="settingCodec"><option>MJPEG</option><option>H.264</option><option>LiveKit</option></select></div>
                         </div>
-                        <div class="metric">
-                            <div class="metric-label">Hostname</div>
-                            <div id="hostnameText" class="metric-value">--</div>
+                        <div class="settings-card">
+                            <h3>Recording Settings</h3>
+                            <div class="field"><label>Local path</label><input id="settingLocalPath" value="Downloads/Aspire"></div>
+                            <div class="field"><label>Format</label><select id="settingFormat"><option>mp4</option><option>webm</option></select></div>
+                            <div class="field"><label>Auto-record</label><select id="settingAutoRecord"><option>Off</option><option>On connect</option><option>On motion</option></select></div>
                         </div>
-                        <div class="metric">
-                            <div class="metric-label">LAN IP</div>
-                            <div id="lanText" class="metric-value">--</div>
+                        <div class="settings-card">
+                            <h3>Audio Settings</h3>
+                            <div class="field"><label>Input device</label><select id="settingAudioInput"></select></div>
+                            <div class="field"><label>Output device</label><select id="settingAudioOutput"></select></div>
+                            <div class="field"><label>Volume</label><input id="settingVolume" type="range" min="0" max="100" value="72"></div>
                         </div>
-                        <div class="metric">
-                            <div class="metric-label">Audio</div>
-                            <div id="audioStateText" class="metric-value">--</div>
+                        <div class="settings-card">
+                            <h3>Server Settings</h3>
+                            <div class="field"><label>Server URL</label><input id="settingServerUrl" placeholder="https://server.example.com"></div>
+                            <div class="field"><label>Sync interval</label><select id="settingSyncInterval"><option>Manual</option><option>5 min</option><option>15 min</option><option>Hourly</option></select></div>
+                            <div class="field"><label>Authentication</label><input id="settingAuth" placeholder="Token or key"></div>
+                        </div>
+                        <div class="settings-card">
+                            <h3>UI Settings</h3>
+                            <div class="field"><label>Theme</label><select id="settingTheme"><option>Dark surveillance</option><option>High contrast</option></select></div>
+                            <div class="field"><label>Sidebar behavior</label><select id="settingSidebar"><option>Fixed</option><option>Auto collapse</option></select></div>
+                            <div class="field"><label>Layout preference</label><select id="settingLayout"><option>Desktop monitoring</option><option>Compact</option></select></div>
                         </div>
                     </div>
-                </section>
-
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Host Stream</h2>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Open From Host</div>
-                        <div id="hostUrlText" class="metric-value">Waiting for stream info</div>
+                    <div class="settings-actions">
+                        <button class="btn" type="button" onclick="loadSettings()">Reset</button>
+                        <button class="btn primary" type="button" onclick="saveSettings()">Save settings</button>
                     </div>
                 </section>
-
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">GPS</h2>
-                        <span id="gpsAgeChip" class="chip">Waiting</span>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Current Position</div>
-                        <div id="gpsDetailText" class="metric-value">Browser GPS initializing</div>
-                    </div>
-                </section>
-
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">AI Host</h2>
-                        <span class="chip"><span class="dot warn"></span> Not connected</span>
-                    </div>
-                    <div class="metric">
-                        <div class="metric-label">Overlay Status</div>
-                        <div class="metric-value">Reserved for external host overlays</div>
-                    </div>
-                </section>
-
-                <section class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Power</h2>
-                    </div>
-                    <button id="btnShutdown" class="btn btn-shutdown" onclick="shutdownDevice()">SHUTDOWN</button>
-                </section>
-            </aside>
-
-            <section class="panel media-panel" aria-label="Media">
-                <div class="panel-header">
-                    <h2 class="panel-title">Media</h2>
-                    <span id="mediaCountChip" class="chip">Loading</span>
-                </div>
-                <div id="mediaList" class="media-list"></div>
             </section>
         </main>
     </div>
 
     <div id="previewModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="modalTitle">Video</div>
-                <button class="modal-close" onclick="closePreview()">Close</button>
-            </div>
+            <div class="modal-head"><div id="modalTitle" class="modal-title">Video</div><button class="modal-close" onclick="closePreview()">Close</button></div>
             <video id="previewVideo" class="modal-video" controls></video>
-            <div class="modal-map">
-                <div id="map"></div>
-                <div id="mapLoading" class="map-loading">Loading GPS</div>
-            </div>
-            <div class="map-info" id="mapInfo"></div>
+            <div class="modal-map"><div id="map"></div><div id="mapLoading" class="map-loading">Loading GPS</div></div>
+            <div id="mapInfo" class="map-info"></div>
         </div>
     </div>
 
     <div id="photoModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title" id="photoTitle">Photo</div>
-                <button class="modal-close" onclick="closePhotoModal()">Close</button>
-            </div>
-            <img id="photoPreview" class="photo-preview" src="" alt="Photo preview">
-            <div class="media-actions">
-                <button class="action-btn btn-upload" onclick="uploadImage(document.getElementById('photoTitle').textContent)">Upload</button>
-            </div>
+            <div class="modal-head"><div id="photoTitle" class="modal-title">Snapshot</div><button class="modal-close" onclick="closePhotoModal()">Close</button></div>
+            <img id="photoPreview" class="photo-preview" src="" alt="Snapshot preview">
+            <div class="file-actions"><button class="mini-btn green" onclick="uploadImage(document.getElementById('photoTitle').textContent)">Upload</button></div>
         </div>
     </div>
 
     <div id="renameModal" class="rename-modal">
         <div class="rename-dialog">
-            <div class="rename-title" id="renameTitle">Rename Video</div>
-            <input type="text" id="renameInput" class="rename-input" placeholder="Enter new name">
+            <div id="renameTitle" class="rename-title">Rename Video</div>
+            <input id="renameInput" class="rename-input" placeholder="Enter new name">
             <div class="rename-buttons">
-                <button class="rename-btn rename-btn-save" onclick="saveRename()">Save</button>
-                <button class="rename-btn rename-btn-cancel" onclick="closeRenameModal()">Cancel</button>
+                <button class="btn primary" onclick="saveRename()">Save</button>
+                <button class="btn" onclick="closeRenameModal()">Cancel</button>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        let isRecording = false;
-        let audioEnabled = true;
-        let currentRenameFile = null;
-        let currentRenameType = null;
-        let currentRenameBase = null;
-        let currentRecordingFiles = [];
-        let previewMap = null;
-        let gpsWatchId = null;
-        let hasGPS = false;
-        let lastGPSUpdate = 0;
-        let recordingStartTime = null;
-        let timerInterval = null;
-        let gpsPoints = [];
-        let currentMarker = null;
-        let wakeLock = null;
-
         const $ = (id) => document.getElementById(id);
-        const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        }[c]));
+        const state = {
+            isRecording: false,
+            audioEnabled: true,
+            media: [],
+            currentRecordingFiles: [],
+            currentRenameFile: null,
+            currentRenameType: null,
+            currentRenameBase: null,
+            recStart: null,
+            recTimer: null,
+            streamStart: Date.now(),
+            desktopStart: null,
+            desktopTimer: null,
+            desktopRecorder: null,
+            desktopChunks: [],
+            desktopBlobUrl: null,
+            canvasTimer: null,
+            lastSnapshot: null,
+            localFiles: [],
+            micStream: null,
+            analyser: null,
+            talkMuted: false,
+            previewMap: null,
+            currentMarker: null,
+            gpsPoints: []
+        };
+
+        const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         const jsArg = (value) => JSON.stringify(String(value ?? ''));
 
-        async function requestWakeLock() {
-            if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    wakeLock.addEventListener('release', () => {});
-                } catch (err) {
-                    console.error('[WAKE LOCK]', err.name, err.message);
-                }
-            }
+        async function apiFetch(url, options = {}) {
+            const response = await fetch(url, options);
+            const text = await response.text();
+            let payload = text;
+            try { payload = text ? JSON.parse(text) : {}; } catch (err) {}
+            if (!response.ok) throw new Error(payload && payload.error ? payload.error : response.status + ' ' + response.statusText);
+            return payload;
         }
 
-        function setText(id, text) {
-            const el = $(id);
-            if (el) el.textContent = text;
+        function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
+        function toast(message, type = 'good') {
+            const el = $('toast');
+            el.textContent = message;
+            el.className = 'toast show ' + type;
+            clearTimeout(toast.timer);
+            toast.timer = setTimeout(() => { el.className = 'toast'; }, 2800);
         }
-
-        function formatAge(seconds) {
+        function dot(color, text) { return '<span class="dot ' + color + '"></span>' + htmlEscape(text); }
+        function fmtTime(seconds) {
+            seconds = Math.max(0, Math.floor(seconds));
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return (h ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+        function fmtAge(seconds) {
             if (seconds === null || seconds === undefined) return '--';
             if (seconds < 1) return Math.round(seconds * 1000) + ' ms';
             return seconds.toFixed(1) + ' s';
         }
 
-        function startRecordingTimer() {
-            recordingStartTime = Date.now();
-            clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-                const mins = Math.floor(elapsed / 60);
-                const secs = elapsed % 60;
-                setText('recTimer', String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0'));
-            }, 1000);
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach((el) => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach((el) => el.classList.toggle('active', el.dataset.page === page));
+            $('page-' + page).classList.add('active');
+            const titles = {
+                live: ['Live Stream', 'Enterprise live monitoring from Aspire Smart Helmet'],
+                dashboard: ['Dashboard', 'System health, sync, recording, and communication status'],
+                recordings: ['Recordings', 'Device recordings and media operations'],
+                local: ['Local Files', 'Client-side browser captures and desktop recordings'],
+                server: ['Server Files', 'Files available from the helmet media API'],
+                settings: ['Settings', 'Stream, recording, audio, server, and interface preferences']
+            };
+            setText('pageTitle', titles[page][0]);
+            setText('pageSubtitle', titles[page][1]);
+            if (page === 'recordings' || page === 'server') loadMedia();
         }
 
-        function stopRecordingTimer() {
-            clearInterval(timerInterval);
-            timerInterval = null;
+        document.querySelectorAll('[data-page]').forEach((btn) => btn.addEventListener('click', () => switchPage(btn.dataset.page)));
+        document.querySelectorAll('[data-page-shortcut]').forEach((btn) => btn.addEventListener('click', () => switchPage(btn.dataset.pageShortcut)));
+
+        function updateStreamTimer() {
+            setText('streamTimer', fmtTime((Date.now() - state.streamStart) / 1000));
+        }
+
+        async function updateStatus() {
+            try {
+                const d = await apiFetch('/api/status');
+                const wasRecording = state.isRecording;
+                state.isRecording = Boolean(d.is_recording);
+                state.audioEnabled = Boolean(d.audio_enabled);
+                state.currentRecordingFiles = d.current_recording || [];
+
+                if (state.isRecording && !wasRecording) startRecTimer();
+                if (!state.isRecording && wasRecording) stopRecTimer();
+                $('localRecState').innerHTML = dot(state.isRecording ? 'green' : 'yellow', state.isRecording ? 'Recording' : 'Idle');
+                $('sysLocalRec').innerHTML = dot(state.isRecording ? 'green' : 'yellow', state.isRecording ? 'Active' : 'Idle');
+                $('dashLocalRec').innerHTML = dot(state.isRecording ? 'green' : 'yellow', 'Local Recording');
+                $('liveBadge').textContent = state.isRecording ? 'REC' : 'LIVE';
+
+                setText('storageText', (d.storage_free_gb ?? '--') + ' GB free');
+                const free = Number(d.storage_free_gb || 0);
+                $('storageFill').style.width = (free ? Math.max(6, Math.min(95, 100 - free / 64 * 100)) : 24).toFixed(0) + '%';
+            } catch (err) {
+                $('deviceOnline').innerHTML = dot('red', 'Offline');
+                $('sysDevice').innerHTML = dot('red', 'Offline');
+            }
+        }
+
+        async function updateHealth() {
+            try {
+                const [health, stream] = await Promise.all([apiFetch('/api/health'), apiFetch('/api/stream_info')]);
+                const ok = Boolean(health.ok) && stream.status !== 'error';
+                $('deviceOnline').innerHTML = dot(ok ? 'green' : 'red', ok ? 'Online' : 'Offline');
+                $('deviceIdText').textContent = health.device_id || '--';
+                $('connectionText').textContent = (health.lan_addresses || []).join(', ') || '--';
+                $('connectivityBadge').innerHTML = dot(ok ? 'green' : 'red', ok ? 'Connected' : 'Offline');
+                $('sysStream').innerHTML = dot(stream.has_frame ? 'green' : 'yellow', stream.status || 'warming');
+                $('dashStream').innerHTML = dot(stream.has_frame ? 'green' : 'yellow', 'Stream');
+                $('sysDevice').innerHTML = dot(ok ? 'green' : 'red', ok ? 'Connected' : 'Offline');
+                $('dashDevice').innerHTML = dot(ok ? 'green' : 'red', 'Device');
+                setText('streamModeText', stream.stream || 'mjpeg');
+                setText('streamResolutionText', (stream.width || '--') + ' x ' + (stream.height || '--'));
+                setText('resolutionBadge', stream.width ? (stream.width >= 1080 ? '1080p' : stream.width + 'p') : $('qualitySelect').value);
+                setText('fpsText', String(stream.fps_target || '--'));
+                setText('frameAgeText', fmtAge(stream.last_frame_age_seconds));
+                setText('hostUrlText', (stream.host_urls || [])[0] || health.stream_url || '--');
+                setText('signalText', stream.has_frame ? 'Strong' : 'Weak');
+            } catch (err) {
+                $('sysStream').innerHTML = dot('red', 'Offline');
+                $('dashStream').innerHTML = dot('red', 'Stream');
+            }
+        }
+
+        function startRecTimer() {
+            state.recStart = Date.now();
+            clearInterval(state.recTimer);
+            state.recTimer = setInterval(() => setText('recTimer', fmtTime((Date.now() - state.recStart) / 1000)), 1000);
+        }
+        function stopRecTimer() {
+            clearInterval(state.recTimer);
+            state.recTimer = null;
             setText('recTimer', '00:00');
         }
+        async function startLocalRecord() {
+            try {
+                await apiFetch('/api/start_record');
+                toast('Local recording requested');
+                setTimeout(updateStatus, 500);
+            } catch (err) { toast('Start recording failed: ' + err.message, 'bad'); }
+        }
+        async function stopLocalRecord() {
+            try {
+                await apiFetch('/api/stop_record', {method: 'POST'});
+                toast('Stop recording requested');
+                setTimeout(updateStatus, 500);
+                setTimeout(loadMedia, 900);
+            } catch (err) { toast('Stop recording failed: ' + err.message, 'bad'); }
+        }
 
-        function startGPS() {
-            const secureContext = (window.isSecureContext === true);
-            const isLocalhost = (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
-            if (!secureContext && !isLocalhost) {
-                $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Browser blocked on HTTP</span>';
-                setText('gpsDetailText', 'Browser GPS requires HTTPS on LAN IP. Using server GPS if available.');
-                setText('gpsAgeChip', 'HTTP');
-                return;
+        function drawStreamFrame() {
+            const img = $('videoFeed');
+            const canvas = $('streamCanvas');
+            const width = img.naturalWidth || 1280;
+            const height = img.naturalHeight || 720;
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#02050b';
+            ctx.fillRect(0, 0, width, height);
+            try { ctx.drawImage(img, 0, 0, width, height); } catch (err) {}
+            return canvas;
+        }
+        function snapshotBlob() {
+            const canvas = drawStreamFrame();
+            return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+        }
+        async function captureSnapshot() {
+            try {
+                await apiFetch('/api/capture_photo');
+                toast('Device snapshot captured');
+            } catch (err) {
+                toast('Device snapshot failed, saving local frame instead', 'bad');
             }
+            await saveLocalSnapshot(false);
+            setTimeout(loadMedia, 800);
+        }
+        async function saveLocalSnapshot(download = true) {
+            const blob = await snapshotBlob();
+            if (!blob) return toast('Snapshot unavailable', 'bad');
+            const name = 'snapshot_' + new Date().toISOString().replace(/[:.]/g, '-') + '.jpg';
+            const url = URL.createObjectURL(blob);
+            state.lastSnapshot = {name, url, size: (blob.size / 1048576).toFixed(2), created: new Date()};
+            state.localFiles.unshift({...state.lastSnapshot, type: 'image'});
+            setText('snapshotState', name);
+            renderLocalFiles();
+            if (download) downloadUrl(url, name);
+        }
+        function previewLastSnapshot() {
+            if (!state.lastSnapshot) return toast('No snapshot captured yet', 'bad');
+            setText('photoTitle', state.lastSnapshot.name);
+            $('photoPreview').src = state.lastSnapshot.url;
+            $('photoModal').className = 'modal active';
+        }
 
-            if (!('geolocation' in navigator)) {
-                $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Browser not supported</span>';
-                setText('gpsDetailText', 'Browser GPS is not supported. Using server GPS if available.');
-                return;
+        function startDesktopRecording() {
+            if (state.desktopRecorder && state.desktopRecorder.state === 'recording') return;
+            const canvas = drawStreamFrame();
+            const stream = canvas.captureStream(8);
+            state.desktopChunks = [];
+            state.desktopRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
+            state.desktopRecorder.ondataavailable = (event) => { if (event.data.size) state.desktopChunks.push(event.data); };
+            state.desktopRecorder.onstop = () => {
+                const blob = new Blob(state.desktopChunks, {type: 'video/webm'});
+                if (state.desktopBlobUrl) URL.revokeObjectURL(state.desktopBlobUrl);
+                state.desktopBlobUrl = URL.createObjectURL(blob);
+                const name = 'desktop_recording_' + new Date().toISOString().replace(/[:.]/g, '-') + '.webm';
+                state.localFiles.unshift({name, url: state.desktopBlobUrl, size: (blob.size / 1048576).toFixed(2), type: 'video', created: new Date()});
+                renderLocalFiles();
+            };
+            state.canvasTimer = setInterval(drawStreamFrame, 125);
+            state.desktopRecorder.start();
+            state.desktopStart = Date.now();
+            clearInterval(state.desktopTimer);
+            state.desktopTimer = setInterval(() => setText('desktopTimer', fmtTime((Date.now() - state.desktopStart) / 1000)), 1000);
+            $('desktopRecState').innerHTML = dot('green', 'Recording');
+            $('sysDesktopRec').innerHTML = dot('green', 'Active');
+            $('dashDesktopRec').innerHTML = dot('green', 'Desktop Recording');
+            toast('Desktop recording started');
+        }
+        function stopDesktopRecording() {
+            if (!state.desktopRecorder || state.desktopRecorder.state !== 'recording') return toast('Desktop recorder is not active', 'bad');
+            clearInterval(state.canvasTimer);
+            clearInterval(state.desktopTimer);
+            state.desktopRecorder.stop();
+            $('desktopRecState').innerHTML = dot('yellow', 'Ready to download');
+            $('sysDesktopRec').innerHTML = dot('yellow', 'Ready');
+            $('dashDesktopRec').innerHTML = dot('yellow', 'Desktop Recording');
+            toast('Desktop recording stopped');
+        }
+        function downloadDesktopRecording() {
+            if (!state.desktopBlobUrl) return toast('No desktop recording available', 'bad');
+            downloadUrl(state.desktopBlobUrl, 'desktop_recording.webm');
+        }
+        function downloadUrl(url, name) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        async function loadMedia() {
+            try {
+                const data = await apiFetch('/api/list_media');
+                state.media = Array.isArray(data) ? data : [];
+                setText('mediaCountChip', state.media.length + ' item' + (state.media.length === 1 ? '' : 's'));
+                renderMedia();
+                renderRecentRecordings();
+                renderServerFiles();
+            } catch (err) {
+                $('mediaList').innerHTML = '<div class="empty-state">Media unavailable: ' + htmlEscape(err.message) + '</div>';
             }
-
-            gpsWatchId = navigator.geolocation.watchPosition(
-                function(position) {
-                    hasGPS = true;
-                    lastGPSUpdate = Date.now();
-                    const gpsData = {
-                        lat: position.coords.latitude,
-                        lon: position.coords.longitude,
-                        accuracy: position.coords.accuracy,
-                        speed: position.coords.speed || 0.0
-                    };
-
-                    fetch('/api/update_gps', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify(gpsData)
-                    });
-
-                    $('gpsStatus').innerHTML = '<span class="dot ok"></span><span>GPS: Locked</span>';
-                    setText('gpsDetailText', gpsData.lat.toFixed(5) + ', ' + gpsData.lon.toFixed(5) + ' / +/- ' + Math.round(gpsData.accuracy || 0) + ' m');
-                    setText('gpsAgeChip', 'Fresh');
-                },
-                function(error) {
-                    console.log('[GPS] Error:', error.message);
-                    $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Browser blocked/error</span>';
-                    setText('gpsDetailText', 'Browser GPS error: ' + error.message + '. Using server GPS if available.');
-                    setText('gpsAgeChip', 'Error');
-                },
-                {enableHighAccuracy: true, maximumAge: 0, timeout: 10000}
-            );
         }
-
-        function updateGpsAge() {
-            if (hasGPS && (Date.now() - lastGPSUpdate) > 5000) {
-                $('gpsStatus').innerHTML = '<span class="dot warn"></span><span>GPS: Searching</span>';
-                setText('gpsAgeChip', 'Stale');
+        function flatMedia() {
+            const out = [];
+            for (const item of state.media) {
+                if (item.type === 'batch') for (const chunk of item.chunks || []) out.push({...chunk, type: 'video'});
+                else out.push(item);
             }
+            return out;
         }
-
-        function updateStatus() {
-            fetch('/api/status')
-                .then(r => r.json())
-                .then(d => {
-                    const wasRecording = isRecording;
-                    isRecording = d.is_recording;
-                    audioEnabled = d.audio_enabled;
-                    currentRecordingFiles = d.current_recording || [];
-
-                    if (isRecording && !wasRecording) startRecordingTimer();
-                    if (!isRecording && wasRecording) stopRecordingTimer();
-
-                    setText('statusText', d.status || 'STANDBY');
-                    setText('storageText', 'Storage: ' + (d.storage_free_gb ?? '--') + ' GB');
-                    $('recIndicator').className = 'rec-indicator' + (isRecording ? ' active' : '');
-
-                    const btn = $('btnAudio');
-                    const audioIndicator = $('audioIndicator');
-                    if (audioEnabled) {
-                        btn.className = 'btn-audio-toggle';
-                        btn.textContent = 'A';
-                        audioIndicator.className = 'audio-indicator active';
-                        audioIndicator.textContent = 'AUDIO';
-                        setText('audioStateText', 'Enabled');
-                    } else {
-                        btn.className = 'btn-audio-toggle muted';
-                        btn.textContent = 'M';
-                        audioIndicator.className = 'audio-indicator muted';
-                        audioIndicator.textContent = 'MUTED';
-                        setText('audioStateText', 'Muted');
-                    }
-
-                    const recBtn = $('btnRecord');
-                    if (isRecording) {
-                        recBtn.textContent = 'STOP RECORDING';
-                        recBtn.className = 'btn btn-record recording';
-                    } else {
-                        recBtn.textContent = 'REC VIDEO';
-                        recBtn.className = 'btn btn-record';
-                    }
-
-                    if (currentRecordingFiles.length > 0) loadMedia();
-
-                    const g = d.gps || {};
-                    const lat = Number(g.lat || 0);
-                    const lon = Number(g.lon || 0);
-                    const acc = Number(g.accuracy || 0);
-                    if (!hasGPS && (lat !== 0 || lon !== 0)) {
-                        $('gpsStatus').innerHTML = '<span class="dot ok"></span><span>GPS: Locked (Server)</span>';
-                        setText('gpsDetailText', lat.toFixed(5) + ', ' + lon.toFixed(5) + ' / +/- ' + Math.round(acc) + ' m');
-                        setText('gpsAgeChip', 'Server');
-                    }
-                })
-                .catch(() => {
-                    setText('statusText', 'STATUS UNAVAILABLE');
-                });
+        function renderRecentRecordings() {
+            const items = flatMedia().filter((x) => x.type !== 'image').slice(0, 5);
+            $('recentRecordings').innerHTML = items.length ? items.map(renderRecordRow).join('') : '<div class="empty-state">No recent recordings</div>';
         }
-
-        function updateRuntimeHealth() {
-            Promise.all([
-                fetch('/api/health').then(r => r.json()),
-                fetch('/api/stream_info').then(r => r.json())
-            ]).then(([health, stream]) => {
-                const ok = Boolean(health.ok) && stream.status !== 'error';
-                const hasFrame = Boolean(stream.has_frame);
-                $('healthDot').className = 'dot ' + (ok && hasFrame ? 'ok' : ok ? 'warn' : 'error');
-                $('deviceStateChip').innerHTML = '<span class="dot ' + (ok ? 'ok' : 'error') + '"></span>' + (ok ? 'Online' : 'Error');
-                setText('deviceIdText', health.device_id || '--');
-                setText('hostnameText', health.hostname || '--');
-                setText('lanText', (health.lan_addresses || []).join(', ') || '--');
-
-                const frameAge = stream.last_frame_age_seconds;
-                const ageClass = frameAge === null || frameAge === undefined ? 'warn' : frameAge < 2 ? 'good' : 'bad';
-                $('frameAgeText').className = 'metric-value ' + ageClass;
-                setText('frameAgeText', formatAge(frameAge));
-                setText('frameCountText', String(stream.frame_count ?? health.stream_frame_count ?? '--'));
-                setText('streamModeText', 'MJPEG / ' + (stream.width || 640) + 'x' + (stream.height || '--') + ' / Q' + (stream.jpeg_quality || '--'));
-                setText('streamSummary', 'Stream: ' + (stream.status || 'warming'));
-
-                const bestHostUrl = (stream.host_urls || [])[0] || (health.lan_addresses || [])[0] && ('http://' + health.lan_addresses[0] + ':' + (health.http_port || 5001) + '/video_feed');
-                setText('hostUrlText', bestHostUrl || 'No LAN URL reported');
-                setText('streamUrlText', stream.url || health.stream_url || '/video_feed');
-            }).catch(() => {
-                $('healthDot').className = 'dot error';
-                setText('streamSummary', 'Stream: unavailable');
-                setText('deviceStateChip', 'Unavailable');
-            });
+        function renderServerFiles() {
+            const items = flatMedia();
+            $('serverFiles').innerHTML = items.length ? items.map(renderRecordRow).join('') : '<div class="empty-state">No server files</div>';
         }
-
-        function toggleRecord() {
-            fetch(isRecording ? '/api/stop_record' : '/api/start_record', {method: isRecording ? 'POST' : 'GET'});
-            setTimeout(updateStatus, 500);
+        function renderRecordRow(item) {
+            return '<div class="record-item">' +
+                '<div class="thumb">' + (item.type === 'image' ? 'IMG' : 'MP4') + '</div>' +
+                '<div><div class="file-name">' + htmlEscape(item.name) + '</div><div class="file-meta">' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ' - ' + htmlEscape(item.size || '--') + ' MB - ' + (item.duration || '--') + '</div></div>' +
+                '<div class="file-actions"><a class="mini-btn blue" href="/api/download/' + encodeURIComponent(item.name) + '" download>Download</a><button class="mini-btn red" onclick="deleteFile(' + jsArg(item.name) + ')">Delete</button><button class="mini-btn green" onclick="' + (item.type === 'image' ? 'uploadImage' : 'uploadFile') + '(' + jsArg(item.name) + ')">Sync</button></div>' +
+                '</div>';
         }
-
-        function toggleAudio() {
-            audioEnabled = !audioEnabled;
-            fetch('/api/toggle_audio', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({enabled: audioEnabled})
-            }).then(r => r.json()).then(d => {
-                audioEnabled = d.audio_enabled;
-                updateStatus();
-            });
+        function renderLocalFiles() {
+            $('localFiles').innerHTML = state.localFiles.length ? state.localFiles.map((item) => (
+                '<div class="record-item"><div class="thumb">' + (item.type === 'image' ? 'IMG' : 'WEBM') + '</div><div><div class="file-name">' + htmlEscape(item.name) + '</div><div class="file-meta">' + item.created.toLocaleString() + ' - ' + item.size + ' MB</div></div><div class="file-actions"><button class="mini-btn blue" onclick="downloadUrl(' + jsArg(item.url) + ', ' + jsArg(item.name) + ')">Download</button></div></div>'
+            )).join('') : '<div class="empty-state">No local captures yet</div>';
         }
-
-        function capturePhoto() {
-            fetch('/api/capture_photo').then(() => {
-                setTimeout(loadMedia, 1000);
-            });
+        function renderMedia() {
+            let html = '';
+            if (state.currentRecordingFiles.length) html += renderRecordingSession();
+            for (const item of state.media) html += item.type === 'batch' ? renderBatchGroup(item) : renderMediaItem(item);
+            $('mediaList').innerHTML = html || '<div class="empty-state">No media files yet</div>';
         }
-
-        function copyDownloadLink(filename) {
-            const downloadUrl = window.location.origin + '/api/download/' + filename;
-            navigator.clipboard.writeText(downloadUrl).then(() => {
-                $('copyNotification').className = 'copy-notification show';
-                setTimeout(() => {$('copyNotification').className = 'copy-notification';}, 2000);
-            }).catch(() => {
-                alert('Download link: ' + downloadUrl);
-            });
+        function renderRecordingSession() {
+            return '<div class="recording-session-card"><div class="file-name">Recording in progress</div><div class="file-meta">' + state.currentRecordingFiles.map((f) => htmlEscape(f.name) + ' (' + htmlEscape(f.size) + ' MB)').join(', ') + '</div></div>';
         }
-
-        function showRenameModal(filename, type = 'single', base = null) {
-            currentRenameFile = filename;
-            currentRenameType = type;
-            currentRenameBase = base;
-            if (type === 'batch') {
-                setText('renameTitle', 'Rename Video Session');
-                $('renameInput').value = base.replace('video_', '').replace(/_/g, ' ');
-            } else {
-                setText('renameTitle', 'Rename Video');
-                $('renameInput').value = filename.replace('video_', '').replace('.mp4', '').replace(/_/g, ' ');
-            }
-            $('renameModal').className = 'rename-modal active';
-            $('renameInput').focus();
-        }
-
-        function closeRenameModal() {
-            $('renameModal').className = 'rename-modal';
-            currentRenameFile = null;
-            currentRenameType = null;
-            currentRenameBase = null;
-        }
-
-        function saveRename() {
-            const newName = $('renameInput').value.trim();
-            if (!newName) {
-                alert('Please enter a name');
-                return;
-            }
-
-            const endpoint = currentRenameType === 'batch' ? '/api/rename_batch' : '/api/rename_file';
-            const payload = currentRenameType === 'batch'
-                ? {base: currentRenameBase, new_name: newName}
-                : {old_name: currentRenameFile, new_name: newName};
-
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload)
-            }).then(r => r.json()).then(d => {
-                if (d.success) {
-                    closeRenameModal();
-                    loadMedia();
-                } else {
-                    alert('Failed: ' + (d.error || 'Unknown'));
-                }
-            });
-        }
-
-        function loadMedia() {
-            fetch('/api/list_media')
-                .then(r => r.json())
-                .then(data => {
-                    const mediaList = $('mediaList');
-                    setText('mediaCountChip', data.length + ' item' + (data.length === 1 ? '' : 's'));
-
-                    if (data.length === 0 && currentRecordingFiles.length === 0) {
-                        mediaList.innerHTML = '<div class="empty-state">No media files yet</div>';
-                        return;
-                    }
-
-                    let html = '';
-                    if (currentRecordingFiles.length > 0) {
-                        html += '<div class="recording-session-card">';
-                        html += '<div class="recording-session-header"><div class="recording-icon"></div><div class="recording-session-title">Recording in progress</div></div>';
-                        html += '<div class="recording-session-info">Started: ' + htmlEscape(currentRecordingFiles[0]?.started || '') + '</div>';
-                        html += '<div class="recording-chunks-list">';
-                        for (let chunk of currentRecordingFiles) {
-                            html += '<div class="recording-chunk-item">';
-                            html += '<div class="recording-chunk-name">' + htmlEscape(chunk.name) + '</div>';
-                            html += '<div class="recording-chunk-size">' + htmlEscape(chunk.size) + ' MB</div>';
-                            html += '</div>';
-                        }
-                        html += '</div></div>';
-                    }
-
-                    for (let item of data) {
-                        html += item.type === 'batch' ? renderBatchGroup(item) : renderMediaItem(item);
-                    }
-                    mediaList.innerHTML = html;
-                });
-        }
-
         function renderBatchGroup(batch) {
-            let html = '<div class="batch-group">';
-            html += '<div class="batch-header"><div><div class="batch-title">Video Session (' + htmlEscape(batch.chunk_count) + ' chunks)</div><div class="batch-info">' + htmlEscape(batch.base) + '</div></div></div>';
-            html += '<div class="batch-stats">';
-            html += '<div class="batch-stat">' + htmlEscape(Number(batch.total_size || 0).toFixed(2)) + ' MB</div>';
-            if (batch.uploaded_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.uploaded_count) + ' uploaded</div>';
-            if (batch.failed_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.failed_count) + ' failed</div>';
-            if (batch.converting_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.converting_count) + ' converting</div>';
-            if (batch.incomplete_count > 0) html += '<div class="batch-stat">' + htmlEscape(batch.incomplete_count) + ' incomplete</div>';
-            html += '</div><div class="batch-actions">';
-            if (batch.uploaded_count < batch.chunk_count && batch.incomplete_count === 0) {
-                html += '<button class="batch-btn batch-btn-upload" onclick="batchUpload(' + jsArg(batch.base) + ')">Upload All</button>';
-            }
-            html += '<button class="batch-btn batch-btn-rename" onclick="showRenameModal(' + jsArg(batch.base) + ', \'batch\', ' + jsArg(batch.base) + ')">Rename</button>';
-            html += '<button class="batch-btn batch-btn-delete" onclick="deleteBatch(' + jsArg(batch.base) + ')">Delete</button>';
-            html += '</div><div class="chunk-list">';
-
-            for (let chunk of batch.chunks) {
-                const canUpload = !chunk.uploaded && !chunk.converting && !chunk.incomplete;
-                html += '<div class="chunk-item" onclick="showPreview(' + jsArg(chunk.name) + ')">';
-                html += '<div class="chunk-name">' + htmlEscape(chunk.name) + '</div>';
-                html += '<div class="chunk-info"><span class="chunk-size">' + htmlEscape(chunk.size) + ' MB</span>' + renderChunkStatus(chunk) + '</div>';
-                if (canUpload) {
-                    html += '<div class="chunk-actions"><button class="chunk-btn chunk-btn-upload" onclick="event.stopPropagation(); uploadFile(' + jsArg(chunk.name) + ')">Upload</button></div>';
-                }
-                html += '</div>';
-            }
-            html += '</div></div>';
-            return html;
+            let html = '<div class="batch-group"><div class="file-name">Video Session (' + htmlEscape(batch.chunk_count) + ' chunks)</div><div class="file-meta">' + htmlEscape(batch.base) + '</div><div class="file-actions">';
+            if (batch.uploaded_count < batch.chunk_count && batch.incomplete_count === 0) html += '<button class="mini-btn green" onclick="batchUpload(' + jsArg(batch.base) + ')">Upload All</button>';
+            html += '<button class="mini-btn yellow" onclick="showRenameModal(' + jsArg(batch.base) + ', &quot;batch&quot;, ' + jsArg(batch.base) + ')">Rename</button><button class="mini-btn red" onclick="deleteBatch(' + jsArg(batch.base) + ')">Delete</button></div>';
+            for (const chunk of batch.chunks || []) html += '<div class="record-item"><div class="thumb">MP4</div><div><div class="file-name">' + htmlEscape(chunk.name) + '</div><div class="file-meta">' + htmlEscape(chunk.size) + ' MB ' + renderChunkStatus(chunk) + '</div></div><div class="file-actions"><button class="mini-btn blue" onclick="showPreview(' + jsArg(chunk.name) + ')">Preview</button><button class="mini-btn green" onclick="uploadFile(' + jsArg(chunk.name) + ')">Sync</button></div></div>';
+            return html + '</div>';
         }
-
+        function renderMediaItem(item) {
+            return '<div class="media-item">' + renderStatusBadge(item) +
+                '<div class="record-item"><div class="thumb">' + (item.type === 'image' ? 'IMG' : 'MP4') + '</div><div><div class="media-name">' + htmlEscape(item.name) + '</div><div class="media-meta">' + htmlEscape(item.size) + ' MB</div></div><div class="file-actions"><button class="mini-btn blue" onclick="' + (item.type === 'image' ? 'showPhotoModal' : 'showPreview') + '(' + jsArg(item.name) + ')">Preview</button><a class="mini-btn blue" href="/api/download/' + encodeURIComponent(item.name) + '" download>Download</a><button class="mini-btn green" onclick="' + (item.type === 'image' ? 'uploadImage' : 'uploadFile') + '(' + jsArg(item.name) + ')">Sync</button><button class="mini-btn red" onclick="deleteFile(' + jsArg(item.name) + ')">Delete</button></div></div></div>';
+        }
+        function renderStatusBadge(item) {
+            if (item.uploaded) return '<span class="status-badge uploaded">Uploaded</span>';
+            if (item.failed) return '<span class="status-badge failed">Failed</span>';
+            if (item.converting) return '<span class="status-badge converting">Converting</span>';
+            if (item.incomplete) return '<span class="status-badge incomplete">Incomplete</span>';
+            if (item.upload_status && item.upload_status.status === 'uploading') return '<span class="status-badge uploading">Uploading</span>';
+            return '';
+        }
         function renderChunkStatus(item) {
             if (item.uploaded) return '<span class="chunk-status uploaded">Uploaded</span>';
             if (item.failed) return '<span class="chunk-status failed">Failed</span>';
@@ -1179,213 +1183,225 @@
             return '';
         }
 
-        function renderMediaItem(item) {
-            let classes = 'media-item';
-            if (item.uploaded) classes += ' uploaded';
-            if (item.failed) classes += ' failed';
-            if (item.incomplete) classes += ' incomplete';
-
-            const statusBadge = renderStatusBadge(item);
-            const clickHandler = item.type === 'image' ? 'showPhotoModal(' + jsArg(item.name) + ')' : 'showPreview(' + jsArg(item.name) + ')';
-            let html = '<div class="' + classes + '">';
-            html += statusBadge;
-            html += '<div class="media-header" onclick="' + clickHandler + '">';
-            html += '<div class="media-name">' + (item.type === 'image' ? 'Photo ' : 'Video ') + htmlEscape(item.name) + '</div>';
-            html += '<div class="media-size">' + htmlEscape(item.size) + ' MB</div>';
-            html += '</div><div class="media-actions">';
-            html += '<button class="action-btn btn-copy-link" onclick="event.stopPropagation(); copyDownloadLink(' + jsArg(item.name) + ')">Copy Link</button>';
-            if (item.type === 'video' && !item.uploaded && !item.converting && !item.incomplete) {
-                html += '<button class="action-btn btn-upload" onclick="event.stopPropagation(); uploadFile(' + jsArg(item.name) + ')">Upload</button>';
+        function firstMedia(type) {
+            return flatMedia().find((item) => type === 'image' ? item.type === 'image' : item.type !== 'image');
+        }
+        function downloadLatest(type) {
+            const item = firstMedia(type);
+            if (!item) return toast('No ' + type + ' files available', 'bad');
+            location.href = '/api/download/' + encodeURIComponent(item.name);
+        }
+        async function syncRecordings() {
+            const items = flatMedia().filter((x) => x.type !== 'image' && !x.uploaded && !x.converting && !x.incomplete);
+            if (!items.length) return toast('No recordings ready to sync', 'bad');
+            await syncItems(items, uploadFile);
+        }
+        async function syncSnapshots() {
+            const items = flatMedia().filter((x) => x.type === 'image' && !x.uploaded);
+            if (!items.length) return toast('No snapshots ready to sync', 'bad');
+            await syncItems(items, uploadImage);
+        }
+        async function syncItems(items, uploader) {
+            $('syncText').textContent = 'Syncing';
+            $('sysSync').innerHTML = dot('green', 'Syncing');
+            $('dashSync').innerHTML = dot('green', 'Server Sync');
+            for (let i = 0; i < items.length; i++) {
+                setSyncProgress(Math.round((i / items.length) * 100));
+                await uploader(items[i].name, false);
             }
-            if (item.type === 'image' && !item.uploaded) {
-                html += '<button class="action-btn btn-upload" onclick="event.stopPropagation(); uploadImage(' + jsArg(item.name) + ')">Upload</button>';
-            }
-            if (item.type === 'video' && !item.converting) {
-                html += '<button class="action-btn btn-rename" onclick="event.stopPropagation(); showRenameModal(' + jsArg(item.name) + ')">Rename</button>';
-            }
-            html += '<button class="action-btn btn-delete" onclick="event.stopPropagation(); deleteFile(' + jsArg(item.name) + ')">Delete</button>';
-            html += '</div></div>';
-            return html;
+            setSyncProgress(100);
+            $('syncText').textContent = 'Complete';
+            $('sysSync').innerHTML = dot('yellow', 'Idle');
+            $('dashSync').innerHTML = dot('yellow', 'Server Sync');
+        }
+        function setSyncProgress(value) {
+            $('syncProgress').style.width = value + '%';
+            setText('syncPercentText', value + '%');
         }
 
-        function renderStatusBadge(item) {
-            if (item.uploaded) return '<div class="status-badge uploaded">Uploaded</div>';
-            if (item.failed) return '<div class="status-badge failed">Failed</div>';
-            if (item.converting) return '<div class="status-badge converting">Converting</div>';
-            if (item.incomplete) return '<div class="status-badge incomplete">Incomplete</div>';
-            if (item.upload_status && item.upload_status.status === 'uploading') return '<div class="status-badge uploading">Uploading</div>';
-            return '';
+        function showRenameModal(filename, type = 'single', base = null) {
+            state.currentRenameFile = filename; state.currentRenameType = type; state.currentRenameBase = base;
+            setText('renameTitle', type === 'batch' ? 'Rename Video Session' : 'Rename Video');
+            $('renameInput').value = (base || filename).replace('video_', '').replace('.mp4', '').replace(/_/g, ' ');
+            $('renameModal').className = 'rename-modal active';
+            $('renameInput').focus();
+        }
+        function closeRenameModal() { $('renameModal').className = 'rename-modal'; }
+        async function saveRename() {
+            const newName = $('renameInput').value.trim();
+            if (!newName) return toast('Enter a name first', 'bad');
+            const endpoint = state.currentRenameType === 'batch' ? '/api/rename_batch' : '/api/rename_file';
+            const payload = state.currentRenameType === 'batch' ? {base: state.currentRenameBase, new_name: newName} : {old_name: state.currentRenameFile, new_name: newName};
+            try {
+                const d = await apiFetch(endpoint, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                closeRenameModal(); toast('Renamed successfully'); loadMedia();
+            } catch (err) { toast('Rename failed: ' + err.message, 'bad'); }
+        }
+        async function uploadFile(filename, ask = true) {
+            if (ask && !confirm('Upload ' + filename + ' to server?')) return;
+            try {
+                const d = await apiFetch('/api/upload_cloud', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filename})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Recording upload started'); setTimeout(loadMedia, 700);
+            } catch (err) { toast('Upload failed: ' + err.message, 'bad'); }
+        }
+        async function uploadImage(filename, ask = true) {
+            if (ask && !confirm('Upload ' + filename + ' to server?')) return;
+            try {
+                const d = await apiFetch('/api/upload_image', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filename})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Snapshot upload started'); setTimeout(loadMedia, 700);
+            } catch (err) { toast('Snapshot upload failed: ' + err.message, 'bad'); }
+        }
+        async function batchUpload(base) {
+            if (!confirm('Upload all chunks in this session?')) return;
+            try {
+                const d = await apiFetch('/api/batch_upload', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({base})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Batch upload started'); setTimeout(loadMedia, 700);
+            } catch (err) { toast('Batch upload failed: ' + err.message, 'bad'); }
+        }
+        async function deleteFile(filename) {
+            if (!confirm('Delete ' + filename + '?')) return;
+            try {
+                const d = await apiFetch('/api/delete_file', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filename})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Deleted'); loadMedia();
+            } catch (err) { toast('Delete failed: ' + err.message, 'bad'); }
+        }
+        async function deleteBatch(base) {
+            if (!confirm('Delete entire video session?')) return;
+            try {
+                const d = await apiFetch('/api/delete_batch', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({base})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Session deleted'); loadMedia();
+            } catch (err) { toast('Delete session failed: ' + err.message, 'bad'); }
         }
 
-        function showPreview(filename) {
+        function playStream() { if (!$('videoFeed').src) $('videoFeed').src = '/video_feed?ts=' + Date.now(); toast('Stream playing'); }
+        function pauseStream() { $('videoFeed').dataset.pausedSrc = $('videoFeed').src; $('videoFeed').removeAttribute('src'); toast('Stream paused'); }
+        function stopStream() { $('videoFeed').removeAttribute('src'); toast('Stream stopped'); }
+        function toggleMute() { const muted = $('muteBtn').dataset.muted === 'true'; $('muteBtn').dataset.muted = String(!muted); setText('muteBtn', muted ? 'MUT' : 'UNM'); toast(muted ? 'Audio unmuted' : 'Audio muted'); }
+        function toggleFullscreen() { const el = $('streamStage'); if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); }
+
+        async function showPreview(filename) {
             setText('modalTitle', filename);
-            $('previewVideo').src = '/data/' + filename;
+            $('previewVideo').src = '/data/' + encodeURIComponent(filename);
             $('previewModal').className = 'modal active';
             loadGPSForVideo(filename);
         }
-
-        function loadGPSForVideo(filename) {
+        async function loadGPSForVideo(filename) {
             $('mapLoading').style.display = 'block';
             setText('mapLoading', 'Loading GPS');
-            fetch('/api/get_gps_data/' + filename)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.error) {
-                        setText('mapLoading', 'No GPS data');
-                        $('mapInfo').innerHTML = '<div class="empty-state">No GPS data available</div>';
-                        return;
-                    }
-
-                    gpsPoints = data.points || [];
-                    if (!gpsPoints.length) {
-                        setText('mapLoading', 'No GPS points');
-                        return;
-                    }
-
-                    $('mapLoading').style.display = 'none';
-                    if (!previewMap) {
-                        previewMap = L.map('map').setView([gpsPoints[0].lat, gpsPoints[0].lon], 15);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19,
-                            attribution: 'OpenStreetMap'
-                        }).addTo(previewMap);
-                    } else {
-                        previewMap.setView([gpsPoints[0].lat, gpsPoints[0].lon], 15);
-                    }
-
-                    previewMap.eachLayer(layer => {
-                        if (layer instanceof L.Polyline || layer instanceof L.Marker || layer instanceof L.CircleMarker) {
-                            previewMap.removeLayer(layer);
-                        }
-                    });
-
-                    const coords = gpsPoints.map(p => [p.lat, p.lon]);
-                    const polyline = L.polyline(coords, {color: '#34d399', weight: 4}).addTo(previewMap);
-                    L.marker([gpsPoints[0].lat, gpsPoints[0].lon]).addTo(previewMap);
-                    L.marker([gpsPoints[gpsPoints.length - 1].lat, gpsPoints[gpsPoints.length - 1].lon]).addTo(previewMap);
-                    previewMap.fitBounds(polyline.getBounds());
-                    setTimeout(() => previewMap.invalidateSize(), 100);
-
-                    const video = $('previewVideo');
-                    video.ontimeupdate = function() {
-                        const videoDuration = video.duration;
-                        if (gpsPoints.length > 0 && videoDuration > 0) {
-                            const index = Math.floor((video.currentTime / videoDuration) * (gpsPoints.length - 1));
-                            const point = gpsPoints[index];
-                            if (currentMarker) previewMap.removeLayer(currentMarker);
-                            currentMarker = L.circleMarker([point.lat, point.lon], {
-                                radius: 8,
-                                color: '#ef4444',
-                                fillColor: '#ef4444',
-                                fillOpacity: 1
-                            }).addTo(previewMap);
-                        }
-                    };
-
-                    $('mapInfo').innerHTML =
-                        '<div class="map-info-row"><div class="map-label">Total Points</div><div class="map-value">' + gpsPoints.length + '</div></div>' +
-                        '<div class="map-info-row"><div class="map-label">Start</div><div class="map-value">' + data.start.lat.toFixed(5) + ', ' + data.start.lon.toFixed(5) + '</div></div>' +
-                        '<div class="map-info-row"><div class="map-label">End</div><div class="map-value">' + data.end.lat.toFixed(5) + ', ' + data.end.lon.toFixed(5) + '</div></div>';
-                })
-                .catch(() => {
-                    setText('mapLoading', 'Error loading GPS');
-                });
+            try {
+                const data = await apiFetch('/api/get_gps_data/' + encodeURIComponent(filename));
+                state.gpsPoints = data.points || [];
+                if (!state.gpsPoints.length) { setText('mapLoading', 'No GPS points'); return; }
+                $('mapLoading').style.display = 'none';
+                if (!state.previewMap) {
+                    state.previewMap = L.map('map').setView([state.gpsPoints[0].lat, state.gpsPoints[0].lon], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: 'OpenStreetMap'}).addTo(state.previewMap);
+                }
+                state.previewMap.eachLayer((layer) => { if (layer instanceof L.Polyline || layer instanceof L.Marker || layer instanceof L.CircleMarker) state.previewMap.removeLayer(layer); });
+                const coords = state.gpsPoints.map((p) => [p.lat, p.lon]);
+                const polyline = L.polyline(coords, {color: '#22c55e', weight: 4}).addTo(state.previewMap);
+                L.marker(coords[0]).addTo(state.previewMap);
+                L.marker(coords[coords.length - 1]).addTo(state.previewMap);
+                state.previewMap.fitBounds(polyline.getBounds());
+                setTimeout(() => state.previewMap.invalidateSize(), 100);
+                $('mapInfo').innerHTML = '<div class="map-info-row"><div class="map-label">Total Points</div><div class="map-value">' + state.gpsPoints.length + '</div></div>';
+            } catch (err) { setText('mapLoading', 'No GPS data'); }
         }
+        function closePreview() { $('previewModal').className = 'modal'; $('previewVideo').src = ''; }
+        function showPhotoModal(filename) { setText('photoTitle', filename); $('photoPreview').src = '/data/' + encodeURIComponent(filename); $('photoModal').className = 'modal active'; }
+        function closePhotoModal() { $('photoModal').className = 'modal'; $('photoPreview').src = ''; }
 
-        function closePreview() {
-            $('previewModal').className = 'modal';
-            $('previewVideo').src = '';
-            gpsPoints = [];
-            if (currentMarker && previewMap) {
-                previewMap.removeLayer(currentMarker);
-                currentMarker = null;
+        async function initAudioDevices() {
+            for (let i = 0; i < 18; i++) $('voiceMeter').insertAdjacentHTML('beforeend', '<span></span>');
+            try {
+                await navigator.mediaDevices.getUserMedia({audio: true}).then((s) => s.getTracks().forEach((t) => t.stop()));
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const inputs = devices.filter((d) => d.kind === 'audioinput');
+                const outputs = devices.filter((d) => d.kind === 'audiooutput');
+                fillSelect('micSelect', inputs, 'Default microphone');
+                fillSelect('speakerSelect', outputs, 'Default speaker');
+                fillSelect('settingAudioInput', inputs, 'Default microphone');
+                fillSelect('settingAudioOutput', outputs, 'Default speaker');
+                $('talkStatus').innerHTML = dot('green', 'Ready');
+                $('sysTalk').innerHTML = dot('green', 'Ready');
+                $('dashTalk').innerHTML = dot('green', 'Live Talk');
+            } catch (err) {
+                $('talkStatus').innerHTML = dot('red', 'Mic blocked');
+                $('sysTalk').innerHTML = dot('red', 'Blocked');
             }
         }
+        function fillSelect(id, devices, fallback) {
+            const select = $(id);
+            select.innerHTML = '<option value="">' + fallback + '</option>' + devices.map((d, i) => '<option value="' + htmlEscape(d.deviceId) + '">' + htmlEscape(d.label || fallback + ' ' + (i + 1)) + '</option>').join('');
+        }
+        async function startTalk() {
+            if (state.talkMuted) return toast('Live Talk is muted', 'bad');
+            try {
+                state.micStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: $('micSelect').value ? {exact: $('micSelect').value} : undefined}});
+                const audioContext = new AudioContext();
+                const source = audioContext.createMediaStreamSource(state.micStream);
+                state.analyser = audioContext.createAnalyser();
+                source.connect(state.analyser);
+                $('pttButton').classList.add('active');
+                $('talkStatus').innerHTML = dot('green', 'Transmitting');
+                animateVoice();
+            } catch (err) { toast('Microphone unavailable: ' + err.message, 'bad'); }
+        }
+        function stopTalk() {
+            if (state.micStream) state.micStream.getTracks().forEach((t) => t.stop());
+            state.micStream = null;
+            $('pttButton').classList.remove('active');
+            $('talkStatus').innerHTML = dot('green', 'Ready');
+            clearVoice();
+        }
+        function animateVoice() {
+            if (!state.analyser || !state.micStream) return;
+            const data = new Uint8Array(state.analyser.frequencyBinCount);
+            state.analyser.getByteFrequencyData(data);
+            const avg = data.reduce((a, b) => a + b, 0) / data.length;
+            [...$('voiceMeter').children].forEach((bar, i) => {
+                const active = i < Math.max(1, Math.round(avg / 12));
+                bar.classList.toggle('active', active);
+                bar.style.height = active ? (8 + i) + 'px' : '5px';
+            });
+            requestAnimationFrame(animateVoice);
+        }
+        function clearVoice() { [...$('voiceMeter').children].forEach((bar) => { bar.classList.remove('active'); bar.style.height = '5px'; }); }
+        function toggleTalkMute() { state.talkMuted = !state.talkMuted; setText('talkMuteBtn', state.talkMuted ? 'Unmute' : 'Mute/unmute'); if (state.talkMuted) stopTalk(); }
+        $('pttButton').addEventListener('mousedown', startTalk);
+        $('pttButton').addEventListener('mouseup', stopTalk);
+        $('pttButton').addEventListener('mouseleave', stopTalk);
+        $('pttButton').addEventListener('touchstart', (e) => { e.preventDefault(); startTalk(); });
+        $('pttButton').addEventListener('touchend', stopTalk);
 
-        function showPhotoModal(filename) {
-            setText('photoTitle', filename);
-            $('photoPreview').src = '/data/' + filename;
-            $('photoModal').className = 'modal active';
+        function saveSettings() {
+            const values = {};
+            document.querySelectorAll('#page-settings input, #page-settings select').forEach((el) => values[el.id] = el.value);
+            localStorage.setItem('helmetDashboardSettings', JSON.stringify(values));
+            toast('Settings saved locally');
+        }
+        function loadSettings() {
+            const values = JSON.parse(localStorage.getItem('helmetDashboardSettings') || '{}');
+            Object.entries(values).forEach(([id, value]) => { if ($(id)) $(id).value = value; });
+            $('qualitySelect').value = $('settingResolution').value || '1080p';
         }
 
-        function closePhotoModal() {
-            $('photoModal').className = 'modal';
-            $('photoPreview').src = '';
-        }
-
-        function uploadFile(filename) {
-            if (!confirm('Upload ' + filename + ' to cloud?')) return;
-            fetch('/api/upload_cloud', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({filename: filename})
-            }).then(() => setTimeout(loadMedia, 500));
-        }
-
-        function uploadImage(filename) {
-            if (!confirm('Upload ' + filename + ' to cloud?')) return;
-            fetch('/api/upload_image', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({filename: filename})
-            }).then(() => setTimeout(loadMedia, 500));
-        }
-
-        function batchUpload(base) {
-            if (!confirm('Upload all chunks in this session?')) return;
-            fetch('/api/batch_upload', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({base: base})
-            }).then(() => setTimeout(loadMedia, 500));
-        }
-
-        function deleteFile(filename) {
-            if (!confirm('Delete ' + filename + '?')) return;
-            fetch('/api/delete_file', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({filename: filename})
-            }).then(loadMedia);
-        }
-
-        function deleteBatch(base) {
-            if (!confirm('Delete entire video session?')) return;
-            fetch('/api/delete_batch', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({base: base})
-            }).then(loadMedia);
-        }
-
-        function shutdownDevice() {
-            if (!confirm('Power off the device now?')) return;
-            const btn = $('btnShutdown');
-            btn.disabled = true;
-            btn.textContent = 'SHUTTING DOWN';
-            fetch('/api/shutdown', {method: 'POST'})
-                .then(r => r.json())
-                .then(d => {
-                    if (d && d.success) alert('Shutdown initiated. The device will power off shortly.');
-                    else alert('Failed to initiate shutdown: ' + (d.error || 'Unknown'));
-                })
-                .catch(() => alert('Failed to initiate shutdown'))
-                .finally(() => {
-                    btn.disabled = false;
-                    btn.textContent = 'SHUTDOWN';
-                });
-        }
-
-        requestWakeLock();
-        document.addEventListener('click', requestWakeLock);
-        startGPS();
-        updateStatus();
-        updateRuntimeHealth();
-        loadMedia();
-        setInterval(updateGpsAge, 3000);
+        setInterval(updateStreamTimer, 1000);
         setInterval(updateStatus, 2000);
-        setInterval(updateRuntimeHealth, 3000);
-        setInterval(loadMedia, 3000);
+        setInterval(updateHealth, 3000);
+        setInterval(loadMedia, 6000);
+        updateStreamTimer();
+        updateStatus();
+        updateHealth();
+        loadMedia();
+        initAudioDevices();
+        loadSettings();
     </script>
 </body>
 </html>
