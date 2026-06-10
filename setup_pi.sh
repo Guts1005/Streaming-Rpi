@@ -33,7 +33,7 @@ echo "==================================================="
 # 2. System update and dependencies
 echo "[1/7] Updating system and installing dependencies..."
 sudo apt update
-sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git
+sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git rpicam-apps
 
 # 3. Clone Repository
 echo "[2/7] Cloning repository..."
