@@ -97,6 +97,7 @@ echo "[7/7] Configuring Autostart and Systemd Services..."
 
 # Desktop autostart
 mkdir -p ~/.config/autostart
+rm -f ~/.config/autostart/hm_releases.desktop
 
 cat <<EOF > ~/.config/autostart/hm-updater.desktop
 [Desktop Entry]
