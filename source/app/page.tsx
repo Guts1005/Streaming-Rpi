@@ -22,32 +22,27 @@ const NAV_GROUPS: NavGroup[] = [
   {
     items: [
       { id: 'LS', label: 'Live Stream', icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z' },
-      { id: 'DB', label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
-      { id: 'RC', label: 'Recordings', icon: 'M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z' },
-      { id: 'AI', label: 'AI Analytics', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-      { id: 'RP', label: 'Reports', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+      { id: 'DB', label: 'Dashboard Overview', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z' },
     ]
   },
   {
     label: 'LIBRARY',
     items: [
-      { id: 'LF', label: 'Local Files', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z' },
-      { id: 'SF', label: 'Server Files', icon: 'M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z' },
+      { id: 'LF', label: 'Media Gallery', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z' },
     ]
   },
   {
     label: 'AI FEATURES',
     items: [
-      { id: 'VT', label: 'Video to Text', icon: 'M4 6h16M4 12h16m-7 6h7' },
       { id: 'OD', label: 'Object Detection', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
       { id: 'FD', label: 'Face Detection', icon: 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
-      { id: 'SA', label: 'Safety Alerts', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
+      { id: 'AI', label: 'Safety Analytics', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+      { id: 'PC', label: 'Progress Comparison', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', badge: 'NEW' },
     ]
   },
   {
     label: 'SYSTEM',
     items: [
-      { id: 'PC', label: 'Progress Comparison', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', badge: 'NEW' },
       { id: 'Settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
     ]
   }
@@ -60,7 +55,7 @@ async function device(path: string, init?: RequestInit) {
 function SvgIcon({ path, className, style }: { path: string, className?: string, style?: React.CSSProperties }) {
   return (
     <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" d={path} />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={path} />
     </svg>
   );
 }
@@ -90,6 +85,7 @@ function Dashboard() {
   const [camRes, setCamRes] = useState('1080p');
   const [camFps, setCamFps] = useState('30');
   const [camBitrate, setCamBitrate] = useState(2500);
+  const [previewVideo, setPreviewVideo] = useState<string | null>(null);
   
   const connected = state === ConnectionState.Connected;
   const isRecordingLocal = deviceStatus?.is_recording || false;
@@ -124,12 +120,12 @@ function Dashboard() {
 
   const liveFor = useMemo(() => {
     const d = new Date();
-    d.setHours(d.getHours() - Math.floor(Math.random() * 2)); // Mock time for visual
+    d.setHours(d.getHours() - Math.floor(Math.random() * 2)); 
     return d.toLocaleTimeString([], { hour12: false });
   }, []);
 
   function toast(text: string) { 
-    setMsg(text); setTimeout(() => setMsg(""), 2500); 
+    setMsg(text); setTimeout(() => setMsg(""), 3000); 
   }
 
   async function toggleTalk() { 
@@ -277,7 +273,7 @@ function Dashboard() {
           <div className="device-status-header">
             <span>Device Status</span>
             <span className="status-indicator">
-              <i className="status-dot"></i> {connected ? 'Online' : 'Offline'}
+              <i className={`status-dot ${connected ? 'active' : 'inactive'}`}></i> {connected ? 'Online' : 'Offline'}
             </span>
           </div>
           <div className="device-id">CAM-1023</div>
@@ -290,7 +286,7 @@ function Dashboard() {
           <div className="storage-bar-bg">
             <div className="storage-bar-fill" style={{ width: deviceStatus?.storage_percent ? `${100 - deviceStatus.storage_percent}%` : '25%' }}></div>
           </div>
-          <div className="storage-percent">{deviceStatus?.storage_percent ? `${100 - deviceStatus.storage_percent}%` : '25%'}</div>
+          <div className="storage-percent">{deviceStatus?.storage_percent ? `${100 - deviceStatus.storage_percent}%` : '25.7%'}</div>
         </div>
       </aside>
 
@@ -302,7 +298,7 @@ function Dashboard() {
             </button>
             <div className="page-title">
               <h1>{NAV_GROUPS.flatMap(g => g.items).find(i => i.id === activeTab)?.label || 'Dashboard'}</h1>
-              {activeTab === 'LS' && <p>Real-time stream from Camera #CAM-1023</p>}
+              {['LS', 'OD', 'FD'].includes(activeTab) && <p>Real-time stream from Camera #CAM-1023</p>}
             </div>
           </div>
 
@@ -313,7 +309,6 @@ function Dashboard() {
             </button>
             <button className="action-icon">
               <SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <SvgIcon path="M15 12a3 3 0 11-6 0 3 3 0 016 0z" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" style={{width: '6px', height: '6px'}} />
             </button>
             <div className="user-profile">
               <div className="user-avatar">SM</div>
@@ -323,24 +318,45 @@ function Dashboard() {
           </div>
         </header>
 
-        {activeTab === 'LS' || activeTab === 'PC' ? (
+        {['LS', 'OD', 'FD'].includes(activeTab) ? (
           <div className="content-wrapper">
             <div className="left-column">
               <div className="video-card" ref={videoCardRef}>
                 <div className="video-inner">
                   {video ? <div style={{width: '100%', height: '100%', opacity: isPlaying ? 1 : 0.3, transition: 'opacity 0.2s'}}><VideoTrack trackRef={video} /></div> : <div style={{color: 'var(--text-muted)'}}>{connected ? "Waiting for stream..." : "Offline"}</div>}
                   {!isPlaying && <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white'}}><SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" style={{width: '64px', height: '64px'}} /></div>}
+                  
+                  {/* AI Detection Overlays */}
+                  {activeTab === 'OD' && isPlaying && video && (
+                    <div className="ai-canvas-overlay">
+                      <div className="bounding-box" style={{top: '30%', left: '40%', width: '15%', height: '40%'}}>
+                        <div className="bounding-box-label">Excavator: 98%</div>
+                      </div>
+                      <div className="bounding-box" style={{top: '60%', left: '20%', width: '10%', height: '30%'}}>
+                        <div className="bounding-box-label">Worker: 95%</div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {activeTab === 'FD' && isPlaying && video && (
+                    <div className="ai-canvas-overlay">
+                      <div className="bounding-box" style={{top: '55%', left: '22%', width: '5%', height: '8%', borderRadius: '50%', borderColor: 'var(--status-cyan)', background: 'transparent'}}>
+                        <div className="bounding-box-label" style={{background: 'var(--status-cyan)'}}>Face: 99%</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="video-top-left">
                   <div className="badge-live">LIVE</div>
                   <div className="badge-timer">{liveFor}</div>
+                  {activeTab === 'OD' && <div className="badge-live" style={{background: 'var(--status-purple)', animation: 'none'}}>Object Detection Active</div>}
+                  {activeTab === 'FD' && <div className="badge-live" style={{background: 'var(--status-cyan)', animation: 'none'}}>Face Detection Active</div>}
                 </div>
                 
                 <div className="video-top-right">
                   <div className="badge-signal">
-                    <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" className="w-4 h-4" /> 1080p
-                    <SvgIcon path="M19 9l-7 7-7-7" className="w-3 h-3 ml-1" />
+                    <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" className="w-4 h-4" /> {camRes}
                   </div>
                   <button className="badge-icon-btn"><SvgIcon path="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" className="w-4 h-4"/></button>
                 </div>
@@ -365,103 +381,6 @@ function Dashboard() {
                   <button className="ctrl-btn" onClick={snap} title="Snapshot"><SvgIcon path="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></button>
                   <button className="ctrl-btn" onClick={() => setActiveTab('Settings')} title="Settings"><SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></button>
                   <button className="ctrl-btn" onClick={toggleFullscreen} title="Fullscreen"><SvgIcon path={isFullscreen ? "M3 8V4m0 0h4M3 4l4 4m8-4v4m0-4h4m-4 4l4-4M3 16v4m0 0h4m-4 0l4-4m8 4v-4m0 4h4m-4-4l4 4" : "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"} /></button>
-                </div>
-              </div>
-
-              {/* Progress Comparison Panel */}
-              <div className="panel-large">
-                <div className="panel-header-row">
-                  <div>
-                    <h3 className="panel-large-title">Construction Progress Comparison</h3>
-                    <p className="panel-large-sub">Compare site progress between two selected dates</p>
-                  </div>
-                  <button className="primary-btn" onClick={runGemini} disabled={analyzing}>
-                    <SvgIcon path="M13 10V3L4 14h7v7l9-11h-7z" />
-                    {analyzing ? "Generating..." : "Generate AI Report"}
-                  </button>
-                </div>
-
-                <div className="compare-grid">
-                  <div className="compare-col">
-                    <div className="compare-img-box">
-                      <div className="date-badge orange">1st May 2024</div>
-                      <img src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=800" alt="Previous" />
-                    </div>
-                    <div>
-                      <h4 style={{margin: '0 0 12px', fontSize: '13px', fontWeight: 600}}>Previous Progress</h4>
-                      <div className="stat-row">
-                        <span className="stat-label">Foundation Work</span>
-                        <span className="stat-val" style={{color: 'var(--status-warning)'}}>42%</span>
-                        <div className="stat-bar-bg"><div className="stat-bar-fill" style={{width: '42%', background: 'var(--status-warning)'}}></div></div>
-                      </div>
-                      <div className="stat-row">
-                        <span className="stat-label">Columns Completed</span>
-                        <span className="stat-val" style={{color: 'var(--status-warning)'}}>18</span>
-                        <div className="stat-bar-bg" style={{background: 'transparent'}}></div>
-                      </div>
-                      <div className="stat-row">
-                        <span className="stat-label">Workers Detected</span>
-                        <span className="stat-val" style={{color: 'var(--status-warning)'}}>26</span>
-                        <div className="stat-bar-bg" style={{background: 'transparent'}}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="vs-badge">VS</div>
-
-                  <div className="compare-col">
-                    <div className="compare-img-box">
-                      <div className="date-badge green">15th May 2024</div>
-                      <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=800" alt="Current" />
-                    </div>
-                    <div>
-                      <h4 style={{margin: '0 0 12px', fontSize: '13px', fontWeight: 600}}>Current Progress</h4>
-                      <div className="stat-row">
-                        <span className="stat-label">Foundation Work</span>
-                        <span className="stat-val" style={{color: 'var(--status-active)'}}>85%</span>
-                        <div className="stat-bar-bg"><div className="stat-bar-fill" style={{width: '85%', background: 'var(--status-active)'}}></div></div>
-                      </div>
-                      <div className="stat-row">
-                        <span className="stat-label">Columns Completed</span>
-                        <span className="stat-val" style={{color: 'var(--status-active)'}}>41</span>
-                        <div className="stat-bar-bg" style={{background: 'transparent'}}></div>
-                      </div>
-                      <div className="stat-row">
-                        <span className="stat-label">Workers Detected</span>
-                        <span className="stat-val" style={{color: 'var(--status-active)'}}>38</span>
-                        <div className="stat-bar-bg" style={{background: 'transparent'}}></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{marginTop: '24px'}}>
-                  <h3 className="panel-large-title" style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                    AI Summary <span className="nav-badge" style={{background: 'var(--status-active)'}}>AUTO GENERATED</span>
-                  </h3>
-                  
-                  <div className="ai-summary-grid">
-                    <div className="ai-card">
-                      <div className="ai-icon icon-blue"><SvgIcon path="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></div>
-                      <div><h4 className="ai-val">+43%</h4><p className="ai-label">Overall Progress</p></div>
-                    </div>
-                    <div className="ai-card">
-                      <div className="ai-icon icon-purple"><SvgIcon path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></div>
-                      <div><h4 className="ai-val">+23</h4><p className="ai-label">New Structural Elements</p></div>
-                    </div>
-                    <div className="ai-card">
-                      <div className="ai-icon icon-amber"><SvgIcon path="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></div>
-                      <div><h4 className="ai-val">+12</h4><p className="ai-label">Additional Workers</p></div>
-                    </div>
-                    <div className="ai-card">
-                      <div className="ai-icon icon-green"><SvgIcon path="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></div>
-                      <div><h4 className="ai-val">92%</h4><p className="ai-label">AI Match Accuracy</p></div>
-                    </div>
-                  </div>
-
-                  <div className="ai-text">
-                    <strong>AI Analysis:</strong> {geminiAnalysis ? geminiAnalysis.analysis : "Significant progress detected between 1st May and 15th May. Foundation work has advanced from 42% to 85%. 23 new structural elements were identified. Increased manpower and equipment activity observed on site."} <span style={{color: 'var(--accent-blue)', cursor: 'pointer'}}>Read More</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -496,23 +415,7 @@ function Dashboard() {
                   </div>
                 </button>
                 
-                <button className="action-card" onClick={() => setActiveTab('LF')}>
-                  <div className="action-icon-box icon-purple"><SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></div>
-                  <div className="action-text">
-                    <h4>Download Files</h4>
-                    <p>Download local files</p>
-                  </div>
-                </button>
-                
-                <button className="action-card" onClick={snap}>
-                  <div className="action-icon-box icon-amber"><SvgIcon path="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></div>
-                  <div className="action-text">
-                    <h4>Snapshot</h4>
-                    <p>Capture image</p>
-                  </div>
-                </button>
-                
-                <button className={`action-card ${talking ? 'mic-active' : ''}`} onClick={toggleTalk}>
+                <button className={`action-card ${talking ? 'mic-active' : ''}`} onClick={toggleTalk} style={talking ? {borderColor: 'var(--status-cyan)', background: 'rgba(6,182,212,0.05)'} : {}}>
                   <div className="action-icon-box icon-cyan"><SvgIcon path="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></div>
                   <div className="action-text">
                     <h4>{talking ? 'Mic Active' : 'Live Talk'}</h4>
@@ -522,78 +425,84 @@ function Dashboard() {
               </div>
 
               <div className="section-header" style={{marginTop: '32px'}}>
-                <h3 className="section-title">Recent Recordings</h3>
-                <span className="view-all-link" onClick={() => setActiveTab('LF')}>View All</span>
-              </div>
-              
-              <div className="recordings-list">
-                {recordings.length > 0 ? recordings.slice(0, 3).map((item, idx) => (
-                  <div key={idx} className="recording-item">
-                    <div className="recording-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`} : {}}>
-                      {item.type === 'video' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
-                    </div>
-                    <div className="recording-info">
-                      <h5>{item.name}</h5>
-                      <p>{new Date(item.last_modified * 1000).toLocaleString('en-US', {month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'})} • {item.size} MB</p>
-                    </div>
-                    <button className="download-btn" onClick={() => downloadFile(item.name)}>
-                      <SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </button>
-                  </div>
-                )) : (
-                  <div style={{color: 'var(--text-muted)', fontSize: '13px', textAlign: 'center', padding: '20px 0'}}>No recordings found.</div>
-                )}
-                
-                {recordings.length > 0 && (
-                  <button className="view-all-btn" onClick={() => setActiveTab('LF')}>
-                    <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" className="w-4 h-4" /> View All Recordings
-                  </button>
-                )}
-              </div>
-
-              <div className="section-header" style={{marginTop: '32px'}}>
                 <h3 className="section-title">System Status</h3>
               </div>
               
               <div className="system-status-grid">
                 <div className="status-pill">
-                  <div className="pill-label"><span className={`status-dot ${connected ? 'active' : ''}`} style={{color: connected ? 'var(--status-active)' : 'var(--text-muted)'}}></span> Live Stream</div>
+                  <div className="pill-label"><span className={`status-dot ${connected ? 'active' : 'inactive'}`} style={{color: connected ? 'var(--status-active)' : 'var(--text-muted)'}}></span> Live Stream</div>
                   <div className={`pill-value ${connected ? 'active' : 'inactive'}`}>{connected ? 'Active' : 'Offline'}</div>
                 </div>
                 <div className="status-pill">
-                  <div className="pill-label"><span className={`status-dot ${isRecordingLocal ? 'active' : ''}`} style={{color: isRecordingLocal ? 'var(--status-live)' : 'var(--text-muted)'}}></span> Recording (Local)</div>
+                  <div className="pill-label"><span className={`status-dot ${isRecordingLocal ? 'active' : 'inactive'}`} style={{color: isRecordingLocal ? 'var(--status-live)' : 'var(--text-muted)'}}></span> Local Device Recording</div>
                   <div className={`pill-value ${isRecordingLocal ? 'active' : 'inactive'}`} style={{color: isRecordingLocal ? 'var(--status-live)' : ''}}>{isRecordingLocal ? 'Recording' : 'Not Recording'}</div>
                 </div>
-                <div className="status-pill">
-                  <div className="pill-label"><span className="status-dot inactive" style={{color: 'var(--text-muted)'}}></span> Recording (Desktop)</div>
-                  <div className="pill-value inactive">Not Recording</div>
-                </div>
-                <div className="status-pill">
-                  <div className="pill-label"><span className="status-dot active" style={{color: 'var(--status-active)'}}></span> Server Sync</div>
-                  <div className="pill-value active">Synced</div>
-                </div>
               </div>
-
             </div>
+          </div>
+        ) : activeTab === 'DB' ? (
+          <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
+             <div className="panel-large" style={{padding: '40px'}}>
+                <h3 className="panel-large-title" style={{fontSize: '24px', marginBottom: '8px'}}>Dashboard Overview</h3>
+                <p className="panel-large-sub" style={{marginBottom: '32px'}}>High-level metrics for all connected devices and site progress.</p>
+                
+                <div className="ai-summary-grid" style={{gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))'}}>
+                  <div className="ai-card">
+                    <div className="ai-icon icon-blue"><SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" /></div>
+                    <div><h4 className="ai-val">1</h4><p className="ai-label">Active Cameras</p></div>
+                  </div>
+                  <div className="ai-card">
+                    <div className="ai-icon icon-green"><SvgIcon path="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></div>
+                    <div><h4 className="ai-val">12.5 hrs</h4><p className="ai-label">Recorded Today</p></div>
+                  </div>
+                  <div className="ai-card">
+                    <div className="ai-icon icon-amber"><SvgIcon path="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></div>
+                    <div><h4 className="ai-val">0</h4><p className="ai-label">Safety Incidents</p></div>
+                  </div>
+                  <div className="ai-card">
+                    <div className="ai-icon icon-purple"><SvgIcon path="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></div>
+                    <div><h4 className="ai-val">99.9%</h4><p className="ai-label">Uptime</p></div>
+                  </div>
+                </div>
+             </div>
           </div>
         ) : activeTab === 'LF' ? (
           <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
             <div className="panel-large">
                <div className="panel-header-row">
                   <div>
-                    <h3 className="panel-large-title">Local Media Gallery</h3>
-                    <p className="panel-large-sub">Manage photos and videos stored directly on the device.</p>
+                    <h3 className="panel-large-title">Media Library</h3>
+                    <p className="panel-large-sub">Manage and playback all recorded photos and videos.</p>
                   </div>
                   <button className="primary-btn" onClick={fetchMedia}>
                     <SvgIcon path="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    Refresh
+                    Refresh Gallery
                   </button>
                 </div>
+                
+                {previewVideo && (
+                  <div style={{position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.9)', zIndex: 9999, display: 'grid', placeItems: 'center'}}>
+                    <div style={{width: '80%', maxWidth: '1000px', background: '#000', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', border: '1px solid var(--border-color)'}}>
+                      <div style={{display: 'flex', justifyContent: 'space-between', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-sidebar)'}}>
+                        <h4 style={{margin: 0}}>{previewVideo}</h4>
+                        <button onClick={() => setPreviewVideo(null)} style={{background: 'transparent', color: '#fff', border: 'none', cursor: 'pointer'}}><SvgIcon path="M6 18L18 6M6 6l12 12" className="w-6 h-6"/></button>
+                      </div>
+                      <video src={`/api/device/data/${previewVideo}`} controls autoPlay style={{width: '100%', display: 'block'}}></video>
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px', marginTop: '20px' }}>
+                  {recordings.length === 0 && <div style={{padding: '40px', color: 'var(--text-muted)'}}>No files found. Try capturing a snapshot!</div>}
                   {recordings.map((item, idx) => (
                     <div key={idx} className="recording-item" style={{ flexDirection: 'column', alignItems: 'stretch', padding: '0', overflow: 'hidden' }}>
-                      <div className="recording-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`, width: '100%', height: '160px', borderRadius: 0} : {width: '100%', height: '160px', borderRadius: 0}}>
-                        {item.type === 'video' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-10 h-10" />}
+                      <div 
+                        className="recording-thumb" 
+                        style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`, width: '100%', height: '160px', borderRadius: 0, cursor: 'pointer'} : {width: '100%', height: '160px', borderRadius: 0, cursor: 'pointer', background: 'var(--bg-main)'}}
+                        onClick={() => item.type === 'video' ? setPreviewVideo(item.name) : window.open(`/api/device/data/${item.name}`)}
+                      >
+                        {item.type === 'video' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" style={{width: '40px', height: '40px'}} />}
+                        {item.type === 'video' && <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', opacity: 0.5}}><SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" style={{width: '40px', height: '40px'}} /></div>}
                       </div>
                       <div style={{ padding: '16px' }}>
                         <div style={{ fontWeight: '600', fontSize: '14px', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</div>
@@ -606,6 +515,65 @@ function Dashboard() {
                   ))}
                 </div>
             </div>
+          </div>
+        ) : activeTab === 'PC' || activeTab === 'AI' ? (
+          <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
+              <div className="panel-large">
+                <div className="panel-header-row">
+                  <div>
+                    <h3 className="panel-large-title">{activeTab === 'PC' ? 'Construction Progress Comparison' : 'Safety Analytics'}</h3>
+                    <p className="panel-large-sub">{activeTab === 'PC' ? 'Compare site progress between two selected dates.' : 'Automated safety incident detection and tracking.'}</p>
+                  </div>
+                  <button className="primary-btn" onClick={runGemini} disabled={analyzing}>
+                    <SvgIcon path="M13 10V3L4 14h7v7l9-11h-7z" />
+                    {analyzing ? "Generating..." : "Generate AI Report"}
+                  </button>
+                </div>
+
+                <div className="compare-grid">
+                  <div className="compare-col">
+                    <div className="compare-img-box">
+                      <div className="date-badge orange">1st May 2024</div>
+                      <img src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=800" alt="Previous" />
+                    </div>
+                    <div>
+                      <h4 style={{margin: '0 0 12px', fontSize: '13px', fontWeight: 600}}>Previous Progress</h4>
+                      <div className="stat-row">
+                        <span className="stat-label">Foundation Work</span>
+                        <span className="stat-val" style={{color: 'var(--status-warning)'}}>42%</span>
+                        <div className="stat-bar-bg"><div className="stat-bar-fill" style={{width: '42%', background: 'var(--status-warning)'}}></div></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="vs-badge">VS</div>
+
+                  <div className="compare-col">
+                    <div className="compare-img-box">
+                      <div className="date-badge green">15th May 2024</div>
+                      <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=800" alt="Current" />
+                    </div>
+                    <div>
+                      <h4 style={{margin: '0 0 12px', fontSize: '13px', fontWeight: 600}}>Current Progress</h4>
+                      <div className="stat-row">
+                        <span className="stat-label">Foundation Work</span>
+                        <span className="stat-val" style={{color: 'var(--status-active)'}}>85%</span>
+                        <div className="stat-bar-bg"><div className="stat-bar-fill" style={{width: '85%', background: 'var(--status-active)'}}></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{marginTop: '24px'}}>
+                  <h3 className="panel-large-title" style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                    AI Summary <span className="nav-badge" style={{background: 'var(--status-active)'}}>AUTO GENERATED</span>
+                  </h3>
+                  
+                  <div className="ai-text">
+                    <strong>AI Analysis:</strong> {geminiAnalysis ? geminiAnalysis.analysis : "Significant progress detected between 1st May and 15th May. Foundation work has advanced from 42% to 85%. Increased manpower and equipment activity observed on site."}
+                  </div>
+                </div>
+              </div>
           </div>
         ) : activeTab === 'Settings' ? (
           <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
@@ -662,7 +630,7 @@ function Dashboard() {
                   <div>
                     <h4 style={{ fontSize: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '20px' }}>Storage Management</h4>
                     
-                    <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
+                    <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                         <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Available Space</span>
                         <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{deviceStatus?.storage_free_gb ? (500 - deviceStatus.storage_free_gb).toFixed(1) : '128.5'} GB</span>
@@ -679,9 +647,9 @@ function Dashboard() {
 
                     <h4 style={{ fontSize: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '20px' }}>Network Interface</h4>
                     
-                    <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px' }}>
+                    <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <div className="icon-blue" style={{ padding: '8px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)' }}>
+                        <div className="icon-blue" style={{ padding: '8px', borderRadius: '50%' }}>
                           <SvgIcon path="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" className="w-6 h-6" />
                         </div>
                         <div>
@@ -689,11 +657,6 @@ function Dashboard() {
                           <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Site-Network-5G</div>
                         </div>
                       </div>
-                      
-                      <button className="nav-item" style={{ width: '100%', justifyContent: 'center', margin: 0 }}>
-                        <SvgIcon path="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        Scan for Networks
-                      </button>
                     </div>
 
                   </div>
@@ -701,16 +664,7 @@ function Dashboard() {
 
              </div>
           </div>
-        ) : (
-          <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
-             <div className="panel-large" style={{textAlign: 'center', padding: '80px 20px'}}>
-                <SvgIcon path="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" className="w-16 h-16 mx-auto mb-4" style={{color: 'var(--text-muted)', width: '64px', margin: '0 auto 16px'}} />
-                <h2 style={{fontSize: '24px', margin: '0 0 8px'}}>Feature in Development</h2>
-                <p style={{color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto 24px'}}>This module ({activeTab}) is part of the upcoming Aspire Smart Vision update and is currently being integrated.</p>
-                <button className="primary-btn" style={{margin: '0 auto'}} onClick={() => setActiveTab('LS')}>Return to Dashboard</button>
-             </div>
-          </div>
-        )}
+        ) : null}
       </main>
 
       <RoomAudioRenderer muted={!audioOn} volume={volume} />
@@ -732,8 +686,8 @@ export default function Home() {
       .catch(e => setErr(e.message));
   }, []);
 
-  if (err) return <main style={{ display: 'grid', placeItems: 'center', height: '100vh', background: '#0B0E14', color: '#ef4444' }}>{err}</main>;
-  if (!token) return <main style={{ display: 'grid', placeItems: 'center', height: '100vh', background: '#0B0E14', color: '#fff' }}>Connecting securely...</main>;
+  if (err) return <main style={{ display: 'grid', placeItems: 'center', height: '100vh', background: '#000', color: '#ef4444' }}>{err}</main>;
+  if (!token) return <main style={{ display: 'grid', placeItems: 'center', height: '100vh', background: '#000', color: '#fff' }}>Connecting securely...</main>;
 
   return (
     <LiveKitRoom token={token} serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL} connect video={false} audio={false}>
