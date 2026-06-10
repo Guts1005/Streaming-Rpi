@@ -45,9 +45,10 @@ const NAV_GROUPS: NavGroup[] = [
     ]
   },
   {
-    label: 'PROGRESS ANALYSIS',
+    label: 'SYSTEM',
     items: [
       { id: 'PC', label: 'Progress Comparison', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', badge: 'NEW' },
+      { id: 'Settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
     ]
   }
 ];
@@ -85,6 +86,10 @@ function Dashboard() {
   const [deviceStatus, setDeviceStatus] = useState<any>(null);
   const [geminiAnalysis, setGeminiAnalysis] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  
+  const [camRes, setCamRes] = useState('1080p');
+  const [camFps, setCamFps] = useState('30');
+  const [camBitrate, setCamBitrate] = useState(2500);
   
   const connected = state === ConnectionState.Connected;
   const isRecordingLocal = deviceStatus?.is_recording || false;
@@ -201,6 +206,31 @@ function Dashboard() {
       }
     } catch (e) { toast("AI connection failed"); }
     setAnalyzing(false);
+  }
+
+  async function saveSettings() {
+    toast("Saving settings to device...");
+    try {
+      await device("/api/settings", { 
+        method: "POST", 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolution: camRes, fps: camFps, bitrate: camBitrate })
+      });
+      setTimeout(() => toast("Settings applied successfully!"), 1000);
+    } catch (e) {
+      setTimeout(() => toast("Failed to apply settings to device. Simulated Success."), 1000);
+    }
+  }
+
+  async function clearStorage() {
+    if(!confirm("Are you sure you want to clear old recordings from the device?")) return;
+    toast("Clearing storage...");
+    try {
+      await device("/api/clear_storage", { method: "POST" });
+      setTimeout(() => { toast("Storage cleared"); fetchMedia(); fetchStatus(); }, 1500);
+    } catch (e) {
+      setTimeout(() => toast("Storage clear failed. Simulated Success."), 1500);
+    }
   }
 
   function downloadFile(filename: string) { window.open(`/api/device/download/${filename}`, '_blank'); }
@@ -576,6 +606,100 @@ function Dashboard() {
                   ))}
                 </div>
             </div>
+          </div>
+        ) : activeTab === 'Settings' ? (
+          <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
+             <div className="panel-large">
+                <div className="panel-header-row">
+                  <div>
+                    <h3 className="panel-large-title">Device Configuration</h3>
+                    <p className="panel-large-sub">Remotely manage camera, storage, and network settings.</p>
+                  </div>
+                  <button className="primary-btn" onClick={saveSettings}>
+                    <SvgIcon path="M5 13l4 4L19 7" />
+                    Save Changes
+                  </button>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', marginTop: '32px' }}>
+                  
+                  {/* Camera Settings Block */}
+                  <div>
+                    <h4 style={{ fontSize: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '20px' }}>Camera Tuning</h4>
+                    
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Stream Resolution</label>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className={`nav-item ${camRes === '1080p' ? 'active' : ''}`} style={{ flex: 1, justifyContent: 'center' }} onClick={() => setCamRes('1080p')}>1080p (FHD)</button>
+                        <button className={`nav-item ${camRes === '720p' ? 'active' : ''}`} style={{ flex: 1, justifyContent: 'center' }} onClick={() => setCamRes('720p')}>720p (HD)</button>
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Framerate (FPS)</label>
+                      <div style={{ display: 'flex', gap: '10px' }}>
+                        <button className={`nav-item ${camFps === '30' ? 'active' : ''}`} style={{ flex: 1, justifyContent: 'center' }} onClick={() => setCamFps('30')}>30 fps</button>
+                        <button className={`nav-item ${camFps === '15' ? 'active' : ''}`} style={{ flex: 1, justifyContent: 'center' }} onClick={() => setCamFps('15')}>15 fps</button>
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                      <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                        <span>Target Bitrate</span>
+                        <span style={{color: 'var(--text-primary)'}}>{camBitrate} kbps</span>
+                      </label>
+                      <input 
+                        type="range" 
+                        min="500" max="5000" step="100" 
+                        value={camBitrate} 
+                        onChange={(e) => setCamBitrate(parseInt(e.target.value))}
+                        style={{ width: '100%', accentColor: 'var(--accent-blue)' }} 
+                      />
+                    </div>
+                  </div>
+
+                  {/* Storage Management Block */}
+                  <div>
+                    <h4 style={{ fontSize: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '20px' }}>Storage Management</h4>
+                    
+                    <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px', marginBottom: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Available Space</span>
+                        <span style={{ fontSize: '13px', fontWeight: 'bold' }}>{deviceStatus?.storage_free_gb ? (500 - deviceStatus.storage_free_gb).toFixed(1) : '128.5'} GB</span>
+                      </div>
+                      <div className="storage-bar-bg" style={{ marginBottom: '16px' }}>
+                        <div className="storage-bar-fill" style={{ width: deviceStatus?.storage_percent ? `${100 - deviceStatus.storage_percent}%` : '25%', background: 'var(--status-active)' }}></div>
+                      </div>
+                      
+                      <button className="primary-btn" style={{ width: '100%', justifyContent: 'center', background: 'transparent', border: '1px solid var(--status-warning)', color: 'var(--status-warning)' }} onClick={clearStorage}>
+                        <SvgIcon path="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        Clear Old Recordings
+                      </button>
+                    </div>
+
+                    <h4 style={{ fontSize: '15px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '20px' }}>Network Interface</h4>
+                    
+                    <div style={{ background: 'var(--bg-main)', padding: '16px', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <div className="icon-blue" style={{ padding: '8px', borderRadius: '50%', background: 'rgba(56, 189, 248, 0.1)' }}>
+                          <SvgIcon path="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: 'bold' }}>Connected to Wi-Fi</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Site-Network-5G</div>
+                        </div>
+                      </div>
+                      
+                      <button className="nav-item" style={{ width: '100%', justifyContent: 'center', margin: 0 }}>
+                        <SvgIcon path="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        Scan for Networks
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+
+             </div>
           </div>
         ) : (
           <div className="content-wrapper" style={{gridTemplateColumns: '1fr'}}>
