@@ -6,8 +6,8 @@ Wants=wifi-qr-connect.service network-online.target
 [Service]
 Type=simple
 User=trc
-WorkingDirectory=/home/trc
-ExecStart=/home/trc/publish_livekit.sh
+WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases
+ExecStart=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/tools/publish_livekit.sh
 Restart=always
 RestartSec=5
 

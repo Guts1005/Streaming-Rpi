@@ -59,8 +59,9 @@ EOF
 # 5. File permissions
 echo "[4/7] Setting file permissions..."
 chmod +x updater.sh
-chmod +x generate_certs.sh
+chmod +x generate_certs.sh || true
 chmod +x tools/start_rtsp_stream.sh || true
+chmod +x tools/publish_livekit.sh || true
 
 # 6. Virtual Environment & PIP
 echo "[5/7] Setting up Python virtual environment..."
