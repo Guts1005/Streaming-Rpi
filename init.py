@@ -811,18 +811,36 @@ def livekit_audio_status():
         "output_device": "system default"
     })
 
+record_proc = None
+
 @app.route('/api/start_record')
 def start_record():
-    global req_start_rec
+    global record_proc, is_recording_active
     if not is_recording_active:
-        req_start_rec = True
+        is_recording_active = True
+        if not record_proc:
+            import subprocess
+            subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            path = os.path.join(RECORD_FOLDER, f"video_{ts}_chunk000.mp4")
+            cmd = "rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o - | ffmpeg -y -f h264 -i - -c:v copy " + f"'{path}'"
+            record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
     return "OK"
 
 @app.route('/api/stop_record', methods=['POST'])
 def stop_record():
-    global req_stop_rec
+    global record_proc, is_recording_active
     if is_recording_active:
-        req_stop_rec = True
+        is_recording_active = False
+        if record_proc:
+            import os, signal, subprocess
+            try:
+                os.killpg(os.getpgid(record_proc.pid), signal.SIGTERM)
+                record_proc.wait(timeout=5)
+            except Exception:
+                pass
+            record_proc = None
+            subprocess.run(["sudo", "systemctl", "start", "livekit-publisher.service"], check=False)
     return "OK"
 
 @app.route('/api/toggle_audio', methods=['POST'])
@@ -834,23 +852,20 @@ def toggle_audio():
 
 @app.route('/api/capture_photo')
 def capture_photo():
-    with frame_lock:
-        if latest_frame_jpeg is None:
-            return "ERROR"
-        data = latest_frame_jpeg
+    import subprocess
+    was_streaming = subprocess.run(["systemctl", "is-active", "--quiet", "livekit-publisher.service"]).returncode == 0
+    if was_streaming:
+        subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
+        time.sleep(1)
 
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     path = os.path.join(RECORD_FOLDER, f"img_{ts}.jpg")
-    nparr = np.frombuffer(data, np.uint8)
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    subprocess.run(["rpicam-still", "--timeout", "1000", "--nopreview", "-o", path], check=False)
 
-    try:
-        txt = f"GPS: {float(current_gps_data.get('lat',0.0)):.5f}, {float(current_gps_data.get('lon',0.0)):.5f}"
-    except:
-        txt = "GPS: 0.00000, 0.00000"
+    if was_streaming:
+        subprocess.run(["sudo", "systemctl", "start", "livekit-publisher.service"], check=False)
 
-    cv2.putText(img, txt, (10, STREAM_HEIGHT-20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0,255,0), 2)
-    cv2.imwrite(path, img)
     return "OK"
 
 @app.route('/api/update_gps', methods=['POST'])
@@ -1603,8 +1618,8 @@ if __name__ == '__main__':
     generate_ssl_certificates()
 
     threading.Thread(target=discovery_service, daemon=True).start()
-    threading.Thread(target=camera_worker, daemon=True).start()
-    threading.Thread(target=gpio_control_worker, daemon=True).start()
+    # threading.Thread(target=camera_worker, daemon=True).start()
+    # threading.Thread(target=gpio_control_worker, daemon=True).start()
     threading.Thread(target=offline_sync_worker, daemon=True).start()
 
     try:
