@@ -18,12 +18,13 @@ echo "  2) IMX219 (Requires specific config)"
 read -p "Enter choice (1 or 2): " CAMERA_CHOICE
 
 echo ""
-echo "--- 2. LiveKit Configuration ---"
-read -p "Enter LIVEKIT_URL (e.g. wss://your-project.livekit.cloud): " LK_URL
-read -p "Enter LIVEKIT_API_KEY: " LK_KEY
-read -p "Enter LIVEKIT_API_SECRET: " LK_SECRET
-read -p "Enter LIVEKIT_ROOM (default: helmet-live): " LK_ROOM
-LK_ROOM=${LK_ROOM:-helmet-live}
+echo "--- 2. Environment Variables ---"
+echo "Setting up LiveKit and Github credentials..."
+LK_URL="wss://streaming-rpi-2jtqu2qo.livekit.cloud"
+LK_KEY="APIA9ZvbR8nPx9p"
+LK_SECRET="Eg0Z0JTjwZlo1fYZb8OEe8O8pWQ4HHNEQHiQbM6MfRgB"
+LK_ROOM="helmet-live"
+GITHUB_PAT="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"
 
 echo ""
 echo "Starting automated installation... This will take a few minutes."
@@ -38,8 +39,6 @@ sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev f
 echo "[2/7] Cloning repository..."
 mkdir -p ~/Desktop/Projects/Streaming-Rpi
 cd ~/Desktop/Projects/Streaming-Rpi
-
-read -p "Enter GitHub Personal Access Token (PAT) to clone repository: " GITHUB_PAT
 
 # We use the PAT to clone without prompting for passwords
 if [ ! -d "hm_releases" ]; then

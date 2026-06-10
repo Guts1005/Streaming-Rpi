@@ -118,6 +118,45 @@ pip install -r requirements-host.txt
 python tools/host_mjpeg_viewer.py --url http://<pi-ip>:5001/video_feed
 ```
 
+## LiveKit Two-Way Audio
+
+The Vercel dashboard uses toggle talk to publish the viewer microphone into the
+LiveKit room. The Pi audio bridge also publishes the Pi USB/default microphone
+to LiveKit and plays remote browser audio through the Pi default speaker.
+
+Pi setup:
+
+```bash
+sudo apt update
+sudo apt install -y portaudio19-dev
+source venv/bin/activate
+pip install -r requirements-livekit-audio.txt
+```
+
+Create `.env` in the repo on the Pi:
+
+```env
+LIVEKIT_URL=wss://streaming-rpi-2jtqu2qo.livekit.cloud
+LIVEKIT_TOKEN_URL=https://helmet-live-viewer.vercel.app/api/token
+LIVEKIT_ROOM=helmet-live
+```
+
+Run manually:
+
+```bash
+python tools/livekit_audio_bridge.py
+```
+
+Optional boot service:
+
+```bash
+sudo systemctl disable --now livekit-audio-receiver 2>/dev/null || true
+sudo cp tools/livekit-audio-bridge.service /etc/systemd/system/livekit-audio-bridge.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now livekit-audio-bridge
+journalctl -u livekit-audio-bridge -f
+```
+
 ### Controls
 - **REC VIDEO** - Start recording
 - **STOP** - Stop recording

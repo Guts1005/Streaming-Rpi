@@ -1,107 +1,287 @@
 {
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\generate_certs.sh": {
-    "mtime": 1770830276.0,
-    "ast_hash": "556f348f5ddf352844b0bdbf2d53c32e",
+    "mtime": 1780477236.80396,
+    "ast_hash": "ce23ae88d312ccd5ab6a8d5d85e22f7d",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\init.py": {
-    "mtime": 1779739621.5986862,
-    "ast_hash": "608c4b2b2cdc0d19dfff0f0fe0ac470c",
+    "mtime": 1780485000.4311512,
+    "ast_hash": "d09ec86a3bcfcb144291036ce37dc03e",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\main.py": {
-    "mtime": 1770830276.0,
+    "mtime": 1780477236.8109586,
     "ast_hash": "f31a6ed98362a844dab5ed94828ab434",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\uploader.py": {
-    "mtime": 1770830276.0,
-    "ast_hash": "d180828ae4c98dece9a0838e65e6905c",
+    "mtime": 1780477236.8159604,
+    "ast_hash": "2a4ef1e7fda7b220389ae60b2b5357f0",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tests\\test_uploader.py": {
-    "mtime": 1779739735.6363974,
-    "ast_hash": "6edcfc4e67a47239ebe06dedc082ddfa",
+    "mtime": 1780477236.8129604,
+    "ast_hash": "8a19d360e11b4875e8677ed02f289fed",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\camera.py": {
-    "mtime": 1770830276.0,
-    "ast_hash": "e16b4376fd594455ee5c1c3da2aee8d9",
+    "mtime": 1780477236.7919612,
+    "ast_hash": "196fe4ea1aa4c2913bf4e1dd97599871",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\gpio_handler.py": {
-    "mtime": 1770830276.0,
-    "ast_hash": "e5b1e1f2017c7828dad742c97cf7f0c6",
+    "mtime": 1780477236.7919612,
+    "ast_hash": "65b2b8f0c8572ff4d5c8fd3dc8f813d0",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\merger.py": {
-    "mtime": 1770830276.0,
-    "ast_hash": "8226fd13efdc0c04e5099fd2f7dc0bc4",
+    "mtime": 1780477236.7929614,
+    "ast_hash": "93ab7534798377eac4b6b39d42b44046",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\recorder.py": {
-    "mtime": 1770830276.0,
-    "ast_hash": "0ae98c9535133e905c8c3a8e0fde6299",
+    "mtime": 1780477236.7929614,
+    "ast_hash": "c56c69911c1383228f99edfe8aabd422",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\Unused\\utils.py": {
-    "mtime": 1770830276.0,
-    "ast_hash": "b1f4266cfe8a3aa8ad6b6f74fbf6e33b",
+    "mtime": 1780477236.7929614,
+    "ast_hash": "33e0447c0418f9e08b88e1b529701b31",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\README.md": {
-    "mtime": 1779708019.2622583,
-    "ast_hash": "b620c4ffd6d1451c594600cd9b28b0f7",
+    "mtime": 1780481107.4542353,
+    "ast_hash": "38ce9fc3086e4a4ad7972bd2dfbf25c2",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\templates\\index.html": {
-    "mtime": 1770830276.0,
-    "ast_hash": "75298dc3ba32cdf578c29f5742e30be6",
+    "mtime": 1780477236.811961,
+    "ast_hash": "ccf25315ccc97f8097ef5ec9cbc0bf3c",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tests\\test_v1_static.py": {
-    "mtime": 1779739705.7070022,
-    "ast_hash": "59b60d5d3993f354236ba596901b21c8",
+    "mtime": 1780477236.8129604,
+    "ast_hash": "0c394258281624d697901eb934fa3462",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\host_mjpeg_viewer.py": {
-    "mtime": 1779707977.1117022,
-    "ast_hash": "00d23acb66b92ecbb408667d0237ff2c",
+    "mtime": 1780477236.8139594,
+    "ast_hash": "f4146aa48b1299cd9143f1a57fe6d539",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\pi_smoke_check.py": {
-    "mtime": 1779739664.4120417,
-    "ast_hash": "923e3f73b91146c65b77f77357e1f4e4",
+    "mtime": 1780477236.8139594,
+    "ast_hash": "6ae1163a8647adfc456ce3337113da20",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\start_rtsp_stream.sh": {
-    "mtime": 1779707986.277534,
-    "ast_hash": "ccce992cb6c2e5ed0ac95e00d8ef313a",
+    "mtime": 1780477236.81496,
+    "ast_hash": "c7eb70b623bd960c74be52a539aba32c",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\requirements-host.txt": {
-    "mtime": 1779707991.4118433,
-    "ast_hash": "72de0e59aac3bcba0be525b3bbe87296",
+    "mtime": 1780477236.8109586,
+    "ast_hash": "f54cf0d3599003ae82436bceb9578579",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\requirements.txt": {
-    "mtime": 1779707989.175778,
-    "ast_hash": "b5b7a524a4db09e71f4fad7abd6639bc",
+    "mtime": 1780477236.811961,
+    "ast_hash": "969d4c8854c2e1465c32e039011c6ca6",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\TEAM_INTERFACE_HANDOFF.md": {
-    "mtime": 1779736493.1899533,
-    "ast_hash": "d2d6231f8a5fed6121c28892d0f51fae",
+    "mtime": 1780477236.790961,
+    "ast_hash": "facccbc35a83424a268f32672480dce7",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\V1_PROGRESS.md": {
-    "mtime": 1779739760.6634738,
-    "ast_hash": "77e5a649fc1024938b9b5ecbf5e39e42",
+    "mtime": 1780477236.79396,
+    "ast_hash": "b1e6abcdfd879093dc9f5fd7c7e922df",
     "semantic_hash": ""
   },
   "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\V1_STREAMING_PLAN.md": {
-    "mtime": 1779739748.3285136,
-    "ast_hash": "6181e979c8494fd32cf67e124ec06d62",
+    "mtime": 1780477236.79396,
+    "ast_hash": "3ca2594df5bbf20e7c0e5c3e6ed4840b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\app\\api\\device\\[...path]\\route.ts": {
+    "mtime": 1780477236.7959588,
+    "ast_hash": "c37d39ab0b5e17bfca8441dd80b2f29b",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\app\\api\\token\\route.ts": {
+    "mtime": 1780477236.7969594,
+    "ast_hash": "ba38d2168d15633749aa54e66dc032ba",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\app\\layout.tsx": {
+    "mtime": 1780477236.7979586,
+    "ast_hash": "613410d7dfb38ce82e97664ddc2c1c9a",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\app\\page.tsx": {
+    "mtime": 1780485310.2818408,
+    "ast_hash": "1619c3a6b58cec287f6e2dd732c5543e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\eslint.config.mjs": {
+    "mtime": 1780477236.7999592,
+    "ast_hash": "6c4307ffa009658f5c97f5629094c0c2",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\next-env.d.ts": {
+    "mtime": 1780477236.7999592,
+    "ast_hash": "b698cdd97fe8e3bd16dcd74899ad7cef",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\next.config.ts": {
+    "mtime": 1780477236.7999592,
+    "ast_hash": "d01996e559b54c2ce92b99cbd8ddf496",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\package.json": {
+    "mtime": 1780477236.801958,
+    "ast_hash": "007310390b79871c4ae9bca68c4f05b9",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\tsconfig.json": {
+    "mtime": 1780477236.80396,
+    "ast_hash": "ab575e944f15d39a5486cf9fca385c5e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\.vercel\\project.json": {
+    "mtime": 1779915397.543491,
+    "ast_hash": "d6d3d02c70b3974b111d99fa4ee3a98e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\app\\api\\token\\route.ts": {
+    "mtime": 1779915928.1140006,
+    "ast_hash": "747e158de45a621a1e4eb7c797d277b1",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\app\\layout.tsx": {
+    "mtime": 1779915932.98771,
+    "ast_hash": "42c63afa152cf7b484928ce3cfd2f322",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\app\\page.tsx": {
+    "mtime": 1779916358.582749,
+    "ast_hash": "2d8995e7273af3b2b39b54a61068fd78",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\eslint.config.mjs": {
+    "mtime": 1779365071.1431067,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\next-env.d.ts": {
+    "mtime": 1779915958.669719,
+    "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\next.config.ts": {
+    "mtime": 1779365071.1889844,
+    "ast_hash": "9b77af189a21a7a64e4bd7a426f64176",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\package.json": {
+    "mtime": 1779914817.2325113,
+    "ast_hash": "ca7425918a0bfdfa07ec21ea1f970dad",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\tsconfig.json": {
+    "mtime": 1779914208.6620347,
+    "ast_hash": "02fc19ad21338c2ab820a70136310db4",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\ingress.json": {
+    "mtime": 1779911633.0941708,
+    "ast_hash": "3a9c0c054ee0bbf4f2a58d9a86d2e9f3",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\tools\\livekit_audio_receiver.py": {
+    "mtime": 1780480922.0332851,
+    "ast_hash": "c32e42746faf79c1dad7e49fdd197272",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\updater.sh": {
+    "mtime": 1779792998.0627198,
+    "ast_hash": "e125243ac6845ab32b36c82562c642f3",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\CODEX_DEPLOYMENT_HANDOFF.md": {
+    "mtime": 1780477236.7899592,
+    "ast_hash": "f5728e7ac89d76873ba658ef744bcaaf",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\README.md": {
+    "mtime": 1780477236.7949598,
+    "ast_hash": "9162add00befbcdb432430f405c4ad8d",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\.vercel\\README.txt": {
+    "mtime": 1779915397.5444908,
+    "ast_hash": "2b13c79d37d6ed82a3255b83b6815034",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\README.md": {
+    "mtime": 1779365071.1321363,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\requirements-livekit-audio.txt": {
+    "mtime": 1780480929.2797592,
+    "ast_hash": "296b6704d48556237b5c5096775d0348",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\public\\file.svg": {
+    "mtime": 1780477236.801958,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\public\\globe.svg": {
+    "mtime": 1780477236.8029592,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\public\\next.svg": {
+    "mtime": 1780477236.8029592,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\public\\vercel.svg": {
+    "mtime": 1780477236.80396,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\dpl_Dqc7MDHow7vJNqeHc9swyHasAPqR\\src\\public\\window.svg": {
+    "mtime": 1780477236.80396,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\public\\file.svg": {
+    "mtime": 1779365071.159064,
+    "ast_hash": "d09f95206c3fa0bb9bd9fefabfd0ea71",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\public\\globe.svg": {
+    "mtime": 1779365071.1650486,
+    "ast_hash": "2aaafa6a49b6563925fe440891e32717",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\public\\next.svg": {
+    "mtime": 1779365071.170035,
+    "ast_hash": "8e061864f388b47f33a1c3780831193e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\public\\vercel.svg": {
+    "mtime": 1779365071.1750221,
+    "ast_hash": "c0af2f507b369b085b35ef4bbe3bcf1e",
+    "semantic_hash": ""
+  },
+  "C:\\Users\\sharv\\Downloads\\hm_releases-main-latest\\hm_releases-main\\helmet-live-viewer\\public\\window.svg": {
+    "mtime": 1779365071.1790109,
+    "ast_hash": "a2760511c65806022ad20adf74370ff3",
     "semantic_hash": ""
   }
 }
