@@ -1,0 +1,17 @@
+[Unit]
+Description=Smart Helmet WiFi QR Connect
+After=local-fs.target
+Before=livekit-publisher.service gpio-offline-capture.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases
+Environment=GPIO_STREAM_LED=22
+Environment=GPIO_RECORD_LED=23
+Environment=WIFI_QR_SCAN_SECONDS=180
+ExecStart=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/venv/bin/python tools/wifi_qr_connect.py
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
