@@ -57,11 +57,10 @@ LIVEKIT_ROOM=$LK_ROOM
 EOF
 
 # 5. File permissions
-echo "[4/7] Setting file permissions..."
-chmod +x updater.sh
-chmod +x generate_certs.sh || true
-chmod +x tools/start_rtsp_stream.sh || true
-chmod +x tools/publish_livekit.sh || true
+# 5. Fix permissions and Windows line endings
+echo "[4/7] Fixing file permissions and line endings..."
+sed -i 's/\r$//' *.sh tools/*.sh 2>/dev/null || true
+chmod +x *.sh tools/*.sh
 
 # 6. Virtual Environment & PIP
 echo "[5/7] Setting up Python virtual environment..."
