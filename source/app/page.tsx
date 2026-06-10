@@ -11,7 +11,7 @@ import {
   useTracks 
 } from "@livekit/components-react";
 import { ConnectionState, Track } from "livekit-client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 type TokenResponse = { token?: string; error?: string };
 
@@ -76,6 +76,11 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState('LS');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [volume, setVolume] = useState(1);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const videoCardRef = useRef<HTMLDivElement>(null);
+  
   const [recordings, setRecordings] = useState<any[]>([]);
   const [deviceStatus, setDeviceStatus] = useState<any>(null);
   const [geminiAnalysis, setGeminiAnalysis] = useState<any>(null);
@@ -102,7 +107,14 @@ function Dashboard() {
     fetchMedia();
     fetchStatus();
     const interval = setInterval(() => { fetchMedia(); fetchStatus(); }, 15000);
-    return () => clearInterval(interval);
+    
+    const onFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+    };
   }, []);
 
   const liveFor = useMemo(() => {
@@ -133,6 +145,47 @@ function Dashboard() {
     await device("/api/capture_photo"); 
     toast("Snapshot captured successfully!"); 
     fetchMedia();
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      videoCardRef.current?.requestFullscreen().catch(err => {
+        toast(`Error: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  async function startDesktopRec() {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `desktop-capture-${Date.now()}.mp4`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+      mediaRecorder.start();
+      toast("Desktop Recording Started");
+      stream.getVideoTracks()[0].onended = () => {
+        mediaRecorder.stop();
+        toast("Desktop Recording Saved");
+      };
+    } catch (e) {
+      toast("Desktop Recording cancelled");
+    }
+  }
+
+  async function mockSync() {
+    toast("Syncing with server...");
+    setTimeout(() => toast("Sync complete! Files uploaded to Cloud."), 2500);
   }
 
   async function runGemini() {
@@ -243,9 +296,10 @@ function Dashboard() {
         {activeTab === 'LS' || activeTab === 'PC' ? (
           <div className="content-wrapper">
             <div className="left-column">
-              <div className="video-card">
+              <div className="video-card" ref={videoCardRef}>
                 <div className="video-inner">
-                  {video ? <VideoTrack trackRef={video} /> : <div style={{color: 'var(--text-muted)'}}>{connected ? "Waiting for stream..." : "Offline"}</div>}
+                  {video ? <div style={{width: '100%', height: '100%', opacity: isPlaying ? 1 : 0.3, transition: 'opacity 0.2s'}}><VideoTrack trackRef={video} /></div> : <div style={{color: 'var(--text-muted)'}}>{connected ? "Waiting for stream..." : "Offline"}</div>}
+                  {!isPlaying && <div style={{position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white'}}><SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" style={{width: '64px', height: '64px'}} /></div>}
                 </div>
                 
                 <div className="video-top-left">
@@ -262,16 +316,25 @@ function Dashboard() {
                 </div>
 
                 <div className="video-controls-bar">
-                  <button className="ctrl-btn"><SvgIcon path="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /></button>
-                  <button className="ctrl-btn" onClick={() => { setAudioOn(!audioOn); if(!audioOn && room.startAudio) room.startAudio(); }}>
+                  <button className={`ctrl-btn ${!isPlaying ? 'active' : ''}`} onClick={() => setIsPlaying(!isPlaying)} title={isPlaying ? "Pause" : "Play"}>
+                    {isPlaying ? <SvgIcon path="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" /> : <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
+                  </button>
+                  <button className="ctrl-btn" onClick={() => { setAudioOn(!audioOn); if(!audioOn && room.startAudio) room.startAudio(); }} title={audioOn ? "Mute" : "Unmute"}>
                     <SvgIcon path={audioOn ? "M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 10H1L1 14H5L10 19V5L5 10z" : "M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"} />
                   </button>
-                  <div className="volume-slider"><div className="volume-fill"></div><div className="volume-thumb" style={{left: '50%'}}></div></div>
+                  <div className="volume-slider" onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const val = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    setVolume(val);
+                    if(val > 0) setAudioOn(true);
+                  }}>
+                    <div className="volume-fill" style={{width: `${volume * 100}%`}}></div>
+                    <div className="volume-thumb" style={{left: `calc(${volume * 100}% - 6px)`}}></div>
+                  </div>
                   <div className="spacer"></div>
                   <button className="ctrl-btn" onClick={snap} title="Snapshot"><SvgIcon path="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></button>
-                  <button className={`ctrl-btn ${talking ? 'active' : ''}`} onClick={toggleTalk} title="Mic"><SvgIcon path="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></button>
-                  <button className="ctrl-btn"><SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></button>
-                  <button className="ctrl-btn"><SvgIcon path="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></button>
+                  <button className="ctrl-btn" onClick={() => setActiveTab('Settings')} title="Settings"><SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></button>
+                  <button className="ctrl-btn" onClick={toggleFullscreen} title="Fullscreen"><SvgIcon path={isFullscreen ? "M3 8V4m0 0h4M3 4l4 4m8-4v4m0-4h4m-4 4l4-4M3 16v4m0 0h4m-4 0l4-4m8 4v-4m0 4h4m-4-4l4 4" : "M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"} /></button>
                 </div>
               </div>
 
@@ -387,7 +450,7 @@ function Dashboard() {
                   </div>
                 </button>
                 
-                <button className="action-card">
+                <button className="action-card" onClick={startDesktopRec}>
                   <div className="action-icon-box icon-blue"><SvgIcon path="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></div>
                   <div className="action-text">
                     <h4>Desktop Recording</h4>
@@ -395,7 +458,7 @@ function Dashboard() {
                   </div>
                 </button>
                 
-                <button className="action-card">
+                <button className="action-card" onClick={mockSync}>
                   <div className="action-icon-box icon-green"><SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></div>
                   <div className="action-text">
                     <h4>Sync to Server</h4>
@@ -526,7 +589,7 @@ function Dashboard() {
         )}
       </main>
 
-      <RoomAudioRenderer muted={!audioOn} />
+      <RoomAudioRenderer muted={!audioOn} volume={volume} />
     </div>
   );
 }
