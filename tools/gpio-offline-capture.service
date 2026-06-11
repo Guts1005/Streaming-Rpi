@@ -7,10 +7,10 @@ Wants=wifi-qr-connect.service
 Type=simple
 User=root
 WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases
-Environment=GPIO_RECORD_BUTTON=17
-Environment=GPIO_PHOTO_BUTTON=27
-Environment=GPIO_STREAM_LED=22
-Environment=GPIO_RECORD_LED=23
+Environment=GPIO_RECORD_BUTTON=6
+Environment=GPIO_PHOTO_BUTTON=13
+Environment=GPIO_STREAM_LED=19
+Environment=GPIO_RECORD_LED=26
 Environment=USB_MIC_DEVICE=hw:3,0
 ExecStart=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/venv/bin/python tools/gpio_offline_capture.py
 Restart=always
