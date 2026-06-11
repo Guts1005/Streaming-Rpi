@@ -145,7 +145,7 @@ After=network.target smart-helmet-backend.service
 [Service]
 Type=simple
 User=$USER
-ExecStart=/usr/bin/ngrok http --domain=$NGROK_DOMAIN 5001
+ExecStart=/usr/bin/ngrok http --domain=$NGROK_DOMAIN --config=/home/$USER/.config/ngrok/ngrok.yml 5001
 Restart=always
 RestartSec=5
 
