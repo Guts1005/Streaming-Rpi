@@ -43,6 +43,9 @@ function Dashboard() {
   const [analyzing, setAnalyzing] = useState(false);
   const [geminiAnalysis, setGeminiAnalysis] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('LS');
+  const [selectedMedia, setSelectedMedia] = useState<any>(null);
+  const [showGallery, setShowGallery] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   const connected = state === ConnectionState.Connected;
   const isRecordingLocal = deviceStatus?.is_recording || false;
@@ -58,7 +61,8 @@ function Dashboard() {
     try {
       const res = await device("/api/list_media");
       if (res.ok) setRecordings(await res.json());
-    } catch (e) {}
+      else toast("Failed to fetch media list");
+    } catch (e) { toast("Failed to fetch media list"); }
   };
 
   useEffect(() => {
@@ -84,8 +88,17 @@ function Dashboard() {
     } catch (e) { toast(`Mic failed: ${(e as Error).message}`); } 
   }
 
-  async function startRec() { await device("/api/start_record"); toast("Local Recording Started"); fetchStatus(); }
-  async function stopRec() { await device("/api/stop_record", { method: "POST" }); toast("Local Recording Stopped"); fetchStatus(); fetchMedia(); }
+  async function startRec() { 
+    toast("Live stream paused for recording...");
+    await device("/api/start_record"); 
+    fetchStatus(); 
+  }
+  async function stopRec() { 
+    toast("Resuming live stream...");
+    await device("/api/stop_record", { method: "POST" }); 
+    fetchStatus(); 
+    setTimeout(fetchMedia, 2500); 
+  }
   async function snap() { toast("Capturing snapshot..."); await device("/api/capture_photo"); toast("Snapshot captured successfully!"); fetchMedia(); }
   
   async function startDesktopRec() {
@@ -206,7 +219,7 @@ function Dashboard() {
           <div className="left-col">
             <div className="video-card">
               <div className="video-frame">
-                {video ? <div style={{width: '100%', height: '100%', opacity: isPlaying ? 1 : 0.3}}><VideoTrack trackRef={video} /></div> : <div style={{color: 'var(--text-muted)', textAlign: 'center', paddingTop: '20%'}}>Waiting for LiveKit video stream...</div>}
+                {video ? <div style={{width: '100%', height: '100%', opacity: (isPlaying && !isRecordingLocal) ? 1 : 0.3}}><VideoTrack trackRef={video} /></div> : <div style={{color: 'var(--text-muted)', textAlign: 'center', paddingTop: '20%'}}>Waiting for LiveKit video stream...</div>}
                 
                 <div className="video-badges">
                   <div className="badge-group">
@@ -315,7 +328,10 @@ function Dashboard() {
                 <h3 className="section-title">Quick Actions</h3>
                 <div className="quick-actions">
                   <button className={`action-btn ${isRecordingLocal ? 'active' : ''}`} onClick={isRecordingLocal ? stopRec : startRec}>
-                    <div className="action-icon c-red"><SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" /></div>
+                    <div className="action-icon c-red" style={{position: 'relative'}}>
+                      <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" />
+                      {isRecordingLocal && <div style={{position: 'absolute', top: -2, right: -2, width: 8, height: 8, background: 'red', borderRadius: '50%', boxShadow: '0 0 8px red'}}></div>}
+                    </div>
                     <div><h4>Local Recording</h4><p>{isRecordingLocal ? 'Stop Recording' : 'Start Recording'}</p></div>
                   </button>
                   <button className="action-btn" onClick={startDesktopRec}>
@@ -351,7 +367,7 @@ function Dashboard() {
               <h3 className="section-title">Recent Recordings</h3>
               <div className="recordings-list">
                 {recordings.length > 0 ? recordings.slice(0, 3).map((item, idx) => (
-                  <div key={idx} className="rec-item">
+                  <div key={idx} className="rec-item" onClick={() => { setSelectedMedia(item); setVideoError(false); }} style={{cursor: 'pointer'}}>
                     <div className="rec-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`, backgroundSize: 'cover'} : {}}>
                       {item.type === 'video' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" style={{width: '16px', height: '16px'}} />}
                     </div>
@@ -364,7 +380,7 @@ function Dashboard() {
                   <div style={{textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: '12px'}}>No recordings found</div>
                 )}
               </div>
-              <button className="btn-outline">View All Media</button>
+              <button className="btn-outline" onClick={() => setShowGallery(true)}>View All Media</button>
             </div>
 
             <div style={{background: 'var(--bg-panel)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)'}}>
@@ -392,6 +408,83 @@ function Dashboard() {
           </div>
         </div>
       </main>
+
+      {/* Video Player Modal */}
+      {selectedMedia && (
+        <div className="modal-backdrop" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => setSelectedMedia(null)}>
+          <div className="modal-content" style={{background: 'var(--bg-panel)', padding: '20px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', width: '80%', maxWidth: '900px'}} onClick={e => e.stopPropagation()}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '16px'}}>
+              <h3 style={{margin: 0}}>{selectedMedia.name}</h3>
+              <button onClick={() => setSelectedMedia(null)} style={{background: 'none', border: 'none', color: '#fff', cursor: 'pointer'}}><SvgIcon path="M6 18L18 6M6 6l12 12" style={{width: '24px', height: '24px'}} /></button>
+            </div>
+            {selectedMedia.type === 'video' ? (
+              <div style={{width: '100%', background: '#000', borderRadius: 'var(--radius-md)', overflow: 'hidden'}}>
+                {videoError ? (
+                  <div style={{padding: '40px', textAlign: 'center', color: '#ff4444'}}>
+                    <p>Error loading video stream.</p>
+                  </div>
+                ) : (
+                  <video 
+                    controls 
+                    autoPlay 
+                    style={{width: '100%', maxHeight: '60vh'}} 
+                    src={`/api/device/data/${selectedMedia.name}`}
+                    onError={() => setVideoError(true)}
+                  />
+                )}
+              </div>
+            ) : (
+              <div style={{width: '100%', textAlign: 'center'}}>
+                <img src={`/api/device/data/${selectedMedia.name}`} style={{maxWidth: '100%', maxHeight: '60vh', borderRadius: 'var(--radius-md)'}} alt="Snapshot" />
+              </div>
+            )}
+            <div style={{marginTop: '16px', display: 'flex', justifyContent: 'flex-end'}}>
+              <a href={`/api/device/download/${selectedMedia.name}`} target="_blank" rel="noopener noreferrer" style={{color: '#3B82F6', textDecoration: 'none', fontSize: '14px'}}>
+                Download instead
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Modal */}
+      {showGallery && (
+        <div className="modal-backdrop" style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center'}} onClick={() => setShowGallery(false)}>
+          <div className="modal-content" style={{background: 'var(--bg-panel)', padding: '24px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', width: '90%', maxWidth: '1000px', maxHeight: '80vh', overflowY: 'auto'}} onClick={e => e.stopPropagation()}>
+            <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '24px'}}>
+              <h2 style={{margin: 0}}>All Media</h2>
+              <button onClick={() => setShowGallery(false)} style={{background: 'none', border: 'none', color: '#fff', cursor: 'pointer'}}><SvgIcon path="M6 18L18 6M6 6l12 12" style={{width: '24px', height: '24px'}} /></button>
+            </div>
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '16px'}}>
+              {recordings.map((item, idx) => (
+                <div key={idx} style={{background: 'var(--bg-sidebar)', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border-color)'}}>
+                  <div 
+                    style={{
+                      height: '120px', 
+                      background: item.type === 'image' ? `url(/api/device/data/${item.name}) center/cover` : '#000',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => { setShowGallery(false); setSelectedMedia(item); setVideoError(false); }}
+                  >
+                    {item.type === 'video' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" style={{width: '32px', height: '32px', color: '#fff'}} />}
+                  </div>
+                  <div style={{padding: '12px'}}>
+                    <h5 style={{margin: '0 0 4px', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}} title={item.name}>{item.name}</h5>
+                    <p style={{margin: 0, fontSize: '11px', color: 'var(--text-muted)'}}>{item.size} MB</p>
+                    <div style={{marginTop: '8px', display: 'flex', gap: '8px'}}>
+                      <button onClick={() => { setShowGallery(false); setSelectedMedia(item); setVideoError(false); }} style={{flex: 1, padding: '4px', background: '#1D4ED8', border: 'none', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '11px'}}>Play</button>
+                      <button onClick={() => window.open(`/api/device/download/${item.name}`, '_blank')} style={{flex: 1, padding: '4px', background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '11px'}}>Save</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <RoomAudioRenderer muted={!audioOn} volume={1} />
     </div>
