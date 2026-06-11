@@ -19,13 +19,10 @@ read -p "Enter choice (1 or 2): " CAMERA_CHOICE
 
 echo ""
 echo "--- 2. Ngrok Configuration ---"
-echo "Do you want to configure Ngrok for remote dashboard access? (y/n)"
-read -p "Enter choice: " NGROK_CHOICE
-
-if [ "$NGROK_CHOICE" == "y" ]; then
-    read -p "Enter your Ngrok Auth Token: " NGROK_TOKEN
-    read -p "Enter your static Ngrok domain (e.g. unwell-creamer-anytime.ngrok-free.dev): " NGROK_DOMAIN
-fi
+echo "Ngrok Auth Token and Domain automatically injected."
+NGROK_CHOICE="y"
+NGROK_TOKEN="3F0EsMSM4jMAntOrXYlKSkBi4Vn_47Fpv8Sc1TeMqWCNBpppg"
+NGROK_DOMAIN="unwell-creamer-anytime.ngrok-free.dev"
 
 echo ""
 echo "--- 3. Environment Variables ---"
