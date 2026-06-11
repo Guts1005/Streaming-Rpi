@@ -813,7 +813,7 @@ def livekit_audio_status():
 
 record_proc = None
 
-@app.route('/api/start_record')
+@app.route('/api/start_record', methods=['GET', 'POST'])
 def start_record():
     global record_proc, is_recording_active
     if not is_recording_active:
@@ -850,7 +850,7 @@ def toggle_audio():
     audio_enabled = data.get('enabled', True)
     return jsonify({"success": True, "audio_enabled": audio_enabled})
 
-@app.route('/api/capture_photo')
+@app.route('/api/capture_photo', methods=['GET', 'POST'])
 def capture_photo():
     import subprocess
     was_streaming = subprocess.run(["systemctl", "is-active", "--quiet", "livekit-publisher.service"]).returncode == 0
@@ -1534,7 +1534,7 @@ def ai_summary():
     except Exception as e:
         return jsonify({"error": str(e)})
 
-@app.route('/api/gemini_analyze')
+@app.route('/api/gemini_analyze', methods=['GET', 'POST'])
 def gemini_analyze():
     if not GEMINI_API_KEY:
         return jsonify({"error": "Gemini API Key not configured on Pi"}), 500
