@@ -824,10 +824,11 @@ def start_record():
             time.sleep(1.5)
             os.makedirs(RECORD_FOLDER, exist_ok=True)
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            path_h264 = os.path.join(RECORD_FOLDER, f"video_{ts}_raw.h264")
-            path_mp4 = os.path.join(RECORD_FOLDER, f"video_{ts}_chunk000.mp4")
+            abs_record_folder = os.path.abspath(RECORD_FOLDER)
+            path_h264 = os.path.join(abs_record_folder, f"video_{ts}_raw.h264")
+            path_mp4 = os.path.join(abs_record_folder, f"video_{ts}_chunk000.mp4")
             # Save raw h264 directly to disk with logging
-            cmd = f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o '{path_h264}' > '{os.path.join(RECORD_FOLDER, 'camera.log')}' 2>&1"
+            cmd = f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o '{path_h264}' > '{os.path.join(abs_record_folder, 'camera.log')}' 2>&1"
             record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
             # Store paths globally so stop_record can convert it
             global current_record_h264, current_record_mp4
