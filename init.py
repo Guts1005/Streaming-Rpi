@@ -823,6 +823,7 @@ def start_record():
             subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
             time.sleep(1.5)
             os.makedirs(RECORD_FOLDER, exist_ok=True)
+            subprocess.run(["sudo", "chmod", "777", RECORD_FOLDER], check=False)
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             abs_record_folder = os.path.abspath(RECORD_FOLDER)
             path_h264 = os.path.join(abs_record_folder, f"video_{ts}_raw.h264")
