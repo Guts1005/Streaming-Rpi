@@ -10,6 +10,7 @@ This repository is the working base for the Smart Helmet / Raspberry Pi streamin
 - Keep explanations short unless the user explicitly asks for detail.
 - Do not make broad refactors during urgent demo/deployment work.
 - Before committing, ask the user.
+- **CRITICAL NEW RULE**: Every time you start working or making a change, FIRST pull everything (`git pull`) to check for changes and get the latest files.
 - Do not expose or hard-code secrets in committed files.
 
 ## Project Context
@@ -22,7 +23,7 @@ This repository is the working base for the Smart Helmet / Raspberry Pi streamin
 - Pi tools/services: `tools/`
 - Production viewer: `https://helmet-live-viewer.vercel.app/`
 - Raspberry Pi repo path: `/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases`
-- Raspberry Pi LAN IP used during development: `192.168.0.138`
+- Raspberry Pi LAN IP used during development: `192.168.0.240`
 
 Do not assume these are still current if the user says the Pi/network changed. Verify before deployment.
 
@@ -53,17 +54,18 @@ systemctl is-active livekit-publisher livekit-audio-bridge gpio-offline-capture 
 
 ## GPIO Defaults
 
-- `GPIO17`: local recording start/stop button
-- `GPIO27`: image capture button
-- `GPIO22`: stream/WiFi scan status LED
-- `GPIO23`: local recording/photo LED
+- `GPIO6`: local recording start/stop button (Physical Pin 31)
+- `GPIO13`: image capture button (Physical Pin 33)
+- `GPIO19`: stream/WiFi scan status LED (Physical Pin 35)
+- `GPIO26`: local recording/photo LED (Physical Pin 37)
+- `GND`: Ground pin available at Physical Pin 39
 
 Behavior:
 
-- `GPIO22` blinks during WiFi QR scan.
-- `GPIO22` stays ON when streaming/connected status is active.
-- `GPIO23` stays ON during local recording.
-- `GPIO23` blinks once on image capture.
+- `GPIO19` blinks during WiFi QR scan.
+- `GPIO19` stays ON when streaming/connected status is active.
+- `GPIO26` stays ON during local recording.
+- `GPIO26` blinks once on image capture.
 - Local recording may stop LiveKit streaming temporarily because the Pi camera cannot be owned by two processes at the same time.
 
 ## WiFi / Offline Flow

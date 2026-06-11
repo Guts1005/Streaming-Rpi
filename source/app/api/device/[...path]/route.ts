@@ -32,16 +32,27 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   if (contentType) headers.set("content-type", contentType);
   if (accept) headers.set("accept", accept);
   if (range) headers.set("range", range);
+  
+  // Bypass ngrok browser warning screen for API proxy requests
+  headers.set("ngrok-skip-browser-warning", "1");
 
   const method = request.method.toUpperCase();
   const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
 
-  const upstream = await fetch(targetUrl, {
-    method,
-    headers,
-    body,
-    cache: "no-store",
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(targetUrl, {
+      method,
+      headers,
+      body,
+      cache: "no-store",
+    });
+  } catch (err: any) {
+    return Response.json(
+      { error: `Could not reach device at ${base}: ${err.message}` },
+      { status: 502 },
+    );
+  }
 
   const responseHeaders = new Headers();
   for (const key of ["content-type", "content-disposition", "cache-control", "accept-ranges", "content-range", "content-length"]) {

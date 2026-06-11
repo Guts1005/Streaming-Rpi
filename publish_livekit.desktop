@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=LiveKit Publisher
+Exec=lxterminal -e "/home/trc/publish_livekit.sh"
+Terminal=false
+Comment=Start LiveKit video publishing on boot
+X-GNOME-Autostart-enabled=true

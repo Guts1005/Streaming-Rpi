@@ -14,8 +14,8 @@ except Exception:
     LED = None
 
 
-STREAM_LED_PIN = int(os.getenv("GPIO_STREAM_LED", "22"))
-RECORD_LED_PIN = int(os.getenv("GPIO_RECORD_LED", "23"))
+STREAM_LED_PIN = int(os.getenv("GPIO_STREAM_LED", "19"))
+RECORD_LED_PIN = int(os.getenv("GPIO_RECORD_LED", "26"))
 SCAN_SECONDS = int(os.getenv("WIFI_QR_SCAN_SECONDS", "180"))
 SNAPSHOT = "/tmp/smart_helmet_wifi_qr.jpg"
 

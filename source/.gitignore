@@ -1,0 +1,9 @@
+.vercel
+.env*
+
+# Node
+node_modules/
+.next/
+build/
+dist/
+

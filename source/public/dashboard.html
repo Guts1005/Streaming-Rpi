@@ -1,0 +1,3095 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspire Smart Helmet</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
+    <style>
+        :root {
+            --bg: #060b14;
+            --bg2: #0b1424;
+            --panel: rgba(17, 27, 44, 0.78);
+            --panel2: rgba(22, 35, 57, 0.82);
+            --line: rgba(255, 255, 255, 0.09);
+            --line2: rgba(255, 255, 255, 0.16);
+            --text: #f7f9ff;
+            --muted: #8e9bb0;
+            --muted2: #bdc7d8;
+            --blue: #4c73ff;
+            --cyan: #22d3ee;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --purple: #8b5cf6;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+            --soft-shadow: 0 16px 44px rgba(0, 0, 0, 0.28);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; overflow-x: hidden; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(76, 115, 255, 0.14), transparent 34%),
+                radial-gradient(circle at bottom right, rgba(34, 211, 238, 0.08), transparent 30%),
+                var(--bg);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            letter-spacing: 0;
+            overflow-x: hidden;
+        }
+
+        button, input, select { font: inherit; }
+        button { border: 0; color: inherit; cursor: pointer; }
+        button:disabled { cursor: wait; opacity: 0.62; }
+        a { color: inherit; text-decoration: none; }
+
+        .app {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--line);
+            background: rgba(7, 13, 24, 0.92);
+            backdrop-filter: blur(18px);
+            padding: 22px 18px;
+            transition: transform 0.28s ease;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 90;
+            display: none;
+            background: rgba(0, 0, 0, 0.62);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.24s ease;
+        }
+
+        .hamburger {
+            display: none;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--panel);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            box-shadow: var(--soft-shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 46px;
+            margin-bottom: 28px;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .brand-mark {
+            position: relative;
+            width: 36px;
+            height: 36px;
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            border-radius: 50%;
+            flex: 0 0 auto;
+        }
+        .brand-mark::before,
+        .brand-mark::after {
+            content: "";
+            position: absolute;
+            height: 2px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.82);
+        }
+        .brand-mark::before { width: 21px; left: 6px; top: 15px; transform: rotate(18deg); }
+        .brand-mark::after { width: 12px; right: 5px; top: 22px; }
+
+        .nav { display: grid; gap: 8px; }
+        .nav-btn {
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr);
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            border-radius: 8px;
+            background: transparent;
+            padding: 10px 12px;
+            color: #dbe4f3;
+            text-align: left;
+            transition: transform 0.16s ease, background 0.16s ease;
+        }
+        .nav-btn:hover { background: rgba(255, 255, 255, 0.06); transform: translateX(2px); }
+        .nav-btn.active { background: linear-gradient(135deg, #3158ff, #4c77ff); color: #fff; }
+
+        .icon {
+            display: inline-grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--line2);
+            border-radius: 8px;
+            color: var(--muted2);
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .nav-btn.active .icon { border-color: rgba(255,255,255,0.42); color: #fff; }
+
+        .device-card {
+            margin-top: auto;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            padding: 15px;
+        }
+        .device-card h3 { margin: 0 0 12px; font-size: 13px; }
+        .mini-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 9px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+        .mini-row strong { color: #fff; font-weight: 800; text-align: right; overflow-wrap: anywhere; }
+        .bar {
+            overflow: hidden;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
+        }
+        .bar span {
+            display: block;
+            width: 24%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--blue), #8eb0ff);
+        }
+
+        .main { min-width: 0; }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 82px;
+            border-bottom: 1px solid var(--line);
+            background: rgba(7, 13, 24, 0.78);
+            backdrop-filter: blur(18px);
+            padding: 16px 24px;
+        }
+        .top-title { min-width: 0; }
+        h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+        .subtitle {
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+}
+        .top-actions { display: flex; align-items: center; gap: 12px; }
+        .circle {
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 50%;
+            background: var(--panel);
+            color: var(--muted2);
+            font-weight: 900;
+        }
+        .avatar {
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, #eef4ff, #c9d7ed);
+            color: #0b1424;
+            font-weight: 900;
+        }
+
+        .page { display: none; padding: 20px 24px 28px; }
+        .page.active { display: block; }
+
+        .monitor-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.55fr) minmax(380px, 0.95fr);
+            gap: 18px;
+        }
+        .left-stack, .right-stack { display: grid; gap: 16px; align-content: start; min-width: 0; }
+
+        .panel {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    box-shadow: 0 6px 18px rgba(0,0,0,.18);
+}
+        .panel-pad { padding: 14px; }
+        .panel-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .panel-title { margin: 0; font-size: 15px; font-weight: 900; }
+        .panel-sub { color: var(--muted); font-size: 12px; }
+
+        .stream-card { overflow: hidden; position: relative; background: #02050b; }
+        .stream-stage {
+    position: relative;
+    aspect-ratio: 16 / 8;
+    padding-bottom: 72px;
+    overflow: hidden;
+    background: #02050b;
+}
+        #videoFeed {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #02050b;
+        }
+        #streamCanvas { display: none; }
+        .overlay { position: absolute; inset: 0; pointer-events: none; }
+
+        .top-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .badge-row { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            min-height: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.58);
+            padding: 0px 10px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            backdrop-filter: blur(12px);
+        }
+        .badge.live { background: rgba(239, 68, 68, 0.9); border-color: rgba(255, 255, 255, 0.14); }
+        
+        .signal {
+            display: inline-grid;
+            grid-template-columns: repeat(4, 4px);
+            gap: 2px;
+            align-items: end;
+            height: 14px;
+        }
+        .signal i { display: block; width: 4px; border-radius: 2px; background: var(--green); }
+        .signal i:nth-child(1) { height: 5px; }
+        .signal i:nth-child(2) { height: 8px; }
+        .signal i:nth-child(3) { height: 11px; }
+        .signal i:nth-child(4) { height: 14px; }
+
+       .bottom-controls {
+    position: absolute;
+
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 12px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: rgba(5, 8, 14, 0.85);
+
+    padding: 8px 16px;
+
+    backdrop-filter: blur(12px);
+
+    z-index: 20;
+}
+        .control-cluster {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+        .player-btn {
+    display: inline-grid;
+    place-items: center;
+
+    width: 36px;
+    height: 36px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    background: transparent;
+    color: #fff;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+        .player-btn:hover { border-color: var(--line2); background: rgba(255, 255, 255, 0.08); }
+        .player-btn.active { border-color: rgba(76, 115, 255, 0.58); background: rgba(76, 115, 255, 0.2); color: #dbe5ff; }
+        .volume {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 120px;
+        }
+        input[type="range"] { accent-color: var(--blue); width: 100%; }
+        .select {
+            min-height: 38px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            padding: 0 10px;
+        }
+        .select option { color: #111827; }
+
+        .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .action-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel2);
+            padding: 14px;
+        }
+        .action-card h3 { margin: 0 0 10px; font-size: 14px; }
+        .action-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+        .btn {
+            min-height: 38px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+        .btn:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.12); }
+        .btn.primary { background: linear-gradient(135deg, #3158ff, #4c77ff); }
+        .btn.green { background: rgba(34, 197, 94, 0.18); color: #80f5af; }
+        .btn.red { background: rgba(239, 68, 68, 0.18); color: #ff9aa7; }
+        .btn.yellow { background: rgba(234, 179, 8, 0.18); color: #fde68a; }
+
+        .status-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+            margin-right: 7px;
+        }
+        .dot.green, .dot_green {
+    background: var(--green);
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.25);
+}
+       .dot.red, .dot_red {
+    background: var(--red);
+    box-shadow: none;
+}
+
+.dot.yellow, .dot_yellow {
+    background: var(--yellow);
+    box-shadow: none;
+}
+
+        .meter {
+            overflow: hidden;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            margin-top: 10px;
+        }
+        .meter span { display: block; width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); transition: width 0.25s ease; }
+
+        .talk-card { grid-column: 1 / -1; }
+        .talk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .field { display: grid; gap: 6px; }
+        .field label { color: var(--muted); font-size: 12px; font-weight: 800; }
+        .field input, .field select {
+            min-height: 40px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            padding: 8px 10px;
+        }
+        .ptt {
+            width: 100%;
+            min-height: 58px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.86), rgba(248, 113, 113, 0.72));
+            font-size: 14px;
+            font-weight: 1000;
+            letter-spacing: 0.04em;
+        }
+        .ptt.active { animation: pulse 0.9s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.72; } }
+        .voice-meter { display: grid; grid-template-columns: repeat(18, 1fr); gap: 3px; height: 26px; align-items: end; margin-top: 10px; }
+        .voice-meter span { height: 5px; border-radius: 4px; background: rgba(34, 197, 94, 0.25); transition: height 0.08s ease, background 0.08s ease; }
+        .voice-meter span.active { background: var(--green); }
+
+        .info-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+        .info-row { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; color: var(--muted); font-size: 12px; }
+        .info-row strong { color: #fff; text-align: right; overflow-wrap: anywhere; }
+
+        .recent-list, .media-list { display: grid; gap: 10px; }
+        .record-item, .media-item, .batch-group, .recording-session-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel2);
+            padding: 10px;
+        }
+        .record-item {
+            display: grid;
+            grid-template-columns: 68px minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: center;
+        }
+        .thumb {
+    display: grid;
+    place-items: center;
+
+    width: 56px;
+    height: 42px;
+
+    border-radius: 8px;
+
+    background: linear-gradient(
+        135deg,
+        rgba(76,115,255,.34),
+        rgba(34,211,238,.16)
+    );
+
+    color: #fff;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+        
+        .file-name,
+.media-name,
+.chunk-name {
+    overflow: hidden;
+    color: #fff;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+        .file-meta,
+.media-meta,
+.chunk-meta {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
+    opacity: .8;
+}
+        .file-actions, .media-actions, .batch-actions, .chunk-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .file-actions { justify-content: flex-end; margin-top: 0; }
+        .mini-btn {
+            min-height: 34px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 7px 10px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .mini-btn.red { color: #ff9aa7; background: rgba(239,68,68,0.16); }
+        .mini-btn.green { color: #80f5af; background: rgba(34,197,94,0.16); }
+        .mini-btn.blue { color: #9db4ff; background: rgba(76,115,255,0.16); }
+        .mini-btn.yellow { color: #fde68a; background: rgba(234,179,8,0.16); }
+
+        .system-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+        .sys {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel2);
+
+    padding: 10px 12px;
+
+    min-height: 58px;
+}
+        .sys div {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 4px;
+}
+
+.sys strong {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+        .settings-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+        .settings-card { display: grid; gap: 12px; }
+        .settings-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+        .status-badge, .chunk-status, .batch-stat {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            border-radius: 999px;
+            padding: 4px 8px;
+            background: rgba(255,255,255,0.08);
+            color: var(--muted2);
+            font-size: 11px;
+            font-weight: 900;
+        }
+        .status-badge.uploaded, .chunk-status.uploaded { color: #80f5af; background: rgba(34,197,94,0.16); }
+        .status-badge.failed, .chunk-status.failed { color: #ff9aa7; background: rgba(239,68,68,0.16); }
+        .status-badge.converting, .chunk-status.converting { color: #fde68a; background: rgba(234,179,8,0.16); }
+        .status-badge.incomplete, .chunk-status.incomplete { color: #c4b5fd; background: rgba(139,92,246,0.16); }
+        .status-badge.uploading, .chunk-status.uploading { color: #9db4ff; background: rgba(76,115,255,0.16); }
+
+        .empty-state {
+            border: 1px dashed var(--line2);
+            border-radius: 8px;
+            padding: 28px 16px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        .toast {
+            position: fixed;
+            top: 18px;
+            left: 50%;
+            z-index: 3000;
+            display: none;
+            max-width: min(520px, calc(100vw - 28px));
+            transform: translateX(-50%);
+            border: 1px solid var(--line2);
+            border-radius: 8px;
+            background: rgba(13, 23, 38, 0.96);
+            box-shadow: var(--shadow);
+            padding: 12px 14px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+        }
+        .toast.show { display: block; }
+        .toast.good { border-color: rgba(34, 197, 94, 0.44); }
+        .toast.bad { border-color: rgba(239, 68, 68, 0.44); }
+
+        .modal, .rename-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: none;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.92);
+            padding: 18px;
+        }
+        .modal.active { display: block; }
+        .rename-modal.active { display: grid; place-items: center; }
+        .modal-content { width: min(980px, 100%); margin: 0 auto; }
+        .modal-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 12px; }
+        .modal-title { font-weight: 900; overflow-wrap: anywhere; }
+        .modal-close { min-height: 40px; border-radius: 8px; background: rgba(239,68,68,0.18); color: #ff9aa7; padding: 8px 14px; font-weight: 900; }
+        .modal-video, .photo-preview { width: 100%; border-radius: 8px; background: #000; }
+        .modal-video { max-height: 44vh; margin-bottom: 12px; }
+        .modal-map { position: relative; overflow: hidden; width: 100%; height: 320px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+        #map { width: 100%; height: 100%; }
+        .map-loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--muted); font-size: 13px; font-weight: 900; }
+        .map-info { display: grid; gap: 8px; margin-top: 10px; }
+        .map-info-row { display: flex; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 10px; font-size: 12px; }
+        .map-label { color: var(--muted); font-weight: 900; }
+        .map-value { overflow-wrap: anywhere; text-align: right; }
+        .rename-dialog { width: min(420px, 100%); border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 18px; }
+        .rename-title { margin-bottom: 12px; font-weight: 900; }
+        .rename-input { width: 100%; min-height: 42px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,0.06); color: #fff; padding: 10px 12px; }
+        .rename-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+
+        @media (max-width: 1320px) {
+            .monitor-grid { grid-template-columns: 1fr; }
+            .right-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .talk-card { grid-column: auto; }
+            .system-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            html,
+            body { width: 100%; overflow-x: hidden; }
+            body.sidebar-open { overflow: hidden; }
+            .app { display: block; min-width: 0; }
+            .sidebar {
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 1200;
+                width: 260px;
+                max-width: calc(100vw - 36px);
+                height: 100dvh;
+                padding: 18px 16px;
+                transform: translateX(-104%);
+                border-right-color: rgba(255, 255, 255, 0.14);
+                box-shadow: 8px 0 20px rgba(0, 0, 0, 0.18);
+            }
+            body.sidebar-open .sidebar { transform: translateX(0); }
+            .sidebar-overlay { display: block; z-index: 1100; pointer-events: none; }
+            body.sidebar-open .sidebar-overlay { opacity: 1; pointer-events: auto; }
+            .brand { margin-bottom: 16px; }
+            .nav-btn {
+                min-height: 46px;
+                border-radius: 12px;
+            }
+            .device-card,
+            .panel,
+            .action-card,
+            .sys,
+            .record-item,
+            .media-item,
+            .batch-group,
+            .recording-session-card,
+            .empty-state,
+            .rename-dialog {
+                border-radius: 16px;
+                box-shadow: var(--soft-shadow);
+            }
+            .main { width: 100%; min-width: 0; }
+            .topbar {
+                min-height: 64px;
+                display: grid;
+                grid-template-columns: 44px minmax(0, 1fr) auto;
+                gap: 10px;
+                align-items: center;
+                padding: 10px 12px;
+                overflow: hidden;
+            }
+            .hamburger { display: grid; }
+            .top-title { min-width: 0; }
+            h1 {
+                font-size: 17px;
+                line-height: 1.15;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .subtitle {
+                display: none;
+            }
+            .top-actions { gap: 6px; min-width: 0; }
+            .top-actions strong { display: none; }
+            .circle,
+            .avatar {
+                width: 38px;
+                height: 38px;
+                flex: 0 0 auto;
+            }
+            .avatar { display: none; }
+            .page { padding: 12px 12px 22px; }
+            .monitor-grid,
+            .left-stack,
+            .right-stack,
+            .quick-grid,
+            .info-grid,
+            .settings-grid,
+            .talk-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .panel-pad,
+            .action-card { padding: 14px; }
+            .panel-head {
+                align-items: flex-start;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .panel-head .btn { width: 100%; }
+            .stream-card { min-height: 0; overflow: visible; background: transparent; }
+            .stream-stage {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                min-height: 0;
+                aspect-ratio: auto;
+                overflow: visible;
+                border-radius: 16px;
+                border: 0;
+                background: transparent;
+            }
+            #videoFeed {
+                display: block;
+                order: 2;
+                width: 100%;
+                height: auto;
+                min-height: 0;
+                aspect-ratio: 16 / 9;
+                object-fit: cover;
+                overflow: hidden;
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                background: #02050b;
+            }
+            .overlay {
+                order: 1;
+                position: static;
+                inset: auto;
+                display: block;
+                pointer-events: none;
+            }
+            .top-overlay {
+                position: static;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 6px;
+                width: 100%;
+            }
+            .badge-row {
+                display: flex;
+                flex: 1 1 150px;
+                flex-wrap: wrap;
+                gap: 6px;
+                min-width: 0;
+            }
+            .badge-row:last-child { justify-content: flex-end; }
+            .badge {
+                max-width: 100%;
+                min-height: 28px;
+                padding: 5px 8px;
+                border-radius: 999px;
+                font-size: 10px;
+                white-space: nowrap;
+            }
+            .bottom-controls {
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                margin-top: 10px;
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 18px;
+                background: linear-gradient(180deg, rgba(20, 32, 52, 0.9), rgba(11, 18, 31, 0.86));
+                padding: 14px;
+                box-shadow: var(--soft-shadow);
+                backdrop-filter: blur(18px);
+            }
+            .bottom-controls::before {
+                content: "Stream Controls";
+                color: #edf3ff;
+                font-size: 16px;
+                font-weight: 800;
+                line-height: 1.2;
+                margin-bottom: 2px;
+            }
+            .control-cluster {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 9px;
+            }
+            .utility-controls {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .utility-controls .quality-control { grid-column: 1 / -1; }
+            .player-btn,
+            .btn,
+            .mini-btn,
+            .select,
+            .field input,
+            .field select {
+                min-height: 44px;
+                border-radius: 14px;
+            }
+            .btn,
+            .mini-btn { white-space: normal; overflow-wrap: anywhere; }
+            .player-btn {
+                width: 100%;
+                height: 52px;
+                border: 1px solid var(--line);
+                background: rgba(255, 255, 255, 0.08);
+                padding: 0 10px;
+                font-size: 13px;
+                font-weight: 900;
+                white-space: nowrap;
+            }
+            .player-btn.active {
+                border-color: rgba(255, 255, 255, 0.22);
+                background: linear-gradient(135deg,#4c73ff,#6f8fff);
+                box-shadow: 0 0 20px rgba(76,115,255,.35);
+                color: #fff;
+            }
+            .volume {
+                display: grid;
+                grid-template-columns: 94px minmax(0, 1fr);
+                gap: 10px;
+                align-items: center;
+                min-width: 0;
+                border: 1px solid var(--line);
+                border-radius: 16px;
+                padding: 8px 10px;
+                background: rgba(255, 255, 255, 0.04);
+            }
+            .volume .player-btn {
+                width: 94px;
+                padding-inline: 8px;
+            }
+            .volume input[type="range"] { width: 100%; }
+            .select {
+                width: 100%;
+                height: 52px;
+                padding: 0 42px 0 14px;
+                appearance: none;
+                background:
+                    linear-gradient(45deg, transparent 50%, #dbe5ff 50%) right 18px center / 7px 7px no-repeat,
+                    linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+                font-size: 13px;
+                font-weight: 900;
+            }
+            .action-row {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .action-row .btn,
+            .action-row .ptt { width: 100%; }
+            .talk-card { grid-column: auto; }
+            .ptt { min-height: 58px; border-radius: 16px; }
+            .info-row,
+            .status-line,
+            .mini-row {
+                align-items: flex-start;
+            }
+            .system-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+            .sys {
+                min-height: 98px;
+                padding: 12px;
+            }
+            .sys strong { font-size: 12px; overflow-wrap: anywhere; }
+            .sys div { font-size: 11px; line-height: 1.35; }
+            .record-item {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 10px;
+                align-items: stretch;
+                padding: 12px;
+            }
+            .thumb {
+                width: 100%;
+                height: auto;
+                min-height: 132px;
+                border-radius: 14px;
+                font-size: 13px;
+            }
+            .file-name,
+            .media-name,
+            .chunk-name {
+                white-space: normal;
+                overflow-wrap: anywhere;
+                text-overflow: clip;
+                line-height: 1.35;
+            }
+            .file-meta,
+            .media-meta,
+            .chunk-meta { line-height: 1.35; }
+            .file-actions,
+            .media-actions,
+            .batch-actions,
+            .chunk-actions {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+                justify-content: stretch;
+                margin-top: 2px;
+            }
+            .mini-btn { display: inline-grid; place-items: center; text-align: center; }
+            .settings-actions {
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+            .modal,
+            .rename-modal {
+                padding: 0;
+                background: rgba(3, 7, 14, 0.98);
+            }
+            .modal.active { display: block; }
+            .rename-modal.active { display: grid; place-items: stretch; }
+            .modal-content,
+            .rename-dialog {
+                width: 100%;
+                min-height: 100dvh;
+                margin: 0;
+                border-radius: 0;
+                padding: 14px;
+            }
+            .modal-head {
+                position: sticky;
+                top: 0;
+                z-index: 5;
+                margin: -14px -14px 12px;
+                padding: 12px 14px;
+                background: rgba(7, 13, 24, 0.94);
+                backdrop-filter: blur(16px);
+                border-bottom: 1px solid var(--line);
+            }
+            .modal-close {
+                min-width: 74px;
+                min-height: 44px;
+                border-radius: 14px;
+            }
+            .modal-video,
+            .photo-preview {
+                border-radius: 16px;
+                max-height: none;
+            }
+            .modal-video { height: auto; aspect-ratio: 16 / 9; }
+            .modal-map {
+                height: min(48vh, 420px);
+                min-height: 260px;
+                border-radius: 16px;
+            }
+            .map-info-row {
+                display: grid;
+                gap: 4px;
+                border-radius: 14px;
+            }
+            .map-value { text-align: left; }
+            .rename-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+        svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+        .compat-hidden,
+        .compat-select,
+        .quick-compat,
+        .info-compat { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; clip: rect(0 0 0 0) !important; white-space: nowrap !important; opacity: 0 !important; pointer-events: none !important; }
+
+        :root {
+            --bg: #07111F;
+            --bg2: #0A1628;
+            --panel: #0F1B2D;
+            --panel2: #111f33;
+            --line: rgba(255, 255, 255, 0.08);
+            --line2: rgba(255, 255, 255, 0.14);
+            --text: #FFFFFF;
+            --muted: #94A3B8;
+            --muted2: #CBD5E1;
+            --blue: #2563EB;
+            --shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+--soft-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        body {
+            background:
+                radial-gradient(circle at 66% 2%, rgba(37, 99, 235, 0.12), transparent 28%),
+                linear-gradient(180deg, #061020 0%, #07111F 48%, #081423 100%);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        }
+        .app { grid-template-columns: 274px minmax(0, 1fr); }
+        .sidebar {
+            padding: 19px 16px 16px;
+            background: rgba(6, 13, 25, 0.96);
+            border-right-color: rgba(53, 76, 111, 0.46);
+            box-shadow: none;
+        }
+        .brand {
+            gap: 12px;
+            min-height: 44px;
+            margin-bottom: 23px;
+            padding: 0 7px;
+            border-bottom: 0;
+            font-weight: 800;
+        }
+        .brand > span:last-child { display: grid; gap: 2px; min-width: 0; }
+       .brand strong {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+}
+
+.brand small {
+    color: #94A3B8;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+        .brand-mark { width: 39px; height: 39px; border-width: 2px; }
+        .nav { gap: 6px; overflow-y: auto; padding-right: 2px; }
+        .nav-label {
+            margin: 18px 8px 8px;
+            color: #A7B2C4;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .nav-btn {
+            grid-template-columns: 30px minmax(0, 1fr) auto;
+            gap: 10px;
+            min-height: 45px;
+            border-radius: 8px;
+            padding: 9px 11px;
+            color: #E5EDF8;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .nav-btn:hover { transform: none; background: rgba(37, 99, 235, 0.12); }
+        .nav-btn.active { background: linear-gradient(90deg, #0F5DFF 0%, rgba(37, 99, 235, 0.38) 100%); box-shadow: inset 3px 0 0 #38BDF8; }
+        .nav-btn em {
+            border-radius: 5px;
+            background: #2563EB;
+            padding: 2px 5px;
+            font-size: 9px;
+            font-style: normal;
+            font-weight: 800;
+        }
+        .icon {
+            width: 24px;
+            height: 24px;
+            border: 0;
+            border-radius: 0;
+            color: #E2E8F0;
+        }
+        .icon svg { width: 22px; height: 22px; }
+        .device-card {
+            margin-top: 18px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, rgba(15, 27, 45, 0.96), rgba(10, 22, 40, 0.96));
+            box-shadow: var(--soft-shadow);
+            padding: 17px;
+        }
+        .device-card h3 { font-size: 13px; }
+        .bar span { background: #2563EB; }
+        .dot.green { box-shadow: 0 0 10px rgba(34, 197, 94, 0.34); }
+
+        .topbar {
+            min-height: 78px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(7, 17, 31, 0.9);
+            padding: 17px 28px 14px 30px;
+        }
+        h1 { font-size: 18px; font-weight: 700; letter-spacing: 0; }
+        .subtitle { margin-top: 6px; color: #CBD5E1; font-size: 14px; }
+        .top-actions { gap: 18px; }
+        .circle {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            border: 0;
+            background: transparent;
+            color: #fff;
+        }
+        .circle svg { width: 24px; height: 24px; }
+        .circle.notify span {
+            position: absolute;
+            top: -6px;
+            right: -5px;
+            display: grid;
+            place-items: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #EF4444;
+            font-size: 10px;
+            font-weight: 800;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+        .top-actions strong { font-size: 14px; font-weight: 600; }
+        .drop-btn { width: 22px; height: 22px; background: transparent; color: #CBD5E1; font-size: 20px; line-height: 1; }
+
+        .page { padding: 18px 24px 24px; }
+        .monitor-grid {
+            grid-template-columns: minmax(0, 1.55fr) 440px;
+            gap: 14px;
+        }
+        .left-stack, .right-stack { gap: 14px; }
+        .panel,
+        .action-card,
+        .record-item,
+        .media-item,
+        .batch-group,
+        .recording-session-card,
+        .empty-state,
+        .toast,
+        .modal-video,
+        .photo-preview,
+        .modal-map,
+        .map-info-row,
+        .rename-dialog,
+        .rename-input,
+        .modal-close { border-radius: 12px; }
+        .panel {
+    background: rgba(15, 27, 45, 0.82);
+    border-color: var(--line);
+    border-radius: 12px;
+    box-shadow: var(--soft-shadow);
+}
+
+.panel-pad {
+    padding: 14px;
+}
+
+.panel-head {
+    margin-bottom: 10px;
+}
+
+.panel-title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.panel-sub {
+    display: block;
+    margin-top: 1px;
+    color: #CBD5E1;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+        .stream-card {
+            border-radius: 12px;
+            background: #07111F;
+            overflow: hidden;
+        }
+        .stream-stage {
+    position: relative;
+    aspect-ratio: 16 / 8;
+    min-height: 360px;
+    padding-bottom: 72px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+        #videoFeed { object-fit: cover; }
+        .top-overlay { top: 12px; left: 14px; right: 14px; }
+        .badge {
+            min-height: 35px;
+            border-radius: 8px;
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(9, 17, 29, 0.78);
+            padding: 7px 11px;
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+        }
+        .badge.live {
+    background: #DC2626;
+    min-height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+}
+       .quality-badge {
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+}
+        .icon-badge {
+    width: 32px;
+    height: 32px;
+    justify-content: center;
+    padding: 0;
+    border-radius: 8px;
+}
+        .icon-badge svg { width: 18px; height: 18px; }
+       .signal {
+    grid-template-columns: repeat(4, 3px);
+}
+        .bottom-controls {
+            left: 10px;
+            right: 10px;
+            bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 17px;
+            width: auto;
+            border: 0;
+            border-radius: 10px;
+            background: rgba(5, 8, 14, 0.82);
+            padding: 8px 16px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.24);
+        }
+        .player-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 20px;
+        }
+        .player-btn svg { width: 21px; height: 21px; }
+        .volume { flex: 1 1 220px; max-width: 250px; min-width: 150px; }
+        input[type="range"] { height: 4px; accent-color: #ffffff; }
+
+        .quick-panel .panel-head { margin-bottom: 12px; }
+        .quick-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .quick-tile {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+
+    column-gap: 12px;
+
+    align-items: center;
+
+    min-height: 72px;
+
+    border: 1px solid var(--line);
+    border-radius: 12px;
+
+    background: rgba(17, 31, 51, 0.86);
+
+    padding: 10px;
+
+    text-align: left;
+
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+    transition: border-color 0.2s, background 0.2s;
+}
+        .quick-tile:hover { background: rgba(24, 43, 70, 0.92); }
+        .quick-tile strong { align-self: end; font-size: 15px; font-weight: 800; }
+        .quick-tile small { align-self: start; color: #CBD5E1; font-size: 13px; line-height: 1.25; }
+        .tile-icon {
+            grid-row: 1 / 3;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            color: #fff;
+        }
+        .tile-icon svg { width: 29px; height: 29px; }
+        .tile-icon.red { background: linear-gradient(135deg, #7F1D1D, #DC2626); }
+        .tile-icon.red i { width: 24px; height: 24px; border-radius: 50%; background: #FF3B3B; box-shadow: 0 0 0 8px rgba(255,59,59,0.12); }
+        .tile-icon.red.recording i { animation: rec-pulse 1.1s ease-in-out infinite; }
+        @keyframes rec-pulse { 0%,100%{ box-shadow:0 0 0 5px rgba(255,59,59,0.28); background:#FF3B3B; } 50%{ box-shadow:0 0 0 10px rgba(255,59,59,0.08); background:#ff6b6b; } }
+        .tile-status {
+            grid-column: 2;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--muted);
+            margin-top: 2px;
+            letter-spacing: .03em;
+        }
+        .tile-status.active { color: var(--green); }
+        .tile-status.warn { color: var(--yellow); }
+        .quick-tile.is-recording { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.07); }
+        .quick-tile.is-desktop-recording { border-color: rgba(37,99,235,0.4); background: rgba(37,99,235,0.08); }
+        .quick-tile.is-ready-download { border-color: rgba(124,58,237,0.4); background: rgba(124,58,237,0.08); }
+        .quick-tile.is-muted .tile-icon.teal { background: linear-gradient(135deg,#4a1d4a,#7c2d7c); }
+        .quick-tile.is-talking { border-color: rgba(20,184,166,0.4); background: rgba(20,184,166,0.06); }
+        .tile-icon.blue { background: linear-gradient(135deg, #0B3B9C, #2563EB); }
+        .tile-icon.green { background: linear-gradient(135deg, #065F46, #059669); }
+        .tile-icon.purple { background: linear-gradient(135deg, #4C1D95, #7C3AED); }
+        .tile-icon.amber { background: linear-gradient(135deg, #92400E, #D97706); }
+        .tile-icon.teal { background: linear-gradient(135deg, #0F766E, #14B8A6); }
+        .captures-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .capture-thumb {
+            position: relative;
+            aspect-ratio: 16/9;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(17,31,51,0.8);
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .capture-thumb img { width:100%; height:100%; object-fit:cover; display:block; }
+        .capture-thumb.video-capture { display:grid; place-items:center; }
+        .capture-thumb.video-capture span { font-size:10px; font-weight:700; color:var(--muted2); }
+        .capture-thumb .dl-btn {
+            position: absolute;
+            bottom: 4px; right: 4px;
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            background: rgba(0,0,0,0.72);
+            display: grid; place-items: center;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .capture-thumb .dl-btn svg { width:12px; height:12px; color:#fff; }
+        .capture-thumb:hover .dl-btn { opacity:1; }
+        .sync-compact strong { float: right; color: #fff; }
+        .meter { height: 6px; margin-top: 9px; }
+        .meter span { background: #2563EB; }
+
+        .recent-panel .record-item {
+            grid-template-columns: 64px minmax(0, 1fr) 32px;
+            gap: 12px;
+            min-height: 74px;
+            border-radius: 8px;
+            background: rgba(17, 31, 51, 0.78);
+            padding: 9px;
+        }
+        .thumb {
+            width: 64px;
+            height: 54px;
+            border-radius: 7px;
+            background:
+                linear-gradient(135deg, rgba(217,119,6,0.45), rgba(37,99,235,0.18)),
+                url("/video_feed");
+            background-size: cover;
+            background-position: center;
+            color: transparent;
+        }
+        .file-name, .media-name, .chunk-name { font-size: 13px; font-weight: 700; }
+        .file-meta, .media-meta, .chunk-meta { color: #94A3B8; font-size: 12px; }
+        .recent-panel .file-actions { justify-content: center; }
+        .recent-panel .file-actions .mini-btn:not(:first-child) { display: none; }
+        .recent-panel .mini-btn {
+            width: 30px;
+            min-height: 30px;
+            overflow: hidden;
+            color: transparent;
+            background: transparent;
+            padding: 0;
+            position: relative;
+        }
+        .recent-panel .mini-btn::before {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            border: 2px solid #94A3B8;
+            border-top: 0;
+            border-radius: 0 0 3px 3px;
+        }
+        .recent-panel .mini-btn::after {
+            content: "";
+            position: absolute;
+            left: 13px;
+            top: 4px;
+            width: 8px;
+            height: 14px;
+            border-right: 2px solid #94A3B8;
+            border-bottom: 2px solid #94A3B8;
+            transform: rotate(45deg);
+        }
+        .text-btn { background: transparent; color: #CBD5E1; font-size: 14px; }
+        .btn {
+            min-height: 37px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn.primary { background: #2563EB; box-shadow: 0 6px 18px rgba(37,99,235,0.22); }
+        .btn.outline { border: 1px solid #2563EB; background: transparent; color: #60A5FA; }
+        .btn.full { width: 100%; margin-top: 10px; }
+
+        .system-panel .system-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .sys {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 58px;
+            border-radius: 8px;
+            background: rgba(17, 31, 51, 0.78);
+            padding: 12px;
+        }
+        .sys strong { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .sys div { margin: 0; color: #CBD5E1; font-size: 11px; font-weight: 500; }
+
+        .progress-compare {
+            position: relative;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 50px minmax(0, 1fr);
+            gap: 0;
+            align-items: center;
+        }
+        .progress-card {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(17, 31, 51, 0.76);
+        }
+        .progress-image {
+            position: relative;
+            min-height: 146px;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0) 45%, rgba(4,10,18,.9)),
+                url("/video_feed");
+            background-size: cover;
+            background-position: center;
+        }
+        .progress-image.previous { filter: saturate(.82) brightness(.82); }
+        .progress-image span {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            border-radius: 6px;
+            background: #F97316;
+            padding: 7px 9px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .progress-image.current span { background: #16A34A; }
+        .progress-card h3 { margin: 10px 12px 8px; font-size: 14px; }
+        .metric-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 42px minmax(80px, 120px);
+            gap: 10px;
+            align-items: center;
+            margin: 7px 12px;
+            color: #CBD5E1;
+            font-size: 12px;
+        }
+        .metric-row strong { color: #fff; font-size: 13px; }
+        .orange { color: #F97316 !important; }
+        .green-text { color: #22C55E !important; }
+        .metric-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+        .metric-bar i { display: block; height: 100%; border-radius: inherit; background: #F97316; }
+        .metric-bar.green i { background: #22C55E; }
+        .vs {
+            z-index: 1;
+            display: grid;
+            place-items: center;
+            width: 46px;
+            height: 46px;
+            margin: auto;
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50%;
+            background: #0F1B2D;
+            color: #fff;
+            font-weight: 800;
+        }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+        .kpi {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    column-gap: 10px;
+    align-items: center;
+
+    min-height: 64px;
+
+    border: 1px solid var(--line);
+    border-radius: 12px;
+
+    background: rgba(17, 31, 51, 0.74);
+
+    padding: 10px;
+}
+
+.kpi-icon {
+    grid-row: 1 / 3;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+}
+        .kpi-icon.blue { color: #60A5FA; background: rgba(37,99,235,0.18); }
+        .kpi-icon.purple { color: #A78BFA; background: rgba(124,58,237,0.18); }
+        .kpi-icon.orange { color: #F59E0B; background: rgba(217,119,6,0.18); }
+        .kpi-icon.teal { color: #2DD4BF; background: rgba(20,184,166,0.18); }
+        .kpi strong {
+    font-size: 22px;
+    font-weight: 700;
+}
+        .kpi small { color: #CBD5E1; font-size: 12px; }
+        .ai-summary p {
+            margin: 10px 0 0;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(17, 31, 51, 0.74);
+            padding: 11px 13px;
+            color: #CBD5E1;
+            font-size: 13px;
+            line-height: 1.45;
+        }
+        .ai-summary p strong { color: #fff; }
+        .ai-summary p button { background: transparent; color: #60A5FA; font-weight: 700; text-decoration: underline; text-decoration-color: rgba(96,165,250,0.4); cursor: pointer; }
+
+        @media (max-width: 1280px) {
+            .monitor-grid { grid-template-columns: 1fr; }
+            .right-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .quick-panel { grid-column: 1 / -1; }
+        }
+        @media (max-width: 768px) {
+            .app { display: block; }
+            .topbar { grid-template-columns: 44px minmax(0, 1fr); padding: 10px 12px; }
+            .top-actions { grid-column: 1 / -1; justify-content: flex-end; gap: 12px; }
+            .page { padding: 12px; }
+            .stream-stage { min-height: 0; aspect-ratio: 16 / 9; }
+            .bottom-controls {
+                position: static;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                margin: 8px;
+            }
+            .volume { display: contents; }
+            .volume input { grid-column: 1 / -1; max-width: none; }
+            .quick-grid,
+            .right-stack,
+            .system-panel .system-grid,
+            .kpi-grid,
+            .progress-compare { grid-template-columns: 1fr; }
+            .vs { margin: -4px auto; }
+            .metric-row { grid-template-columns: minmax(0, 1fr) 42px; }
+            .metric-bar { grid-column: 1 / -1; }
+            .recent-panel .record-item { grid-template-columns: 64px minmax(0, 1fr) 32px; }
+        }
+
+        /* Final fidelity polish */
+        :root {
+            --bg: #071120;
+            --bg2: #071120;
+            --panel: #0B1728;
+            --panel2: #0F1E34;
+            --line: rgba(255, 255, 255, .06);
+            --line2: rgba(255, 255, 255, .1);
+            --muted: #9CA9BD;
+            --muted2: #C6D0DE;
+            --blue: #2563EB;
+            --green: #22C55E;
+            --yellow: #F59E0B;
+            --purple: #8B5CF6;
+            --shadow: 0 8px 24px rgba(0,0,0,.22);
+            --soft-shadow: 0 8px 24px rgba(0,0,0,.22);
+        }
+        *, *::before, *::after { min-width: 0; }
+        body { background: #071120; font-family: 'Inter', sans-serif; }
+        .app { grid-template-columns: 280px minmax(0, 1fr); }
+        .sidebar { padding: 24px 16px 16px; background: #071120; }
+        .brand { gap: 12px; align-items: center; margin-bottom: 16px; padding: 0 6px; }
+        .brand-mark { width: 33px; height: 33px; }
+        .brand strong { font-size: 15px; font-weight: 800; line-height: 1; }
+        .brand small { margin-top: 1px; font-size: 11px; font-weight: 500; opacity: .75; }
+        .nav-label { margin: 20px 8px 8px; font-size: 12px; letter-spacing: .08em; opacity: .55; }
+        .nav-btn { min-height: 44px; padding: 9px 12px; font-size: 15px; font-weight: 600; }
+        .icon, .icon svg { width: 18px; height: 18px; }
+        .device-card, .panel, .quick-tile, .record-item, .sys, .kpi, .progress-card { border: 1px solid var(--line); box-shadow: var(--shadow); }
+        .device-card, .panel-pad { padding: 16px; }
+        .panel:hover, .quick-tile:hover { box-shadow: 0 12px 30px rgba(0,0,0,.28); }
+
+        .topbar { min-height: 72px; padding: 14px 28px; }
+        h1 { font-size: 20px; font-weight: 700; }
+        .subtitle { font-size: 13px; font-weight: 500; color: #94A3B8; }
+        .circle { width: 28px; height: 28px; }
+        .circle svg { width: 20px; height: 20px; }
+        .circle.notify span { width: 16px; height: 16px; font-size: 9px; opacity: .92; }
+        .avatar { width: 36px; height: 36px; }
+        .top-actions strong { font-size: 15px; font-weight: 600; }
+
+        .monitor-grid { gap: 16px; }
+        .left-stack, .right-stack { gap: 16px; }
+        .panel-title { font-size: 16px; font-weight: 700; }
+        .quick-panel .panel-title, .recent-panel .panel-title, .system-panel .panel-title { font-size: 16px; }
+        .panel-sub, .quick-tile small, .file-meta, .media-meta, .chunk-meta, .sys div { color: var(--muted); font-weight: 500; }
+        .stream-stage { aspect-ratio: 16 / 8; min-height: 0; }
+        .top-overlay { top: 10px; left: 12px; right: 12px; }
+        .badge { min-height: 32px; height: 32px; padding: 6px 10px; font-size: 13px; }
+        .bottom-controls {
+    position: absolute;
+
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 56px;
+
+    gap: 12px;
+    padding: 8px 16px;
+
+    border-radius: 10px;
+    background: rgba(5,8,14,.85);
+
+    backdrop-filter: blur(12px);
+
+    z-index: 20;
+}
+        .player-btn { width: 40px; height: 40px; font-size: 18px; }
+        .player-btn svg { width: 22px; height: 22px; }
+        .volume { flex: 0 1 210px; }
+
+        .quick-grid { gap: 14px; }
+        .quick-tile { min-height: 78px; grid-template-columns: 48px minmax(0, 1fr); padding: 12px; }
+        .tile-icon { width: 48px; height: 48px; }
+        .tile-icon svg { width: 24px; height: 24px; }
+        .quick-tile strong { font-size: 14px; font-weight: 700; }
+        .quick-tile small { font-size: 12px; font-weight: 500; }
+        .recent-panel .record-item { min-height: 72px; grid-template-columns: 56px minmax(0, 1fr) 32px; padding: 8px; }
+        .thumb { width: 56px; height: 56px; }
+        .file-name, .media-name, .chunk-name { font-size: 13px; font-weight: 600; }
+        .file-meta, .media-meta, .chunk-meta { font-size: 11px; }
+        .system-panel .system-grid { gap: 10px; }
+        .sys { min-height: 70px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .sys strong { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .dot { width: 7px; height: 7px; margin-right: 6px; flex-shrink: 0; }
+        .dot.green { box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+
+        .progress-image { min-height: 136px; }
+        .vs { width: 44px; height: 44px; font-size: 13px; }
+        .progress-image span { padding: 5px 8px; font-size: 11px; }
+        .progress-card h3 { margin: 9px 12px 6px; font-size: 13px; }
+        .metric-row { margin: 5px 12px; font-size: 12px; }
+        .kpi-grid { gap: 10px; }
+        .kpi { display: grid; grid-template-columns: 40px minmax(0,1fr); grid-template-rows: auto auto; column-gap: 10px; align-items: center; min-height: 70px; padding: 12px; }
+        .kpi-icon { grid-row: 1 / 3; width: 40px; height: 40px; display: grid; place-items: center; }
+        .kpi-icon svg { width: 20px; height: 20px; }
+        .kpi strong { font-size: 22px; font-weight: 700; }
+        .kpi small { font-size: 12px; font-weight: 500; }
+        .ai-summary p { font-size: 13px; font-weight: 500; }
+
+        @media (min-width: 1440px) {
+            h1 { font-size: 22px; }
+            .panel-title { font-size: 22px; }
+        }
+
+        @media (max-width: 768px) {
+            html, body { overflow-x: hidden; }
+            .sidebar { width: 280px; }
+            .topbar { min-height: 60px; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; padding: 8px 12px; }
+            h1 { font-size: 20px; }
+            .subtitle { display: none; }
+            .top-actions { grid-column: auto; gap: 8px; }
+            .top-actions strong, .drop-btn { display: none; }
+            .page { padding: 12px; }
+            .monitor-grid, .left-stack, .right-stack { gap: 12px; }
+            .panel-pad { padding: 16px; }
+            .stream-stage { aspect-ratio: 16 / 9; overflow: hidden; }
+            .top-overlay { top: 8px; left: 8px; right: 8px; }
+            .badge { height: 30px; min-height: 30px; font-size: 12px; }
+            .bottom-controls {
+                display: flex;
+                height: 56px;
+                overflow-x: auto;
+                justify-content: flex-start;
+                gap: 8px;
+                margin: 0;
+                padding: 8px;
+                scrollbar-width: none;
+            }
+            .bottom-controls::-webkit-scrollbar { display: none; }
+            .player-btn { flex: 0 0 44px; width: 44px; height: 44px; }
+            .volume { display: flex; flex: 0 0 154px; min-width: 154px; }
+            .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+            .quick-tile { min-height: 78px; grid-template-columns: 44px minmax(0,1fr); padding: 10px; }
+            .tile-icon { width: 44px; height: 44px; }
+            .quick-tile strong { font-size: 13px; font-weight: 700; }
+            .quick-tile small { font-size: 11px;  font-weight: 500;
+    opacity: .8; }
+            .recent-panel .record-item {
+    width: 100%;
+    grid-template-columns: 52px minmax(0, 1fr) 28px;
+}
+            .system-panel .system-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .sys { min-height: 70px; align-items: flex-start; flex-direction: column; }
+            .progress-compare { grid-template-columns: 1fr; gap: 8px; }
+            .progress-image {
+    min-height: 130px;
+}
+           .vs {
+    margin: -4px auto;
+    transform: scale(.9);
+}
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+           .kpi {
+    min-height: 64px;
+    padding: 8px;
+}
+
+.kpi strong {
+    font-size: 22px;
+    font-weight: 700;
+}
+        }
+
+        @media (max-width: 768px) {
+            .stream-card {
+                overflow: visible !important;
+                background: transparent;
+            }
+            .stream-stage {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+                position: relative !important;
+                min-height: auto !important;
+                height: auto !important;
+                aspect-ratio: auto !important;
+                overflow: visible !important;
+                background: transparent;
+            }
+            .overlay {
+                display: contents !important;
+                position: static !important;
+                inset: auto !important;
+                order: 2;
+                transform: none !important;
+            }
+            .top-overlay,
+            .bottom-controls {
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
+                top: auto !important;
+                bottom: auto !important;
+                transform: none !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+            .top-overlay {
+                order: 2;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+                z-index: 2;
+            }
+            .bottom-controls {
+                order: -1;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                height: auto !important;
+                min-height: 56px !important;
+                padding: 6px 8px !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                z-index: 3;
+            }
+            .bottom-controls::before { content: none !important; }
+            #videoFeed {
+                order: 3;
+                width: 100% !important;
+                height: auto !important;
+                min-height: 0 !important;
+                display: block !important;
+                position: relative !important;
+                z-index: 1;
+                aspect-ratio: 16 / 9 !important;
+                object-fit: cover !important;
+                border-radius: 12px;
+                overflow: hidden;
+            }
+            .badge-row {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+            .badge-row:last-child {
+                flex: 0 1 auto;
+            }
+            .badge {
+                flex: 0 0 auto;
+                max-width: 100%;
+            }
+            .player-btn {
+                flex: 0 0 44px;
+                min-width: 44px;
+                min-height: 44px;
+            }
+            .volume {
+                flex: 0 0 150px !important;
+                min-width: 150px !important;
+            }
+        }
+
+    @media (min-width: 769px) {
+
+    .stream-stage {
+        position: relative !important;
+        aspect-ratio: 16 / 8 !important;
+        padding-bottom: 72px !important;
+        overflow: hidden !important;
+    }
+
+    .bottom-controls {
+        position: absolute !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 12px !important;
+
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        height: 56px !important;
+        gap: 12px !important;
+
+        padding: 8px 16px !important;
+
+        background: rgba(5,8,14,.85) !important;
+        border-radius: 10px !important;
+
+        z-index: 20 !important;
+    }
+
+}
+@media (max-width:768px){
+
+    .volume{
+        min-width:0 !important;
+        overflow:hidden !important;
+    }
+
+    #muteBtn{
+        width:34px !important;
+        height:34px !important;
+        overflow:hidden !important;
+        font-size:0 !important;
+    }
+
+    #muteBtn *{
+        font-size:0 !important;
+    }
+
+    #volumeSlider{
+        flex:1 !important;
+        min-width:60px !important;
+        max-width:100% !important;
+    }
+
+}
+</style>
+</head>
+<body>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <canvas id="streamCanvas"></canvas>
+    <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+    <svg class="svg-sprite" aria-hidden="true">
+        <symbol id="i-stream" viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 2.1-5M3 17a12 12 0 0 1 0-10M19 12a7 7 0 0 0-2.1-5M21 17a12 12 0 0 0 0-10M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></symbol>
+        <symbol id="i-grid" viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></symbol>
+        <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6M9 9h1"/></symbol>
+        <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3v1a3 3 0 0 0 0 6v1a3 3 0 0 0 5 2.2V4.8A3 3 0 0 0 9 4ZM15 4a3 3 0 0 1 3 3v1a3 3 0 0 1 0 6v1a3 3 0 0 1-5 2.2V4.8A3 3 0 0 1 15 4Z"/></symbol>
+        <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+        <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M17.5 19H7a5 5 0 1 1 1-9.9A6 6 0 0 1 19 11.6 3.8 3.8 0 0 1 17.5 19Z"/></symbol>
+        <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 5h16M8 5v14M4 19h8M15 12h5M15 16h5"/></symbol>
+        <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 2 8 4.5v9L12 20l-8-4.5v-9z"/><path d="M12 11 4 6.5M12 11l8-4.5M12 11v9"/></symbol>
+        <symbol id="i-face" viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4M9 10h.01M15 10h.01M9 15a5 5 0 0 0 6 0"/></symbol>
+        <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 7h18s-3 0-3-7M10 20a2 2 0 0 0 4 0"/></symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V9M9 19V5M14 19v-7M19 19V8"/></symbol>
+        <symbol id="i-monitor" viewBox="0 0 24 24"><path d="M4 5h16v11H4zM8 20h8M12 16v4"/></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></symbol>
+        <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h4l2-3h4l2 3h4v11H4z"/><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/></symbol>
+        <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+        <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M17.7 6.3l-1.4 1.4M7.7 16.3l-1.4 1.4"/></symbol>
+        <symbol id="i-full" viewBox="0 0 24 24"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></symbol>
+        <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM4 21a8 8 0 0 1 16 0"/></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-5"/></symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM18 16l.8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8z"/></symbol>
+    </svg>
+
+    <div class="app">
+        <aside id="sidebar" class="sidebar">
+            <div class="brand"><span class="brand-mark"></span><span><strong>Aspire Smart Vision</strong><small>Live Monitoring & Analytics</small></span></div>
+            <nav class="nav" aria-label="Dashboard navigation">
+                <button class="nav-btn active" data-page="live"><span class="icon"><svg><use href="#i-stream"></use></svg></span><span>Live Stream</span></button>
+                <button class="nav-btn" data-page="dashboard"><span class="icon"><svg><use href="#i-grid"></use></svg></span><span>Dashboard</span></button>
+                <button class="nav-btn" data-page="recordings"><span class="icon"><svg><use href="#i-file"></use></svg></span><span>Recordings</span></button>
+                <button class="nav-btn" data-page="analytics"><span class="icon"><svg><use href="#i-brain"></use></svg></span><span>AI Analytics</span></button>
+                <button class="nav-btn" data-page="reports"><span class="icon"><svg><use href="#i-file"></use></svg></span><span>Reports</span></button>
+                <div class="nav-label">LIBRARY</div>
+                <button class="nav-btn" data-page="local"><span class="icon"><svg><use href="#i-folder"></use></svg></span><span>Local Files</span></button>
+                <button class="nav-btn" data-page="server"><span class="icon"><svg><use href="#i-cloud"></use></svg></span><span>Server Files</span></button>
+                <div class="nav-label">AI FEATURES</div>
+                <button class="nav-btn" data-page="video-text"><span class="icon"><svg><use href="#i-text"></use></svg></span><span>Video to Text</span></button>
+                <button class="nav-btn" data-page="object-detection"><span class="icon"><svg><use href="#i-cube"></use></svg></span><span>Object Detection</span></button>
+                <button class="nav-btn" data-page="face-detection"><span class="icon"><svg><use href="#i-face"></use></svg></span><span>Face Detection</span></button>
+                <button class="nav-btn" data-page="safety-alerts"><span class="icon"><svg><use href="#i-bell"></use></svg></span><span>Safety Alerts</span></button>
+                <div class="nav-label">PROGRESS ANALYSIS</div>
+                <button class="nav-btn" data-page="progress"><span class="icon"><svg><use href="#i-chart"></use></svg></span><span>Progress Comparison</span><em>NEW</em></button>
+            </nav>
+
+            <div class="device-card">
+                <h3>Device Status</h3>
+                <div class="mini-row"><span>State</span><strong id="deviceOnline"><span class="dot yellow"></span>Checking</strong></div>
+                <div class="mini-row"><span>Device ID</span><strong id="deviceIdText">--</strong></div>
+                <div class="mini-row"><span>Storage</span><strong id="storageText">--</strong></div>
+                <div class="bar"><span id="storageFill"></span></div>
+                <div class="mini-row"><span>Connection</span><strong id="connectionText">--</strong></div>
+                <div class="mini-row"><span>Server Sync</span><strong id="syncText">Idle</strong></div>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="topbar">
+                <button id="mobileMenuBtn" class="hamburger" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">&#9776;</button>
+                <div class="top-title">
+                    <h1 id="pageTitle">Live Stream</h1>
+                    <div id="pageSubtitle" class="subtitle">Real-time stream from Camera #CAM-1023</div>
+                </div>
+                <div class="top-actions">
+                    <button class="circle notify" type="button" title="Notifications"><svg><use href="#i-bell"></use></svg><span>3</span></button>
+                    <button class="circle" type="button" title="Settings" data-page-shortcut="settings"><svg><use href="#i-settings"></use></svg></button>
+                    <span class="avatar"><svg><use href="#i-user"></use></svg></span>
+                    <strong>Site Manager</strong>
+                    <button class="drop-btn" type="button" aria-label="Account menu">v</button>
+                </div>
+            </header>
+
+            <section id="page-live" class="page active">
+                <div class="monitor-grid">
+                    <div class="left-stack">
+                        <section class="panel stream-card">
+                            <div class="stream-stage" id="streamStage">
+                                <img id="videoFeed" src="/api/device/api/device/video_feed" alt="">
+                                <div class="overlay">
+                                    <div class="top-overlay">
+                                        <div class="badge-row">
+                                            <span class="badge live" id="liveBadge">LIVE</span>
+                                            <span class="badge" id="streamTimer">00:00:00</span>
+                                            <span class="compat-hidden" id="connectivityBadge"><span class="dot yellow"></span>Connecting</span>
+                                        </div>
+                                        <div class="badge-row">
+                                            <span class="badge quality-badge"><span class="signal"><i></i><i></i><i></i><i></i></span><span id="resolutionBadge">1080p</span><span>v</span></span>
+                                            <button class="badge icon-badge" type="button" onclick="toggleFullscreen()" aria-label="Fullscreen"><svg><use href="#i-full"></use></svg></button>
+                                            <span class="compat-hidden" id="signalText">Signal</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="bottom-controls">
+                                    <button class="player-btn" type="button" onclick="pauseStream()" title="Pause">||</button>
+                                    <div class="volume">
+                                        <button id="muteBtn" class="player-btn" type="button" onclick="toggleMute()" title="Volume"><svg><use href="#i-stream"></use></svg></button>
+                                        <input id="volumeSlider" type="range" min="0" max="100" value="72" aria-label="Volume">
+                                    </div>
+                                    <button class="player-btn" type="button" onclick="captureSnapshot()" title="Camera"><svg><use href="#i-camera"></use></svg></button>
+                                    <button class="player-btn" type="button" onclick="toggleTalkMute()" title="Microphone"><svg><use href="#i-mic"></use></svg></button>
+                                    <button class="player-btn" type="button" data-page-shortcut="settings" title="Settings"><svg><use href="#i-settings"></use></svg></button>
+                                    <button class="player-btn" type="button" onclick="toggleFullscreen()" title="Fullscreen"><svg><use href="#i-full"></use></svg></button>
+                                    <select id="qualitySelect" class="select quality-control compat-select" aria-label="Quality selector">
+                                        <option>1080p</option>
+                                        <option>720p</option>
+                                        <option>480p</option>
+                                        <option>Auto</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-pad">
+                            <div class="panel-head"><div><h2 class="panel-title">Construction Progress Comparison</h2><span class="panel-sub">Compare site progress between two selected dates</span></div><button class="btn primary" type="button" onclick="generateAIReport()"><svg><use href="#i-spark"></use></svg>Generate AI Report</button></div>
+                            <div class="progress-compare">
+                                <article class="progress-card">
+                                    <div class="progress-image previous"><span>1st May 2024</span></div>
+                                    <h3>Previous Progress</h3>
+                                    <div class="metric-row"><span>Foundation Work</span><strong>42%</strong><b class="metric-bar"><i style="width:42%"></i></b></div>
+                                    <div class="metric-row"><span>Columns Completed</span><strong class="orange">18</strong></div>
+                                    <div class="metric-row"><span>Workers Detected</span><strong class="orange">26</strong></div>
+                                </article>
+                                <div class="vs">VS</div>
+                                <article class="progress-card">
+                                    <div class="progress-image current"><span>15th May 2024</span></div>
+                                    <h3>Current Progress</h3>
+                                    <div class="metric-row"><span>Foundation Work</span><strong>85%</strong><b class="metric-bar green"><i style="width:85%"></i></b></div>
+                                    <div class="metric-row"><span>Columns Completed</span><strong class="green-text">41</strong></div>
+                                    <div class="metric-row"><span>Workers Detected</span><strong class="green-text">38</strong></div>
+                                </article>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-pad ai-summary">
+                            <div class="panel-head"><h2 class="panel-title">AI Summary</h2><span class="status-badge uploaded">AUTO GENERATED</span></div>
+                            <div class="kpi-grid">
+                                <div class="kpi"><span class="kpi-icon blue"><svg><use href="#i-chart"></use></svg></span><strong>+43%</strong><small>Overall Progress</small></div>
+                                <div class="kpi"><span class="kpi-icon purple"><svg><use href="#i-chart"></use></svg></span><strong>+23</strong><small>New Structural Elements</small></div>
+                                <div class="kpi"><span class="kpi-icon orange"><svg><use href="#i-user"></use></svg></span><strong>+12</strong><small>Additional Workers</small></div>
+                                <div class="kpi"><span class="kpi-icon teal"><svg><use href="#i-shield"></use></svg></span><strong>92%</strong><small>AI Match Accuracy</small></div>
+                            </div>
+                            <p><strong>AI Analysis:</strong> Significant progress detected between 1st May and 15th May. Foundation work advanced from 42% to 85%, 23 new structural elements were identified, and increased manpower activity was observed on site. <button type="button" onclick="generateAIReport()">Read More</button></p>
+                        </section>
+                    </div>
+
+                    <aside class="right-stack">
+                        <section class="panel panel-pad quick-panel">
+                            <div class="panel-head"><h2 class="panel-title">Quick Actions</h2></div>
+                            <div class="quick-grid">
+                                <button id="btnStartRecord" class="quick-tile" type="button" onclick="toggleLocalRecording()">
+                                    <span class="tile-icon red" id="localRecIcon"><i></i></span>
+                                    <strong>Local Recording</strong>
+                                    <small id="localRecLabel">Start Recording</small>
+                                    <span class="tile-status" id="localRecStatus"></span>
+                                </button>
+                                <button id="btnDesktopRecord" class="quick-tile" type="button" onclick="toggleDesktopRecording()">
+                                    <span class="tile-icon blue" id="desktopRecIcon"><svg><use href="#i-monitor"></use></svg></span>
+                                    <strong>Desktop Recording</strong>
+                                    <small id="desktopRecLabel">Record on PC</small>
+                                    <span class="tile-status" id="desktopRecStatus"></span>
+                                </button>
+                                <button class="quick-tile" type="button" onclick="syncAll()">
+                                    <span class="tile-icon green"><svg><use href="#i-cloud"></use></svg></span>
+                                    <strong>Sync to Server</strong>
+                                    <small id="syncLabel">Upload everything</small>
+                                </button>
+                                <button class="quick-tile" type="button" onclick="openLocalFilesPage()">
+                                    <span class="tile-icon purple"><svg><use href="#i-download"></use></svg></span>
+                                    <strong>Download Files</strong>
+                                    <small id="downloadLabel">View all captures</small>
+                                </button>
+                                <button class="quick-tile" type="button" onclick="captureSnapshot()">
+                                    <span class="tile-icon amber"><svg><use href="#i-camera"></use></svg></span>
+                                    <strong>Snapshot</strong>
+                                    <small id="snapshotLabel">Capture image</small>
+                                </button>
+                                <button id="talkTile" class="quick-tile" type="button" onclick="toggleLiveTalk()">
+                                    <span class="tile-icon teal" id="talkIcon"><svg><use href="#i-mic"></use></svg></span>
+                                    <strong>Live Talk</strong>
+                                    <small id="talkLabel">Tap to speak</small>
+                                </button>
+                            </div>
+                            <div class="quick-compat">
+                                <strong id="localRecState"><span class="dot yellow"></span>Idle</strong><strong id="desktopRecState"><span class="dot yellow"></span>Idle</strong>
+                                <span id="recTimer">00:00</span><span id="desktopTimer">00:00</span><span id="snapshotState">None</span>
+                                <button id="btnStopRecord" type="button" onclick="stopLocalRecord()">Stop recording</button>
+                                <button id="btnDesktopStop" type="button" onclick="stopDesktopRecording()">Stop</button>
+                                <button id="btnDesktopDownload" type="button" onclick="downloadDesktopRecording()">Download</button>
+                                <button id="pttButton" class="ptt" type="button">HOLD TO TALK</button>
+                                <button id="talkMuteBtn" type="button" onclick="toggleTalkMute()">Mute</button>
+                                <select id="micSelect"></select><select id="speakerSelect"></select><strong id="talkStatus"><span class="dot yellow"></span>Ready</strong><div id="voiceMeter"></div>
+                            </div>
+                            <div class="sync-compact"><span>Sync Progress</span><strong id="syncPercentText">0%</strong><div class="meter"><span id="syncProgress"></span></div></div>
+                            <div id="capturesBar" style="display:none; margin-top:12px;">
+                                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                                    <span style="font-size:12px; font-weight:700; color:var(--muted2);">Recent Captures</span>
+                                    <button class="text-btn" style="font-size:12px;" onclick="openLocalFilesPage()">View all</button>
+                                </div>
+                                <div id="capturesGallery" class="captures-gallery"></div>
+                            </div>
+                        </section>
+
+                        <section class="panel panel-pad recent-panel">
+                            <div class="panel-head"><h2 class="panel-title">Recent Recordings</h2><button class="text-btn" type="button" data-page-shortcut="recordings">View All</button></div>
+                            <div id="recentRecordings" class="recent-list"><div class="empty-state">Loading recordings</div></div>
+                            <button class="btn outline full" type="button" data-page-shortcut="recordings"><svg><use href="#i-folder"></use></svg>View All Recordings</button>
+                        </section>
+
+                        <section class="panel panel-pad system-panel">
+                            <div class="panel-head"><h2 class="panel-title">System Status</h2></div>
+                            <div class="system-grid">
+                                <div class="sys"><strong id="sysStream"><span class="dot green"></span>Live Stream</strong><div>Active</div></div>
+                                <div class="sys"><strong id="sysLocalRec"><span class="dot yellow"></span>Recording (Local)</strong><div>Not Recording</div></div>
+                                <div class="sys"><strong id="sysDesktopRec"><span class="dot yellow"></span>Recording (Desktop)</strong><div>Not Recording</div></div>
+                                <div class="sys"><strong id="sysSync"><span class="dot green"></span>Server Sync</strong><div>Synced</div></div>
+                            </div>
+                            <div class="info-compat">
+                                <strong id="sysTalk"><span class="dot yellow"></span>Ready</strong><strong id="sysDevice"><span class="dot yellow"></span>Checking</strong>
+                                <span id="streamModeText">MJPEG</span><span id="streamResolutionText">--</span><span id="fpsText">--</span><span id="frameAgeText">--</span><span id="hostUrlText">--</span>
+                            </div>
+                        </section>
+                    </aside>
+                </div>
+            </section>
+
+            <section id="page-analytics" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">AI Analytics</h2><span class="panel-sub">Analytics workspace</span></div><div class="empty-state">Select an AI feature from the sidebar.</div></section></section>
+            <section id="page-reports" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">Reports</h2><span class="panel-sub">Generated monitoring reports</span></div><div class="empty-state">No reports generated yet.</div></section></section>
+            <section id="page-video-text" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">Video to Text</h2></div><div class="empty-state">Video transcription tools remain connected to existing media files.</div></section></section>
+            <section id="page-object-detection" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">Object Detection</h2></div><div class="empty-state">Object detection workspace.</div></section></section>
+            <section id="page-face-detection" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">Face Detection</h2></div><div class="empty-state">Face detection workspace.</div></section></section>
+            <section id="page-safety-alerts" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">Safety Alerts</h2></div><div class="empty-state">Safety alert monitoring.</div></section></section>
+            <section id="page-progress" class="page"><section class="panel panel-pad"><div class="panel-head"><h2 class="panel-title">Progress Comparison</h2><button class="btn primary" type="button" onclick="switchPage('live')">Open Live Comparison</button></div><div class="empty-state">Progress comparison is available below the live stream.</div></section></section>
+
+            <section id="page-dashboard" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">System Status</h2><span class="panel-sub">Live device and service indicators</span></div>
+                    <div class="system-grid">
+                        <div class="sys"><strong id="dashStream"><span class="dot yellow"></span>Stream</strong><div>Live feed health</div></div>
+                        <div class="sys"><strong id="dashLocalRec"><span class="dot yellow"></span>Local Recording</strong><div>Pi recording state</div></div>
+                        <div class="sys"><strong id="dashDesktopRec"><span class="dot yellow"></span>Desktop Recording</strong><div>Browser capture state</div></div>
+                        <div class="sys"><strong id="dashTalk"><span class="dot yellow"></span>Live Talk</strong><div>Audio channel</div></div>
+                        <div class="sys"><strong id="dashSync"><span class="dot yellow"></span>Server Sync</strong><div>Upload queue</div></div>
+                        <div class="sys"><strong id="dashDevice"><span class="dot yellow"></span>Device</strong><div>Helmet connection</div></div>
+                    </div>
+                </section>
+            </section>
+
+            <section id="page-recordings" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Recordings</h2><span id="mediaCountChip" class="panel-sub">Loading</span></div>
+                    <div id="mediaList" class="media-list"></div>
+                </section>
+            </section>
+
+            <section id="page-local" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Local Files</h2><span class="panel-sub">Client-side captures from this browser</span></div>
+                    <div id="localFiles" class="recent-list"><div class="empty-state">No local captures yet</div></div>
+                </section>
+            </section>
+
+            <section id="page-server" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Server Files</h2><span class="panel-sub">Files returned by device media API</span></div>
+                    <div id="serverFiles" class="recent-list"><div class="empty-state">Loading server files</div></div>
+                </section>
+            </section>
+
+            <section id="page-settings" class="page">
+                <section class="panel panel-pad">
+                    <div class="panel-head"><h2 class="panel-title">Settings</h2><span class="panel-sub">Stored locally for this browser until backend settings endpoints are added</span></div>
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Stream Settings</h3>
+                            <div class="field"><label>Resolution</label><select id="settingResolution"><option>1080p</option><option>720p</option><option>480p</option></select></div>
+                            <div class="field"><label>FPS</label><input id="settingFps" type="number" value="30"></div>
+                            <div class="field"><label>Bitrate</label><input id="settingBitrate" value="4.5 Mbps"></div>
+                            <div class="field"><label>Codec</label><select id="settingCodec"><option>MJPEG</option><option>H.264</option><option>LiveKit</option></select></div>
+                        </div>
+                        <div class="settings-card">
+                            <h3>Recording Settings</h3>
+                            <div class="field"><label>Local path</label><input id="settingLocalPath" value="Downloads/Aspire"></div>
+                            <div class="field"><label>Format</label><select id="settingFormat"><option>mp4</option><option>webm</option></select></div>
+                            <div class="field"><label>Auto-record</label><select id="settingAutoRecord"><option>Off</option><option>On connect</option><option>On motion</option></select></div>
+                        </div>
+                        <div class="settings-card">
+                            <h3>Audio Settings</h3>
+                            <div class="field"><label>Input device</label><select id="settingAudioInput"></select></div>
+                            <div class="field"><label>Output device</label><select id="settingAudioOutput"></select></div>
+                            <div class="field"><label>Volume</label><input id="settingVolume" type="range" min="0" max="100" value="72"></div>
+                        </div>
+                        <div class="settings-card">
+                            <h3>Server Settings</h3>
+                            <div class="field"><label>Server URL</label><input id="settingServerUrl" placeholder="https://server.example.com"></div>
+                            <div class="field"><label>Sync interval</label><select id="settingSyncInterval"><option>Manual</option><option>5 min</option><option>15 min</option><option>Hourly</option></select></div>
+                            <div class="field"><label>Authentication</label><input id="settingAuth" placeholder="Token or key"></div>
+                        </div>
+                        <div class="settings-card">
+                            <h3>UI Settings</h3>
+                            <div class="field"><label>Theme</label><select id="settingTheme"><option>Dark surveillance</option><option>High contrast</option></select></div>
+                            <div class="field"><label>Sidebar behavior</label><select id="settingSidebar"><option>Fixed</option><option>Auto collapse</option></select></div>
+                            <div class="field"><label>Layout preference</label><select id="settingLayout"><option>Desktop monitoring</option><option>Compact</option></select></div>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="btn" type="button" onclick="loadSettings()">Reset</button>
+                        <button class="btn primary" type="button" onclick="saveSettings()">Save settings</button>
+                    </div>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-head"><div id="modalTitle" class="modal-title">Video</div><button class="modal-close" onclick="closePreview()">Close</button></div>
+            <video id="previewVideo" class="modal-video" controls></video>
+            <div class="modal-map"><div id="map"></div><div id="mapLoading" class="map-loading">Loading GPS</div></div>
+            <div id="mapInfo" class="map-info"></div>
+        </div>
+    </div>
+
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-head"><div id="photoTitle" class="modal-title">Snapshot</div><button class="modal-close" onclick="closePhotoModal()">Close</button></div>
+            <img id="photoPreview" class="photo-preview" src="" alt="Snapshot preview">
+            <div class="file-actions"><button class="mini-btn green" onclick="uploadImage(document.getElementById('photoTitle').textContent)">Upload</button></div>
+        </div>
+    </div>
+
+    <div id="renameModal" class="rename-modal">
+        <div class="rename-dialog">
+            <div id="renameTitle" class="rename-title">Rename Video</div>
+            <input id="renameInput" class="rename-input" placeholder="Enter new name">
+            <div class="rename-buttons">
+                <button class="btn primary" onclick="saveRename()">Save</button>
+                <button class="btn" onclick="closeRenameModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+    <script>
+        const $ = (id) => document.getElementById(id);
+        const LIVEKIT_URL = 'wss://streaming-rpi-2jtqu2qo.livekit.cloud';
+        const LIVEKIT_TOKEN_URL = 'https://helmet-live-viewer.vercel.app/api/token';
+        const state = {
+            isRecording: false,
+            audioEnabled: true,
+            media: [],
+            currentRecordingFiles: [],
+            currentRenameFile: null,
+            currentRenameType: null,
+            currentRenameBase: null,
+            recStart: null,
+            recTimer: null,
+            streamStart: Date.now(),
+            desktopStart: null,
+            desktopTimer: null,
+            desktopRecorder: null,
+            desktopChunks: [],
+            desktopBlobUrl: null,
+            canvasTimer: null,
+            lastSnapshot: null,
+            localFiles: [],
+            micStream: null,
+            analyser: null,
+            talkMuted: false,
+            talkActive: false,
+            livekitRoom: null,
+            livekitConnecting: false,
+            helmetAudioMuted: true,
+            previewMap: null,
+            currentMarker: null,
+            gpsPoints: []
+        };
+
+        const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const jsArg = (value) => JSON.stringify(String(value ?? ''));
+
+        async function apiFetch(url, options = {}) {
+            const response = await fetch(url, options);
+            const text = await response.text();
+            let payload = text;
+            try { payload = text ? JSON.parse(text) : {}; } catch (err) {}
+            if (!response.ok) throw new Error(payload && payload.error ? payload.error : response.status + ' ' + response.statusText);
+            return payload;
+        }
+
+        function setText(id, text) { const el = $(id); if (el) el.textContent = text; }
+        function toast(message, type = 'good') {
+            const el = $('toast');
+            el.textContent = message;
+            el.className = 'toast show ' + type;
+            clearTimeout(toast.timer);
+            toast.timer = setTimeout(() => { el.className = 'toast'; }, 2800);
+        }
+        function dot(color, text) { return '<span class="dot ' + color + '"></span>' + htmlEscape(text); }
+        function fmtTime(seconds) {
+            seconds = Math.max(0, Math.floor(seconds));
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return (h ? String(h).padStart(2, '0') + ':' : '') + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+        function fmtAge(seconds) {
+            if (seconds === null || seconds === undefined) return '--';
+            if (seconds < 1) return Math.round(seconds * 1000) + ' ms';
+            return seconds.toFixed(1) + ' s';
+        }
+
+        function setSidebarOpen(open) {
+            document.body.classList.toggle('sidebar-open', open);
+            if ($('mobileMenuBtn')) $('mobileMenuBtn').setAttribute('aria-expanded', String(open));
+        }
+        function closeSidebar() { setSidebarOpen(false); }
+        function toggleSidebar() { setSidebarOpen(!document.body.classList.contains('sidebar-open')); }
+
+        function switchPage(page) {
+            document.querySelectorAll('.page').forEach((el) => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach((el) => el.classList.toggle('active', el.dataset.page === page));
+            $('page-' + page).classList.add('active');
+            const titles = {
+                live: ['Live Stream', 'Real-time stream from Camera #CAM-1023'],
+                dashboard: ['Dashboard', 'System health, sync, recording, and communication status'],
+                recordings: ['Recordings', 'Device recordings and media operations'],
+                local: ['Local Files', 'Client-side browser captures and desktop recordings'],
+                server: ['Server Files', 'Files available from the helmet media API'],
+                settings: ['Settings', 'Stream, recording, audio, server, and interface preferences'],
+                analytics: ['AI Analytics', 'Live intelligence and automated site insights'],
+                reports: ['Reports', 'Generated monitoring and progress reports'],
+                'video-text': ['Video to Text', 'Convert recordings into searchable text'],
+                'object-detection': ['Object Detection', 'Identify equipment, materials, and site activity'],
+                'face-detection': ['Face Detection', 'Worker identity and presence monitoring'],
+                'safety-alerts': ['Safety Alerts', 'Real-time construction safety warnings'],
+                progress: ['Progress Comparison', 'Compare construction progress between selected dates']
+            };
+            const title = titles[page] || titles.live;
+            setText('pageTitle', title[0]);
+            setText('pageSubtitle', title[1]);
+            if (page === 'recordings' || page === 'server') loadMedia();
+            closeSidebar();
+        }
+
+        document.querySelectorAll('[data-page]').forEach((btn) => btn.addEventListener('click', () => switchPage(btn.dataset.page)));
+        document.querySelectorAll('[data-page-shortcut]').forEach((btn) => btn.addEventListener('click', () => switchPage(btn.dataset.pageShortcut)));
+        if ($('mobileMenuBtn')) $('mobileMenuBtn').addEventListener('click', toggleSidebar);
+        if ($('sidebarOverlay')) $('sidebarOverlay').addEventListener('click', closeSidebar);
+        window.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeSidebar(); });
+        window.addEventListener('resize', () => { if (window.innerWidth > 768) closeSidebar(); });
+
+        function updateStreamTimer() {
+            setText('streamTimer', fmtTime((Date.now() - state.streamStart) / 1000));
+        }
+        function setTileSubtitle(id, text) {
+            const tile = $(id);
+            const sub = tile ? tile.querySelector('small') : null;
+            if (sub) sub.textContent = text;
+        }
+
+        async function updateStatus() {
+            try {
+                const d = await apiFetch('/api/device/api/status');
+                const wasRecording = state.isRecording;
+                state.isRecording = Boolean(d.is_recording);
+                state.audioEnabled = Boolean(d.audio_enabled);
+                state.currentRecordingFiles = d.current_recording || [];
+
+                if (state.isRecording && !wasRecording) startRecTimer();
+                if (!state.isRecording && wasRecording) stopRecTimer();
+                $('localRecState').innerHTML = dot(state.isRecording ? 'green' : 'yellow', state.isRecording ? 'Recording' : 'Idle');
+                $('sysLocalRec').innerHTML = dot(state.isRecording ? 'green' : 'yellow', 'Recording (Local)');
+                $('dashLocalRec').innerHTML = dot(state.isRecording ? 'green' : 'yellow', 'Local Recording');
+                $('liveBadge').textContent = state.isRecording ? 'REC' : 'LIVE';
+                setTileSubtitle('btnStartRecord', state.isRecording ? 'Stop Recording' : 'Start Recording');
+                updateLocalRecTile();
+
+                setText('storageText', (d.storage_free_gb ?? '--') + ' GB free');
+                const free = Number(d.storage_free_gb || 0);
+                $('storageFill').style.width = (free ? Math.max(6, Math.min(95, 100 - free / 64 * 100)) : 24).toFixed(0) + '%';
+            } catch (err) {
+                $('deviceOnline').innerHTML = dot('red', 'Offline');
+                $('sysDevice').innerHTML = dot('red', 'Offline');
+            }
+        }
+
+        async function updateHealth() {
+            try {
+                const [health, stream] = await Promise.all([apiFetch('/api/device/api/health'), apiFetch('/api/device/api/stream_info')]);
+                const ok = Boolean(health.ok) && stream.status !== 'error';
+                $('deviceOnline').innerHTML = dot(ok ? 'green' : 'red', ok ? 'Online' : 'Offline');
+                $('deviceIdText').textContent = health.device_id || '--';
+                $('connectionText').textContent = (health.lan_addresses || []).join(', ') || '--';
+                $('connectivityBadge').innerHTML = dot(ok ? 'green' : 'red', ok ? 'Connected' : 'Offline');
+                $('sysStream').innerHTML = dot(stream.has_frame ? 'green' : 'yellow', 'Live Stream');
+                $('dashStream').innerHTML = dot(stream.has_frame ? 'green' : 'yellow', 'Stream');
+                $('sysDevice').innerHTML = dot(ok ? 'green' : 'red', ok ? 'Connected' : 'Offline');
+                $('dashDevice').innerHTML = dot(ok ? 'green' : 'red', 'Device');
+                setText('streamModeText', stream.stream || 'mjpeg');
+                setText('streamResolutionText', (stream.width || '--') + ' x ' + (stream.height || '--'));
+                setText('resolutionBadge', stream.width ? (stream.width >= 1080 ? '1080p' : stream.width + 'p') : $('qualitySelect').value);
+                setText('fpsText', String(stream.fps_target || '--'));
+                setText('frameAgeText', fmtAge(stream.last_frame_age_seconds));
+                setText('hostUrlText', (stream.host_urls || [])[0] || health.stream_url || '--');
+                setText('signalText', stream.has_frame ? 'Strong' : 'Weak');
+            } catch (err) {
+                $('sysStream').innerHTML = dot('red', 'Live Stream');
+                $('dashStream').innerHTML = dot('red', 'Stream');
+            }
+        }
+
+        function startRecTimer() {
+            state.recStart = Date.now();
+            clearInterval(state.recTimer);
+            state.recTimer = setInterval(() => setText('recTimer', fmtTime((Date.now() - state.recStart) / 1000)), 1000);
+        }
+        function stopRecTimer() {
+            clearInterval(state.recTimer);
+            state.recTimer = null;
+            setText('recTimer', '00:00');
+        }
+        async function startLocalRecord() {
+            try {
+                await apiFetch('/api/device/api/start_record');
+                toast('Local recording requested');
+                setTimeout(updateStatus, 500);
+            } catch (err) { toast('Start recording failed: ' + err.message, 'bad'); }
+        }
+        async function stopLocalRecord() {
+            try {
+                await apiFetch('/api/device/api/stop_record', {method: 'POST'});
+                toast('Stop recording requested');
+                setTimeout(updateStatus, 500);
+                setTimeout(loadMedia, 900);
+            } catch (err) { toast('Stop recording failed: ' + err.message, 'bad'); }
+        }
+        function updateLocalRecTile() {
+            const btn = $('btnStartRecord');
+            const icon = $('localRecIcon');
+            const label = $('localRecLabel');
+            const status = $('localRecStatus');
+            if (state.isRecording) {
+                btn.classList.add('is-recording');
+                icon.classList.add('recording');
+                label.textContent = 'Tap to stop';
+                status.textContent = 'RECORDING';
+                status.className = 'tile-status active';
+            } else {
+                btn.classList.remove('is-recording');
+                icon.classList.remove('recording');
+                label.textContent = 'Start Recording';
+                status.textContent = '';
+                status.className = 'tile-status';
+            }
+        }
+        function toggleLocalRecording() {
+            if (state.isRecording) return stopLocalRecord();
+            return startLocalRecord();
+        }
+
+        function drawStreamFrame() {
+            const img = $('videoFeed');
+            if (!img || img.tagName !== 'IMG') return;
+            const canvas = $('streamCanvas');
+            const width = img.naturalWidth || 1280;
+            const height = img.naturalHeight || 720;
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#02050b';
+            ctx.fillRect(0, 0, width, height);
+            try { ctx.drawImage(img, 0, 0, width, height); } catch (err) {}
+            return canvas;
+        }
+        function snapshotBlob() {
+            const canvas = drawStreamFrame();
+            return new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.92));
+        }
+        async function captureSnapshot() {
+            setText('snapshotLabel', 'Capturingâ€¦');
+            try {
+                await apiFetch('/api/device/api/capture_photo');
+                toast('Device snapshot captured');
+            } catch (err) {
+                // fallback to local frame
+            }
+            await saveLocalSnapshot(false);
+            setTimeout(loadMedia, 800);
+            setText('snapshotLabel', 'Capture image');
+        }
+        async function saveLocalSnapshot(download = true) {
+            const blob = await snapshotBlob();
+            if (!blob) return toast('Snapshot unavailable', 'bad');
+            const name = 'snapshot_' + new Date().toISOString().replace(/[:.]/g, '-') + '.jpg';
+            const url = URL.createObjectURL(blob);
+            state.lastSnapshot = {name, url, size: (blob.size / 1048576).toFixed(2), created: new Date()};
+            state.localFiles.unshift({...state.lastSnapshot, type: 'image'});
+            setText('snapshotState', name);
+            renderLocalFiles();
+            refreshCapturesGallery();
+            if (download) downloadUrl(url, name);
+            toast('Snapshot saved â€” see Recent Captures below');
+        }
+        function previewLastSnapshot() {
+            if (!state.lastSnapshot) return toast('No snapshot captured yet', 'bad');
+            setText('photoTitle', state.lastSnapshot.name);
+            $('photoPreview').src = state.lastSnapshot.url;
+            $('photoModal').className = 'modal active';
+        }
+
+        function updateDesktopRecTile(state_) {
+            // state_: 'idle' | 'recording' | 'ready'
+            const btn = $('btnDesktopRecord');
+            const icon = $('desktopRecIcon');
+            const label = $('desktopRecLabel');
+            const status = $('desktopRecStatus');
+            btn.classList.remove('is-desktop-recording','is-ready-download');
+            if (state_ === 'recording') {
+                btn.classList.add('is-desktop-recording');
+                label.textContent = 'Tap to stop';
+                status.textContent = 'RECORDING';
+                status.className = 'tile-status active';
+            } else if (state_ === 'ready') {
+                btn.classList.add('is-ready-download');
+                label.textContent = 'Tap to download';
+                status.textContent = 'READY';
+                status.className = 'tile-status warn';
+            } else {
+                label.textContent = 'Record on PC';
+                status.textContent = '';
+                status.className = 'tile-status';
+            }
+        }
+        function startDesktopRecording() {
+            if (state.desktopRecorder && state.desktopRecorder.state === 'recording') return;
+            const canvas = drawStreamFrame();
+            const stream = canvas.captureStream(8);
+            state.desktopChunks = [];
+            state.desktopRecorder = new MediaRecorder(stream, {mimeType: 'video/webm'});
+            state.desktopRecorder.ondataavailable = (event) => { if (event.data.size) state.desktopChunks.push(event.data); };
+            state.desktopRecorder.onstop = () => {
+                const blob = new Blob(state.desktopChunks, {type: 'video/webm'});
+                if (state.desktopBlobUrl) URL.revokeObjectURL(state.desktopBlobUrl);
+                state.desktopBlobUrl = URL.createObjectURL(blob);
+                const name = 'desktop_' + new Date().toISOString().replace(/[:.]/g, '-') + '.webm';
+                state.localFiles.unshift({name, url: state.desktopBlobUrl, size: (blob.size / 1048576).toFixed(2), type: 'video', created: new Date()});
+                renderLocalFiles();
+                refreshCapturesGallery();
+                updateDesktopRecTile('ready');
+            };
+            state.canvasTimer = setInterval(drawStreamFrame, 125);
+            state.desktopRecorder.start();
+            state.desktopStart = Date.now();
+            clearInterval(state.desktopTimer);
+            state.desktopTimer = setInterval(() => {
+                const t = fmtTime((Date.now() - state.desktopStart) / 1000);
+                setText('desktopTimer', t);
+                $('desktopRecStatus') && ($('desktopRecStatus').textContent = t);
+            }, 1000);
+            $('desktopRecState').innerHTML = dot('green', 'Recording');
+            $('sysDesktopRec').innerHTML = dot('green', 'Recording (Desktop)');
+            $('dashDesktopRec').innerHTML = dot('green', 'Desktop Recording');
+            updateDesktopRecTile('recording');
+            toast('Desktop recording started');
+        }
+        function stopDesktopRecording() {
+            if (!state.desktopRecorder || state.desktopRecorder.state !== 'recording') return toast('Desktop recorder is not active', 'bad');
+            clearInterval(state.canvasTimer);
+            clearInterval(state.desktopTimer);
+            state.desktopRecorder.stop();
+            $('desktopRecState').innerHTML = dot('yellow', 'Ready to download');
+            $('sysDesktopRec').innerHTML = dot('yellow', 'Recording (Desktop)');
+            $('dashDesktopRec').innerHTML = dot('yellow', 'Desktop Recording');
+            toast('Desktop recording stopped â€” tap tile to download');
+        }
+        function downloadDesktopRecording() {
+            if (!state.desktopBlobUrl) return toast('No desktop recording available', 'bad');
+            downloadUrl(state.desktopBlobUrl, 'desktop_recording.webm');
+            // Reset tile after download
+            state.desktopBlobUrl = null;
+            $('desktopRecState').innerHTML = dot('yellow', 'Idle');
+            $('sysDesktopRec').innerHTML = dot('yellow', 'Recording (Desktop)');
+            $('dashDesktopRec').innerHTML = dot('yellow', 'Desktop Recording');
+            updateDesktopRecTile('idle');
+            toast('Download started');
+        }
+        function toggleDesktopRecording() {
+            if (state.desktopRecorder && state.desktopRecorder.state === 'recording') return stopDesktopRecording();
+            if (state.desktopBlobUrl) return downloadDesktopRecording();
+            return startDesktopRecording();
+        }
+        function downloadUrl(url, name) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        async function loadMedia() {
+            try {
+                const data = await apiFetch('/api/device/api/list_media');
+                state.media = Array.isArray(data) ? data : [];
+                setText('mediaCountChip', state.media.length + ' item' + (state.media.length === 1 ? '' : 's'));
+                renderMedia();
+                renderRecentRecordings();
+                renderServerFiles();
+            } catch (err) {
+                $('mediaList').innerHTML = '<div class="empty-state">Media unavailable: ' + htmlEscape(err.message) + '</div>';
+            }
+        }
+        function flatMedia() {
+            const out = [];
+            for (const item of state.media) {
+                if (item.type === 'batch') for (const chunk of item.chunks || []) out.push({...chunk, type: 'video'});
+                else out.push(item);
+            }
+            return out;
+        }
+        function renderRecentRecordings() {
+            const items = flatMedia().filter((x) => x.type !== 'image').slice(0, 5);
+            $('recentRecordings').innerHTML = items.length ? items.map(renderRecordRow).join('') : '<div class="empty-state">No recent recordings</div>';
+        }
+        function renderServerFiles() {
+            const items = flatMedia();
+            $('serverFiles').innerHTML = items.length ? items.map(renderRecordRow).join('') : '<div class="empty-state">No server files</div>';
+        }
+        function renderRecordRow(item) {
+            return '<div class="record-item">' +
+                '<div class="thumb">' + (item.type === 'image' ? 'IMG' : 'MP4') + '</div>' +
+                '<div><div class="file-name">' + htmlEscape(item.name) + '</div><div class="file-meta">' + new Date().toLocaleDateString() + ' - ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) + ' - ' + htmlEscape(item.size || '--') + ' MB - ' + (item.duration || '--') + '</div></div>' +
+                '<div class="file-actions"><a class="mini-btn blue" href="/api/device/api/device/api/download/' + encodeURIComponent(item.name) + '" download>Download</a><button class="mini-btn red" onclick="deleteFile(' + jsArg(item.name) + ')">Delete</button><button class="mini-btn green" onclick="' + (item.type === 'image' ? 'uploadImage' : 'uploadFile') + '(' + jsArg(item.name) + ')">Sync</button></div>' +
+                '</div>';
+        }
+        function renderLocalFiles() {
+            $('localFiles').innerHTML = state.localFiles.length ? state.localFiles.map((item) => (
+                '<div class="record-item"><div class="thumb">' + (item.type === 'image' ? 'IMG' : 'WEBM') + '</div><div><div class="file-name">' + htmlEscape(item.name) + '</div><div class="file-meta">' + item.created.toLocaleString() + ' - ' + item.size + ' MB</div></div><div class="file-actions"><button class="mini-btn blue" onclick="downloadUrl(' + jsArg(item.url) + ', ' + jsArg(item.name) + ')">Download</button></div></div>'
+            )).join('') : '<div class="empty-state">No local captures yet</div>';
+            refreshCapturesGallery();
+        }
+        function renderMedia() {
+            let html = '';
+            if (state.currentRecordingFiles.length) html += renderRecordingSession();
+            for (const item of state.media) html += item.type === 'batch' ? renderBatchGroup(item) : renderMediaItem(item);
+            $('mediaList').innerHTML = html || '<div class="empty-state">No media files yet</div>';
+        }
+        function renderRecordingSession() {
+            return '<div class="recording-session-card"><div class="file-name">Recording in progress</div><div class="file-meta">' + state.currentRecordingFiles.map((f) => htmlEscape(f.name) + ' (' + htmlEscape(f.size) + ' MB)').join(', ') + '</div></div>';
+        }
+        function renderBatchGroup(batch) {
+            let html = '<div class="batch-group"><div class="file-name">Video Session (' + htmlEscape(batch.chunk_count) + ' chunks)</div><div class="file-meta">' + htmlEscape(batch.base) + '</div><div class="file-actions">';
+            if (batch.uploaded_count < batch.chunk_count && batch.incomplete_count === 0) html += '<button class="mini-btn green" onclick="batchUpload(' + jsArg(batch.base) + ')">Upload All</button>';
+            html += '<button class="mini-btn yellow" onclick="showRenameModal(' + jsArg(batch.base) + ', &quot;batch&quot;, ' + jsArg(batch.base) + ')">Rename</button><button class="mini-btn red" onclick="deleteBatch(' + jsArg(batch.base) + ')">Delete</button></div>';
+            for (const chunk of batch.chunks || []) html += '<div class="record-item"><div class="thumb">MP4</div><div><div class="file-name">' + htmlEscape(chunk.name) + '</div><div class="file-meta">' + htmlEscape(chunk.size) + ' MB ' + renderChunkStatus(chunk) + '</div></div><div class="file-actions"><button class="mini-btn blue" onclick="showPreview(' + jsArg(chunk.name) + ')">Preview</button><button class="mini-btn green" onclick="uploadFile(' + jsArg(chunk.name) + ')">Sync</button></div></div>';
+            return html + '</div>';
+        }
+        function renderMediaItem(item) {
+            return '<div class="media-item">' + renderStatusBadge(item) +
+                '<div class="record-item"><div class="thumb">' + (item.type === 'image' ? 'IMG' : 'MP4') + '</div><div><div class="media-name">' + htmlEscape(item.name) + '</div><div class="media-meta">' + htmlEscape(item.size) + ' MB</div></div><div class="file-actions"><button class="mini-btn blue" onclick="' + (item.type === 'image' ? 'showPhotoModal' : 'showPreview') + '(' + jsArg(item.name) + ')">Preview</button><a class="mini-btn blue" href="/api/device/api/device/api/download/' + encodeURIComponent(item.name) + '" download>Download</a><button class="mini-btn green" onclick="' + (item.type === 'image' ? 'uploadImage' : 'uploadFile') + '(' + jsArg(item.name) + ')">Sync</button><button class="mini-btn red" onclick="deleteFile(' + jsArg(item.name) + ')">Delete</button></div></div></div>';
+        }
+        function renderStatusBadge(item) {
+            if (item.uploaded) return '<span class="status-badge uploaded">Uploaded</span>';
+            if (item.failed) return '<span class="status-badge failed">Failed</span>';
+            if (item.converting) return '<span class="status-badge converting">Converting</span>';
+            if (item.incomplete) return '<span class="status-badge incomplete">Incomplete</span>';
+            if (item.upload_status && item.upload_status.status === 'uploading') return '<span class="status-badge uploading">Uploading</span>';
+            return '';
+        }
+        function renderChunkStatus(item) {
+            if (item.uploaded) return '<span class="chunk-status uploaded">Uploaded</span>';
+            if (item.failed) return '<span class="chunk-status failed">Failed</span>';
+            if (item.converting) return '<span class="chunk-status converting">Converting</span>';
+            if (item.incomplete) return '<span class="chunk-status incomplete">Incomplete</span>';
+            if (item.upload_status && item.upload_status.status === 'uploading') return '<span class="chunk-status uploading">Uploading</span>';
+            return '';
+        }
+
+        function firstMedia(type) {
+            return flatMedia().find((item) => type === 'image' ? item.type === 'image' : item.type !== 'image');
+        }
+        function downloadLatest(type) {
+            const item = firstMedia(type);
+            if (!item) return toast('No ' + type + ' files available', 'bad');
+            location.href = '/api/device/api/download/' + encodeURIComponent(item.name);
+        }
+        async function syncAll() {
+            const videos = flatMedia().filter((x) => x.type !== 'image' && !x.uploaded && !x.converting && !x.incomplete);
+            const images = flatMedia().filter((x) => x.type === 'image' && !x.uploaded);
+            const all = [...videos, ...images];
+            if (!all.length) return toast('Everything is already synced', 'bad');
+            setText('syncLabel', 'Syncing ' + all.length + ' file' + (all.length>1?'s':'') + 'â€¦');
+            $('sysSync').innerHTML = dot('green', 'Server Sync');
+            $('dashSync').innerHTML = dot('green', 'Server Sync');
+            for (let i = 0; i < all.length; i++) {
+                setSyncProgress(Math.round((i / all.length) * 100));
+                const item = all[i];
+                await (item.type === 'image' ? uploadImage(item.name, false) : uploadFile(item.name, false));
+            }
+            setSyncProgress(100);
+            setText('syncLabel', 'All synced âœ“');
+            setTimeout(() => setText('syncLabel', 'Upload everything'), 3000);
+            $('syncText').textContent = 'Complete';
+            $('sysSync').innerHTML = dot('green', 'Server Sync');
+        }
+        async function syncRecordings() {
+            const items = flatMedia().filter((x) => x.type !== 'image' && !x.uploaded && !x.converting && !x.incomplete);
+            if (!items.length) return toast('No recordings ready to sync', 'bad');
+            await syncItems(items, uploadFile);
+        }
+        async function syncSnapshots() {
+            const items = flatMedia().filter((x) => x.type === 'image' && !x.uploaded);
+            if (!items.length) return toast('No snapshots ready to sync', 'bad');
+            await syncItems(items, uploadImage);
+        }
+        async function syncItems(items, uploader) {
+            $('syncText').textContent = 'Syncing';
+            $('sysSync').innerHTML = dot('green', 'Server Sync');
+            $('dashSync').innerHTML = dot('green', 'Server Sync');
+            for (let i = 0; i < items.length; i++) {
+                setSyncProgress(Math.round((i / items.length) * 100));
+                await uploader(items[i].name, false);
+            }
+            setSyncProgress(100);
+            $('syncText').textContent = 'Complete';
+            $('sysSync').innerHTML = dot('green', 'Server Sync');
+            $('dashSync').innerHTML = dot('yellow', 'Server Sync');
+        }
+        function setSyncProgress(value) {
+            $('syncProgress').style.width = value + '%';
+            setText('syncPercentText', value + '%');
+        }
+        function openLocalFilesPage() { switchPage('local'); }
+
+        function generateAIReport() { toast('AI progress report generated'); }
+
+        function refreshCapturesGallery() {
+            const bar = $('capturesBar');
+            const gallery = $('capturesGallery');
+            if (!bar || !gallery) return;
+            const items = state.localFiles.slice(0, 6);
+            if (!items.length) { bar.style.display = 'none'; return; }
+            bar.style.display = 'block';
+            gallery.innerHTML = items.map((item) => {
+                if (item.type === 'image') {
+                    return '<div class="capture-thumb" title="' + htmlEscape(item.name) + '">' +
+                        '<img src="' + htmlEscape(item.url) + '" alt="">' +
+                        '<button class="dl-btn" onclick="downloadUrl(' + jsArg(item.url) + ',' + jsArg(item.name) + '); event.stopPropagation()" title="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>' +
+                        '</div>';
+                } else {
+                    return '<div class="capture-thumb video-capture" title="' + htmlEscape(item.name) + '">' +
+                        '<span>â–¶ ' + htmlEscape(item.size) + ' MB</span>' +
+                        '<button class="dl-btn" onclick="downloadUrl(' + jsArg(item.url) + ',' + jsArg(item.name) + '); event.stopPropagation()" title="Download"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg></button>' +
+                        '</div>';
+                }
+            }).join('');
+            // Update download tile count
+            const label = $('downloadLabel');
+            if (label) label.textContent = items.length + ' capture' + (items.length>1?'s':'') + ' ready';
+        }
+
+        function showRenameModal(filename, type = 'single', base = null) {
+            state.currentRenameFile = filename; state.currentRenameType = type; state.currentRenameBase = base;
+            setText('renameTitle', type === 'batch' ? 'Rename Video Session' : 'Rename Video');
+            $('renameInput').value = (base || filename).replace('video_', '').replace('.mp4', '').replace(/_/g, ' ');
+            $('renameModal').className = 'rename-modal active';
+            $('renameInput').focus();
+        }
+        function closeRenameModal() { $('renameModal').className = 'rename-modal'; }
+        async function saveRename() {
+            const newName = $('renameInput').value.trim();
+            if (!newName) return toast('Enter a name first', 'bad');
+            const endpoint = state.currentRenameType === 'batch' ? '/api/device/api/rename_batch' : '/api/device/api/rename_file';
+            const payload = state.currentRenameType === 'batch' ? {base: state.currentRenameBase, new_name: newName} : {old_name: state.currentRenameFile, new_name: newName};
+            try {
+                const d = await apiFetch(endpoint, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                closeRenameModal(); toast('Renamed successfully'); loadMedia();
+            } catch (err) { toast('Rename failed: ' + err.message, 'bad'); }
+        }
+        async function uploadFile(filename, ask = true) {
+            if (ask && !confirm('Upload ' + filename + ' to server?')) return;
+            try {
+                const d = await apiFetch('/api/device/api/upload_cloud', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filename})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Recording upload started'); setTimeout(loadMedia, 700);
+            } catch (err) { toast('Upload failed: ' + err.message, 'bad'); }
+        }
+        async function uploadImage(filename, ask = true) {
+            if (ask && !confirm('Upload ' + filename + ' to server?')) return;
+            try {
+                const d = await apiFetch('/api/device/api/upload_image', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filename})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Snapshot upload started'); setTimeout(loadMedia, 700);
+            } catch (err) { toast('Snapshot upload failed: ' + err.message, 'bad'); }
+        }
+        async function batchUpload(base) {
+            if (!confirm('Upload all chunks in this session?')) return;
+            try {
+                const d = await apiFetch('/api/device/api/batch_upload', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({base})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Batch upload started'); setTimeout(loadMedia, 700);
+            } catch (err) { toast('Batch upload failed: ' + err.message, 'bad'); }
+        }
+        async function deleteFile(filename) {
+            if (!confirm('Delete ' + filename + '?')) return;
+            try {
+                const d = await apiFetch('/api/device/api/delete_file', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({filename})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Deleted'); loadMedia();
+            } catch (err) { toast('Delete failed: ' + err.message, 'bad'); }
+        }
+        async function deleteBatch(base) {
+            if (!confirm('Delete entire video session?')) return;
+            try {
+                const d = await apiFetch('/api/device/api/delete_batch', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({base})});
+                if (d.success === false) throw new Error(d.error || 'Unknown error');
+                toast('Session deleted'); loadMedia();
+            } catch (err) { toast('Delete session failed: ' + err.message, 'bad'); }
+        }
+
+        function setPlayerMode(mode) {
+            document.querySelectorAll('.primary-controls .player-btn').forEach((btn) => btn.classList.remove('active'));
+            const index = mode === 'play' ? 0 : mode === 'pause' ? 1 : 2;
+            const btn = document.querySelectorAll('.primary-controls .player-btn')[index];
+            if (btn) btn.classList.add('active');
+        }
+        function playStream() { connectLiveKitAudio().catch((err) => toast('LiveKit unavailable: ' + err.message, 'bad')); setPlayerMode('play'); toast('Stream playing'); }
+        function pauseStream() { setPlayerMode('pause'); toast('Stream pause is disabled for LiveKit'); }
+        function stopStream() { setPlayerMode('stop'); toast('Stream stop is disabled for LiveKit'); }
+        async function toggleMute() {
+            state.helmetAudioMuted = !state.helmetAudioMuted;
+            $('muteBtn').dataset.muted = String(state.helmetAudioMuted);
+            if (!state.helmetAudioMuted) await enableHelmetAudio();
+            document.querySelectorAll('audio[data-livekit-audio="true"]').forEach((audio) => audio.muted = state.helmetAudioMuted);
+            toast(state.helmetAudioMuted ? 'Helmet audio muted' : 'Helmet audio enabled');
+        }
+        function toggleFullscreen() { const el = $('streamStage'); if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen(); else if (document.exitFullscreen) document.exitFullscreen(); }
+
+        async function showPreview(filename) {
+            setText('modalTitle', filename);
+            $('previewVideo').src = '/api/device/data/' + encodeURIComponent(filename);
+            $('previewModal').className = 'modal active';
+            loadGPSForVideo(filename);
+        }
+        async function loadGPSForVideo(filename) {
+            $('mapLoading').style.display = 'block';
+            setText('mapLoading', 'Loading GPS');
+            try {
+                const data = await apiFetch('/api/device/api/get_gps_data/' + encodeURIComponent(filename));
+                state.gpsPoints = data.points || [];
+                if (!state.gpsPoints.length) { setText('mapLoading', 'No GPS points'); return; }
+                $('mapLoading').style.display = 'none';
+                if (!state.previewMap) {
+                    state.previewMap = L.map('map').setView([state.gpsPoints[0].lat, state.gpsPoints[0].lon], 15);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: 'OpenStreetMap'}).addTo(state.previewMap);
+                }
+                state.previewMap.eachLayer((layer) => { if (layer instanceof L.Polyline || layer instanceof L.Marker || layer instanceof L.CircleMarker) state.previewMap.removeLayer(layer); });
+                const coords = state.gpsPoints.map((p) => [p.lat, p.lon]);
+                const polyline = L.polyline(coords, {color: '#22c55e', weight: 4}).addTo(state.previewMap);
+                L.marker(coords[0]).addTo(state.previewMap);
+                L.marker(coords[coords.length - 1]).addTo(state.previewMap);
+                state.previewMap.fitBounds(polyline.getBounds());
+                setTimeout(() => state.previewMap.invalidateSize(), 100);
+                $('mapInfo').innerHTML = '<div class="map-info-row"><div class="map-label">Total Points</div><div class="map-value">' + state.gpsPoints.length + '</div></div>';
+            } catch (err) { setText('mapLoading', 'No GPS data'); }
+        }
+        function closePreview() { $('previewModal').className = 'modal'; $('previewVideo').src = ''; }
+        function showPhotoModal(filename) { setText('photoTitle', filename); $('photoPreview').src = '/api/device/data/' + encodeURIComponent(filename); $('photoModal').className = 'modal active'; }
+        function closePhotoModal() { $('photoModal').className = 'modal'; $('photoPreview').src = ''; }
+
+        async function connectLiveKitAudio() {
+            if (state.livekitRoom) return state.livekitRoom;
+            if (state.livekitConnecting) {
+                while (state.livekitConnecting) await new Promise((resolve) => setTimeout(resolve, 100));
+                return state.livekitRoom;
+            }
+            if (!window.LivekitClient) throw new Error('LiveKit client unavailable');
+            state.livekitConnecting = true;
+            try {
+                const identity = 'flask-viewer-' + Math.random().toString(36).slice(2);
+                const tokenData = await fetch(LIVEKIT_TOKEN_URL + '?identity=' + encodeURIComponent(identity) + '&name=Helmet%20Dashboard').then((r) => r.json());
+                if (!tokenData.token) throw new Error(tokenData.error || 'Token unavailable');
+                const room = new LivekitClient.Room({ adaptiveStream: false, dynacast: false });
+                function attachTrack(track) {
+                    if (!track) return;
+                    if (track.kind === 'video') {
+                        const video = track.attach();
+                        video.id = 'videoFeed';
+                        video.autoplay = true;
+                        video.playsInline = true;
+                        video.muted = true;
+                        const old = $('videoFeed');
+                        if (old) old.replaceWith(video);
+                        $('streamState').innerHTML = dot('green', 'Connected');
+                        $('liveBadge').textContent = 'LIVE';
+                        return;
+                    }
+                    if (track.kind === 'audio') {
+                        const audio = track.attach();
+                        audio.dataset.livekitAudio = 'true';
+                        audio.autoplay = true;
+                        audio.muted = state.helmetAudioMuted;
+                        audio.style.display = 'none';
+                        document.body.appendChild(audio);
+                        if (!state.helmetAudioMuted) audio.play().catch(() => {});
+                    }
+                }
+                room.on(LivekitClient.RoomEvent.TrackSubscribed, (track) => attachTrack(track));
+                room.on(LivekitClient.RoomEvent.TrackUnsubscribed, (track) => {
+                    track.detach().forEach((el) => el.remove());
+                });
+                await room.connect(LIVEKIT_URL, tokenData.token, { autoSubscribe: true });
+                room.remoteParticipants.forEach((participant) => {
+                    participant.trackPublications.forEach((publication) => {
+                        if (publication.track) attachTrack(publication.track);
+                    });
+                });
+                state.livekitRoom = room;
+                $('talkStatus').innerHTML = dot('green', 'Ready');
+                $('streamState').innerHTML = dot('green', 'Connected');
+                $('sysTalk').innerHTML = dot('green', 'Ready');
+                $('dashTalk').innerHTML = dot('green', 'Live Talk');
+                return room;
+            } finally {
+                state.livekitConnecting = false;
+            }
+        }
+
+        async function enableHelmetAudio() {
+            const room = await connectLiveKitAudio();
+            if (room.startAudio) await room.startAudio().catch(() => {});
+            await Promise.all([...document.querySelectorAll('audio[data-livekit-audio="true"]')].map((audio) => {
+                audio.muted = false;
+                return audio.play().catch(() => {});
+            }));
+        }
+
+        async function initAudioDevices() {
+            for (let i = 0; i < 18; i++) $('voiceMeter').insertAdjacentHTML('beforeend', '<span></span>');
+            try {
+                await navigator.mediaDevices.getUserMedia({audio: true}).then((s) => s.getTracks().forEach((t) => t.stop()));
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const inputs = devices.filter((d) => d.kind === 'audioinput');
+                const outputs = devices.filter((d) => d.kind === 'audiooutput');
+                fillSelect('micSelect', inputs, 'Default microphone');
+                fillSelect('speakerSelect', outputs, 'Default speaker');
+                fillSelect('settingAudioInput', inputs, 'Default microphone');
+                fillSelect('settingAudioOutput', outputs, 'Default speaker');
+                $('talkStatus').innerHTML = dot('green', 'Ready');
+                $('sysTalk').innerHTML = dot('green', 'Ready');
+                $('dashTalk').innerHTML = dot('green', 'Live Talk');
+            } catch (err) {
+                $('talkStatus').innerHTML = dot('red', 'Mic blocked');
+                $('sysTalk').innerHTML = dot('red', 'Blocked');
+            }
+        }
+        function fillSelect(id, devices, fallback) {
+            const select = $(id);
+            select.innerHTML = '<option value="">' + fallback + '</option>' + devices.map((d, i) => '<option value="' + htmlEscape(d.deviceId) + '">' + htmlEscape(d.label || fallback + ' ' + (i + 1)) + '</option>').join('');
+        }
+        async function startTalk() {
+            if (state.talkMuted) return toast('Live Talk is muted', 'bad');
+            try {
+                const room = await connectLiveKitAudio();
+                if ($('micSelect').value && room.switchActiveDevice) await room.switchActiveDevice('audioinput', $('micSelect').value);
+                await room.localParticipant.setMicrophoneEnabled(true);
+                state.micStream = await navigator.mediaDevices.getUserMedia({audio: {deviceId: $('micSelect').value ? {exact: $('micSelect').value} : undefined}});
+                const audioContext = new AudioContext();
+                const source = audioContext.createMediaStreamSource(state.micStream);
+                state.analyser = audioContext.createAnalyser();
+                source.connect(state.analyser);
+                $('pttButton').classList.add('active');
+                $('talkStatus').innerHTML = dot('green', 'Transmitting');
+                state.talkActive = true;
+                updateTalkTile();
+                animateVoice();
+            } catch (err) { toast('Microphone unavailable: ' + err.message, 'bad'); }
+        }
+        async function stopTalk() {
+            if (state.livekitRoom) await state.livekitRoom.localParticipant.setMicrophoneEnabled(false).catch(() => {});
+            if (state.micStream) state.micStream.getTracks().forEach((t) => t.stop());
+            state.micStream = null;
+            state.talkActive = false;
+            $('pttButton').classList.remove('active');
+            $('talkStatus').innerHTML = dot('green', 'Ready');
+            clearVoice();
+            updateTalkTile();
+        }
+        function animateVoice() {
+            if (!state.analyser || !state.micStream) return;
+            const data = new Uint8Array(state.analyser.frequencyBinCount);
+            state.analyser.getByteFrequencyData(data);
+            const avg = data.reduce((a, b) => a + b, 0) / data.length;
+            [...$('voiceMeter').children].forEach((bar, i) => {
+                const active = i < Math.max(1, Math.round(avg / 12));
+                bar.classList.toggle('active', active);
+                bar.style.height = active ? (8 + i) + 'px' : '5px';
+            });
+            requestAnimationFrame(animateVoice);
+        }
+        function clearVoice() { [...$('voiceMeter').children].forEach((bar) => { bar.classList.remove('active'); bar.style.height = '5px'; }); }
+        function updateTalkTile() {
+            const btn = $('talkTile');
+            const label = $('talkLabel');
+            const icon = $('talkIcon');
+            if (!btn) return;
+            if (state.talkActive) {
+                btn.classList.add('is-talking');
+                btn.classList.remove('is-muted');
+                label.textContent = 'Speakingâ€¦';
+                icon.style.boxShadow = '0 0 0 6px rgba(20,184,166,0.22)';
+            } else if (state.talkMuted) {
+                btn.classList.add('is-muted');
+                btn.classList.remove('is-talking');
+                label.textContent = 'Muted â€” tap to unmute';
+                icon.style.boxShadow = '';
+            } else {
+                btn.classList.remove('is-muted','is-talking');
+                label.textContent = 'Tap to speak';
+                icon.style.boxShadow = '';
+            }
+        }
+        async function toggleLiveTalk() {
+            if (state.talkActive) {
+                await stopTalk();
+                state.talkActive = false;
+                updateTalkTile();
+                return;
+            }
+            if (state.talkMuted) {
+                state.talkMuted = false;
+                setText('talkMuteBtn', 'Mute');
+                updateTalkTile();
+                toast('Live Talk unmuted');
+                return;
+            }
+            await startTalk();
+            if (state.talkActive) toast('Live Talk - transmitting');
+        }
+        function toggleTalkMute() {
+            state.talkMuted = !state.talkMuted;
+            setText('talkMuteBtn', state.talkMuted ? 'Unmute' : 'Mute');
+            if (state.talkMuted) { stopTalk(); state.talkActive = false; }
+            updateTalkTile();
+        }
+        $('pttButton').textContent = 'TALK MODE';
+        $('pttButton').addEventListener('click', () => { toggleLiveTalk(); });
+
+        function saveSettings() {
+            const values = {};
+            document.querySelectorAll('#page-settings input, #page-settings select').forEach((el) => values[el.id] = el.value);
+            localStorage.setItem('helmetDashboardSettings', JSON.stringify(values));
+            toast('Settings saved locally');
+        }
+        function loadSettings() {
+            const values = JSON.parse(localStorage.getItem('helmetDashboardSettings') || '{}');
+            Object.entries(values).forEach(([id, value]) => { if ($(id)) $(id).value = value; });
+            $('qualitySelect').value = $('settingResolution').value || '1080p';
+        }
+
+        setInterval(updateStreamTimer, 1000);
+        setInterval(updateStatus, 2000);
+        setInterval(updateHealth, 3000);
+        setInterval(loadMedia, 6000);
+        updateStreamTimer();
+        connectLiveKitAudio().catch((err) => { $('streamState').innerHTML = dot('red', 'LiveKit error'); console.error(err); });
+        updateStatus();
+        updateHealth();
+        loadMedia();
+        initAudioDevices();
+        loadSettings();
+        updateLocalRecTile();
+        updateDesktopRecTile('idle');
+        updateTalkTile();
+    </script>
+</body>
+</html>
+

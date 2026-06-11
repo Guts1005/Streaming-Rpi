@@ -9,7 +9,7 @@ This document outlines the standard procedure for setting up, configuring, and m
 - Raspberry Pi Camera Module (v2 or v3).
 - MicroSD Card (16GB+ recommended).
 - Power Supply (Official 5V 3A for Pi 4).
-- Status LED connected to **GPIO 17** (optional but recommended).
+- Status LED connected to **GPIO 19** (optional but recommended).
 
 ### 2.2 Software
 - **OS**: Raspberry Pi OS (64-bit) with Desktop or Lite.

@@ -1,0 +1,8 @@
+{
+  "input_type": "RTMP_INPUT",
+  "name": "smart-helmet-rtmp",
+  "room_name": "helmet-live",
+  "participant_identity": "helmet-pi",
+  "participant_name": "Smart Helmet Pi",
+  "enable_transcoding": true
+}

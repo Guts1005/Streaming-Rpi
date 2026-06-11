@@ -76,10 +76,10 @@ def get_serial_number():
 
 DEVICE_ID = get_serial_number()
 
-GPIO_RECORD_BUTTON = int(os.getenv("GPIO_RECORD_BUTTON", "17"))
-GPIO_PHOTO_BUTTON = int(os.getenv("GPIO_PHOTO_BUTTON", "27"))
-GPIO_STREAM_LED = int(os.getenv("GPIO_STREAM_LED", "22"))
-GPIO_RECORD_LED = int(os.getenv("GPIO_RECORD_LED", "23"))
+GPIO_RECORD_BUTTON = int(os.getenv("GPIO_RECORD_BUTTON", "6"))
+GPIO_PHOTO_BUTTON = int(os.getenv("GPIO_PHOTO_BUTTON", "13"))
+GPIO_STREAM_LED = int(os.getenv("GPIO_STREAM_LED", "19"))
+GPIO_RECORD_LED = int(os.getenv("GPIO_RECORD_LED", "26"))
 OFFLINE_SYNC_INTERVAL = int(os.getenv("OFFLINE_SYNC_INTERVAL", "60"))
 
 def get_lan_addresses():

@@ -36,3 +36,16 @@ graphify-out/.graphify_python
 *.swo
 .DS_Store
 Thumbs.db
+
+# Node
+node_modules/
+.next/
+build/
+dist/
+
+
+# Archives
+*.rar
+*.zip
+source.rar
+
