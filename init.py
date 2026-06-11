@@ -819,8 +819,10 @@ def start_record():
     if not is_recording_active:
         is_recording_active = True
         if not record_proc:
-            import subprocess
+            import subprocess, time
             subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
+            time.sleep(1.5)
+            os.makedirs(RECORD_FOLDER, exist_ok=True)
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             path = os.path.join(RECORD_FOLDER, f"video_{ts}_chunk000.mp4")
             cmd = "rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o - | ffmpeg -y -f h264 -i - -c:v copy " + f"'{path}'"
