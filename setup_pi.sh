@@ -18,7 +18,17 @@ echo "  2) IMX219 (Requires specific config)"
 read -p "Enter choice (1 or 2): " CAMERA_CHOICE
 
 echo ""
-echo "--- 2. Environment Variables ---"
+echo "--- 2. Ngrok Configuration ---"
+echo "Do you want to configure Ngrok for remote dashboard access? (y/n)"
+read -p "Enter choice: " NGROK_CHOICE
+
+if [ "$NGROK_CHOICE" == "y" ]; then
+    read -p "Enter your Ngrok Auth Token: " NGROK_TOKEN
+    read -p "Enter your static Ngrok domain (e.g. unwell-creamer-anytime.ngrok-free.dev): " NGROK_DOMAIN
+fi
+
+echo ""
+echo "--- 3. Environment Variables ---"
 echo "Setting up LiveKit and Github credentials..."
 LK_URL="wss://streaming-rpi-2jtqu2qo.livekit.cloud"
 LK_KEY="APIA9ZvbR8nPx9p"
@@ -30,12 +40,23 @@ echo ""
 echo "Starting automated installation... This will take a few minutes."
 echo "==================================================="
 
-# 2. System update and dependencies
+# 4. System update and dependencies
 echo "[1/7] Updating system and installing dependencies..."
 sudo apt update
-sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git rpicam-apps
+sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git rpicam-apps curl wget
 
-# 3. Clone Repository
+if [ "$NGROK_CHOICE" == "y" ]; then
+    echo "Installing Ngrok..."
+    curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
+      | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
+      && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" \
+      | sudo tee /etc/apt/sources.list.d/ngrok.list \
+      && sudo apt update \
+      && sudo apt install -y ngrok
+    ngrok config add-authtoken "$NGROK_TOKEN"
+fi
+
+# 5. Clone Repository
 echo "[2/7] Cloning repository..."
 mkdir -p ~/Desktop/Projects/Streaming-Rpi
 cd ~/Desktop/Projects/Streaming-Rpi
@@ -47,7 +68,11 @@ fi
 
 cd hm_releases
 
-# 4. Generate .env file
+echo "Initializing recordings directory to fix permissions..."
+mkdir -p recordings
+sudo chmod 777 recordings
+
+# 6. Generate .env file
 echo "[3/7] Generating .env file..."
 cat <<EOF > .env
 LIVEKIT_URL=$LK_URL
@@ -56,13 +81,12 @@ LIVEKIT_API_SECRET=$LK_SECRET
 LIVEKIT_ROOM=$LK_ROOM
 EOF
 
-# 5. File permissions
-# 5. Fix permissions and Windows line endings
+# 7. Fix permissions and Windows line endings
 echo "[4/7] Fixing file permissions and line endings..."
 sed -i 's/\r$//' *.sh tools/*.sh 2>/dev/null || true
 chmod +x *.sh tools/*.sh
 
-# 6. Virtual Environment & PIP
+# 8. Virtual Environment & PIP
 echo "[5/7] Setting up Python virtual environment..."
 python3 -m venv --system-site-packages venv
 source venv/bin/activate
@@ -71,7 +95,7 @@ pip install -r requirements.txt
 [ -f requirements-host.txt ] && pip install -r requirements-host.txt
 [ -f requirements-livekit-audio.txt ] && pip install -r requirements-livekit-audio.txt
 
-# 7. Configure Camera Boot options
+# 9. Configure Camera Boot options
 echo "[6/7] Configuring camera settings in /boot/firmware/config.txt..."
 CONFIG_FILE="/boot/firmware/config.txt"
 if [ ! -f "$CONFIG_FILE" ]; then
@@ -91,35 +115,68 @@ else
     sudo sed -i 's/^dtoverlay=imx219/#dtoverlay=imx219/' "$CONFIG_FILE"
 fi
 
-# 8. Setup Autostart and Services
+# 10. Setup Autostart and Services
 echo "[7/7] Configuring Autostart and Systemd Services..."
 
-# Desktop autostart
-mkdir -p ~/.config/autostart
-rm -f ~/.config/autostart/hm_releases.desktop
+# Create systemd service for init.py so it runs completely headless
+cat <<EOF | sudo tee /etc/systemd/system/smart-helmet-backend.service > /dev/null
+[Unit]
+Description=Smart Helmet Flask Backend (init.py)
+After=network.target
 
-cat <<EOF > ~/.config/autostart/hm-updater.desktop
-[Desktop Entry]
-Type=Application
-Name=HM Releases Updater
-Exec=lxterminal -e "/home/$USER/Desktop/Projects/Streaming-Rpi/hm_releases/updater.sh"
-Terminal=false
-Comment=Force update code from GitHub and run main.py on boot
-X-GNOME-Autostart-enabled=true
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=/home/$USER/Desktop/Projects/Streaming-Rpi/hm_releases
+ExecStart=/home/$USER/Desktop/Projects/Streaming-Rpi/hm_releases/venv/bin/python init.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable smart-helmet-backend.service
+
+if [ "$NGROK_CHOICE" == "y" ]; then
+    cat <<EOF | sudo tee /etc/systemd/system/ngrok.service > /dev/null
+[Unit]
+Description=Ngrok Tunnel
+After=network.target smart-helmet-backend.service
+
+[Service]
+Type=simple
+User=$USER
+ExecStart=/usr/bin/ngrok http --domain=$NGROK_DOMAIN 5001
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    sudo systemctl daemon-reload
+    sudo systemctl enable ngrok.service
+fi
 
 # Note: Any .service files found in the tools/ directory will be registered with systemd
 for service in tools/*.service; do
     if [ -f "$service" ]; then
         sudo cp "$service" /etc/systemd/system/
-        service_name=$(basename "$service")
+        service_name=\$(basename "$service")
         sudo systemctl daemon-reload
         sudo systemctl enable "$service_name"
     fi
 done
 
+# Cleanup old gui autostart if it exists
+rm -f ~/.config/autostart/hm-updater.desktop
+
 echo "==================================================="
 echo "  Setup Complete! "
 echo "==================================================="
-echo "Please reboot your Raspberry Pi for all changes and camera configurations to take effect."
+echo "Your Raspberry Pi is now 100% turnkey. The backend, GPIO buttons, "
+echo "and Ngrok tunnel will start automatically on every boot!"
+echo ""
+echo "Please reboot your Raspberry Pi for all changes to take effect."
 echo "Command: sudo reboot"
