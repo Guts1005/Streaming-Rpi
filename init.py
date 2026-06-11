@@ -824,14 +824,20 @@ def start_record():
             time.sleep(1.5)
             os.makedirs(RECORD_FOLDER, exist_ok=True)
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            path = os.path.join(RECORD_FOLDER, f"video_{ts}_chunk000.mp4")
-            cmd = "rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o - | ffmpeg -y -f h264 -i - -c:v copy " + f"'{path}'"
+            path_h264 = os.path.join(RECORD_FOLDER, f"video_{ts}_raw.h264")
+            path_mp4 = os.path.join(RECORD_FOLDER, f"video_{ts}_chunk000.mp4")
+            # Save raw h264 directly to disk (100% bulletproof)
+            cmd = f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o '{path_h264}'"
             record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
+            # Store paths globally so stop_record can convert it
+            global current_record_h264, current_record_mp4
+            current_record_h264 = path_h264
+            current_record_mp4 = path_mp4
     return "OK"
 
 @app.route('/api/stop_record', methods=['POST'])
 def stop_record():
-    global record_proc, is_recording_active
+    global record_proc, is_recording_active, current_record_h264, current_record_mp4
     if is_recording_active:
         is_recording_active = False
         if record_proc:
@@ -842,6 +848,16 @@ def stop_record():
             except Exception:
                 pass
             record_proc = None
+            
+            # Convert the raw .h264 file to a playable .mp4 file instantly
+            if 'current_record_h264' in globals() and os.path.exists(current_record_h264):
+                subprocess.run(f"ffmpeg -y -framerate 24 -i '{current_record_h264}' -c:v copy '{current_record_mp4}'", shell=True)
+                # Cleanup the raw file
+                try:
+                    os.remove(current_record_h264)
+                except:
+                    pass
+                    
             subprocess.run(["sudo", "systemctl", "start", "livekit-publisher.service"], check=False)
     return "OK"
 
