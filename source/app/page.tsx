@@ -193,6 +193,7 @@ function Dashboard() {
       // Don't fire if typing in an input or if modal open
       const target = e.target as HTMLElement;
       if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
 
       switch (e.key.toLowerCase()) {
         case '?':
