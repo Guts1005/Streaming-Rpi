@@ -160,7 +160,7 @@ fi
 for service in tools/*.service; do
     if [ -f "$service" ]; then
         sudo cp "$service" /etc/systemd/system/
-        service_name=\$(basename "$service")
+        service_name=$(basename "$service")
         sudo systemctl daemon-reload
         sudo systemctl enable "$service_name"
     fi
