@@ -137,6 +137,29 @@ function Dashboard() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // --- GPS Geolocation Sync ---
+  useEffect(() => {
+    if (!("geolocation" in navigator)) return;
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const payload = {
+          lat: position.coords.latitude,
+          lon: position.coords.longitude,
+          accuracy: position.coords.accuracy || 0,
+          speed: position.coords.speed || 0,
+        };
+        device("/api/update_gps", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 },
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, []);
+
   // --- Gap 2: Live clock update every second ---
   useEffect(() => {
     const timer = setInterval(() => {
