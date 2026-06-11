@@ -53,26 +53,23 @@ def start_publisher_if_online():
 
 
 def start_recording():
-    global record_proc, record_path
+    global record_proc, record_path, record_h264_path
     if record_proc:
         return
     stop_publisher()
+    time.sleep(1.5)
     os.makedirs(RECORD_DIR, exist_ok=True)
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    record_path = os.path.join(RECORD_DIR, f"video_{ts}_chunk000.mp4")
-    cmd = (
-        "rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 "
-        "--inline --timeout 0 --nopreview -o - | "
-        f"ffmpeg -y -f h264 -i - -f alsa -ac 1 -ar 44100 -i {USB_MIC_DEVICE} "
-        f"-map 0:v -map 1:a -c:v copy -c:a aac -shortest '{record_path}' "
-        f"-map 0:v -vf fps=1 -update 1 '{LATEST_SNAPSHOT}'"
-    )
+    abs_record_dir = os.path.abspath(RECORD_DIR)
+    record_h264_path = os.path.join(abs_record_dir, f"video_{ts}_raw.h264")
+    record_path = os.path.join(abs_record_dir, f"video_{ts}_chunk000.mp4")
+    cmd = f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o '{record_h264_path}' > '{os.path.join(abs_record_dir, 'gpio_camera.log')}' 2>&1"
     record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
     logging.info("[GPIO] Local recording started: %s", record_path)
 
 
 def stop_recording():
-    global record_proc, record_path
+    global record_proc, record_path, record_h264_path
     if not record_proc:
         return
     os.killpg(os.getpgid(record_proc.pid), signal.SIGTERM)
@@ -80,9 +77,18 @@ def stop_recording():
         record_proc.wait(timeout=8)
     except subprocess.TimeoutExpired:
         os.killpg(os.getpgid(record_proc.pid), signal.SIGKILL)
+        
+    if 'record_h264_path' in globals() and record_h264_path and os.path.exists(record_h264_path):
+        mux_cmd = f"ffmpeg -y -framerate 24 -i '{record_h264_path}' -c:v copy '{record_path}' -vf fps=1 -update 1 '{LATEST_SNAPSHOT}'"
+        subprocess.run(mux_cmd, shell=True)
+        if os.path.exists(record_path) and os.path.getsize(record_path) > 1000:
+            os.remove(record_h264_path)
+            subprocess.run(["chmod", "777", record_path], check=False)
+            
     logging.info("[GPIO] Local recording stopped: %s", record_path)
     record_proc = None
     record_path = None
+    record_h264_path = None
     start_publisher_if_online()
 
 
