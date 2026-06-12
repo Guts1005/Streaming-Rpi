@@ -29,36 +29,15 @@ async function initDb() {
       username TEXT UNIQUE,
       password_hash TEXT,
       company_id TEXT,
-      customer_id TEXT,
-      created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      status TEXT DEFAULT 'active'
-    )
-  `);
-
-  await runQuery(`
-    CREATE TABLE IF NOT EXISTS customers (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      customer_id TEXT UNIQUE,
-      customer_name TEXT,
-      company_name TEXT,
-      mobile_number TEXT,
-      email TEXT,
-      address TEXT,
-      city TEXT,
-      state TEXT,
-      country TEXT,
-      device_id TEXT,
-      created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-      status TEXT DEFAULT 'active'
+      status TEXT DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
   const adminExists = await getQuery(`SELECT id FROM users WHERE username = 'admin'`);
   if (!adminExists) {
     const hash = await bcrypt.hash('admin123', 10);
-    await runQuery(`INSERT INTO users (username, password_hash, company_id) VALUES ('admin', ?, 'HQ')`, [hash]);
+    await runQuery(`INSERT INTO users (username, password_hash, company_id, status) VALUES ('admin', ?, 'HQ', 'active')`, [hash]);
   }
 }
 
