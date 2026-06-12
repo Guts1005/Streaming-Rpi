@@ -1,12 +1,12 @@
-﻿import { NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { getQuery, allQuery } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 
-export async function GET(request) {
+export async function GET(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const decoded = verifyToken(token);
+  const decoded = verifyToken(token) as any;
   if (!decoded || decoded.username !== 'admin') {
     return NextResponse.json({ error: 'Forbidden: Admin only' }, { status: 403 });
   }
@@ -24,7 +24,7 @@ export async function GET(request) {
       survives_redeployments: false,
       evidence: 'Fetched from live deployed environment'
     });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
