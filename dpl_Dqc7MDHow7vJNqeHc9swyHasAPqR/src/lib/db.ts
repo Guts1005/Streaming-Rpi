@@ -6,24 +6,10 @@ import bcrypt from 'bcryptjs';
 const dbPath = path.join(os.tmpdir(), 'helmet.db');
 const db = new Database(dbPath);
 
-export const runQuery = async (sql: string, params: any[] = []): Promise<any> => {
-  const stmt = db.prepare(sql);
-  const info = stmt.run(params);
-  return { id: info.lastInsertRowid, changes: info.changes };
-};
-
-export const getQuery = async (sql: string, params: any[] = []): Promise<any> => {
-  const stmt = db.prepare(sql);
-  return stmt.get(params);
-};
-
-export const allQuery = async (sql: string, params: any[] = []): Promise<any[]> => {
-  const stmt = db.prepare(sql);
-  return stmt.all(params) as any[];
-};
+let initPromise: Promise<void> | null = null;
 
 async function initDb() {
-  await runQuery(`
+  db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
@@ -32,15 +18,39 @@ async function initDb() {
       status TEXT DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
-  `);
+  `).run();
 
-  const adminExists = await getQuery(`SELECT id FROM users WHERE username = 'admin'`);
+  const adminExists = db.prepare(`SELECT id FROM users WHERE username = 'admin'`).get();
   if (!adminExists) {
     const hash = await bcrypt.hash('admin123', 10);
-    await runQuery(`INSERT INTO users (username, password_hash, company_id, status) VALUES ('admin', ?, 'HQ', 'active')`, [hash]);
+    db.prepare(`INSERT INTO users (username, password_hash, company_id, status) VALUES ('admin', ?, 'HQ', 'active')`).run(hash);
   }
 }
 
-initDb().catch(console.error);
+export const ensureDb = async () => {
+  if (!initPromise) {
+    initPromise = initDb();
+  }
+  return initPromise;
+};
+
+export const runQuery = async (sql: string, params: any[] = []): Promise<any> => {
+  await ensureDb();
+  const stmt = db.prepare(sql);
+  const info = stmt.run(params);
+  return { id: info.lastInsertRowid, changes: info.changes };
+};
+
+export const getQuery = async (sql: string, params: any[] = []): Promise<any> => {
+  await ensureDb();
+  const stmt = db.prepare(sql);
+  return stmt.get(params);
+};
+
+export const allQuery = async (sql: string, params: any[] = []): Promise<any[]> => {
+  await ensureDb();
+  const stmt = db.prepare(sql);
+  return stmt.all(params) as any[];
+};
 
 export default db;
