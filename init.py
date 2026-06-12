@@ -820,7 +820,7 @@ def start_record():
         is_recording_active = True
         if not record_proc:
             import subprocess, time
-            subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
+            subprocess.run(["sudo", "systemctl", "stop", "srs-publisher.service"], check=False)
             time.sleep(1.5)
             os.makedirs(RECORD_FOLDER, exist_ok=True)
             subprocess.run(["sudo", "chmod", "777", RECORD_FOLDER], check=False)
@@ -861,7 +861,7 @@ def stop_record():
                 except:
                     pass
                     
-            subprocess.run(["sudo", "systemctl", "start", "livekit-publisher.service"], check=False)
+            subprocess.run(["sudo", "systemctl", "start", "srs-publisher.service"], check=False)
     return "OK"
 
 @app.route('/api/toggle_audio', methods=['POST'])
@@ -874,9 +874,9 @@ def toggle_audio():
 @app.route('/api/capture_photo', methods=['GET', 'POST'])
 def capture_photo():
     import subprocess
-    was_streaming = subprocess.run(["systemctl", "is-active", "--quiet", "livekit-publisher.service"]).returncode == 0
+    was_streaming = subprocess.run(["systemctl", "is-active", "--quiet", "srs-publisher.service"]).returncode == 0
     if was_streaming:
-        subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
+        subprocess.run(["sudo", "systemctl", "stop", "srs-publisher.service"], check=False)
         time.sleep(1)
 
     ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -885,7 +885,7 @@ def capture_photo():
     subprocess.run(["rpicam-still", "--timeout", "1000", "--nopreview", "-o", path], check=False)
 
     if was_streaming:
-        subprocess.run(["sudo", "systemctl", "start", "livekit-publisher.service"], check=False)
+        subprocess.run(["sudo", "systemctl", "start", "srs-publisher.service"], check=False)
 
     return "OK"
 
@@ -1091,7 +1091,13 @@ def list_media():
     i += glob.glob(os.path.join(RECORD_FOLDER, "uploaded_img_*.jpg"))
     i += glob.glob(os.path.join(RECORD_FOLDER, "failed_upload_img_*.jpg"))
 
-    files = sorted(v + i + temp + incomplete, key=os.path.getmtime, reverse=True)
+    def safe_getmtime(path):
+        try:
+            return os.path.getmtime(path)
+        except FileNotFoundError:
+            return 0
+            
+    files = sorted(v + i + temp + incomplete, key=safe_getmtime, reverse=True)
 
     groups = {}
     standalone = []
