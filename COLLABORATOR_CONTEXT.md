@@ -19,3 +19,6 @@
 ## 3. UI Changes
 - The user rolled back a recent major UI overhaul (the "Aspire Smart Vision" dark theme) via the Vercel dashboard because it was pushed unexpectedly and broke their environment. 
 - Please communicate with the user before committing massive structural changes to the UI layout so they can manage their environment variables and expectations accordingly.
+
+## Recent Updates
+- Replaced the inline SVG login logo with the uploaded Aspire logo in source/app/login/page.tsx.
