@@ -38,7 +38,6 @@ export default function Login() {
       <div style={{ width: '100%', maxWidth: '400px', padding: '32px', backgroundColor: '#1e293b', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <img src="/aspire-logo.jpg" alt="Aspire Logo" style={{ height: '64px', width: 'auto', margin: '0 auto 16px', objectFit: 'contain' }} />
-          <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 600 }}>Smart Helmet</h1>
           <p style={{ margin: '8px 0 0', color: '#94a3b8', fontSize: '14px' }}>Sign in to your account</p>
         </div>
 
