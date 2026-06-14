@@ -65,10 +65,8 @@ body {
 .sidebar-close-btn svg { width: 20px; height: 20px; }
 .sidebar-close-btn:hover { background: rgba(255,255,255,0.06); color: #fff; }
 
-.brand-header { display: flex; align-items: center; gap: 10px; padding: 4px 8px; margin-bottom: 28px; }
-.brand-logo { width: 34px; height: 34px; flex-shrink: 0; }
-.brand-title h2 { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.3; }
-.brand-title span { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.02em; font-weight: 500; }
+.brand-header { display: flex; align-items: center; justify-content: center; padding: 0 4px; margin-bottom: 24px; width: 100%; }
+.brand-image { width: 100%; height: 85px; object-fit: contain; object-position: center; mix-blend-mode: screen; border-radius: 6px; }
 
 .nav-section { flex: 1; display: flex; flex-direction: column; }
 .nav-group-title {

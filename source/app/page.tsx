@@ -1,16 +1,5 @@
 "use client";
 
-import "@livekit/components-styles";
-import { 
-  LiveKitRoom, 
-  RoomAudioRenderer, 
-  VideoTrack, 
-  isTrackReference, 
-  useConnectionState, 
-  useRoomContext, 
-  useTracks 
-} from "@livekit/components-react";
-import { ConnectionState, Track } from "livekit-client";
 import { useEffect, useMemo, useState, useRef } from "react";
 
 type TokenResponse = { token?: string; error?: string };
@@ -28,10 +17,9 @@ async function device(path: string, init?: RequestInit) {
 }
 
 function Dashboard() {
-  const room = useRoomContext();
-  const state = useConnectionState();
-  const tracks = useTracks([Track.Source.Camera], { onlySubscribed: true });
-  const video = tracks.find(isTrackReference);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const mpegtsPlayerRef = useRef<any>(null);
+  const [connected, setConnected] = useState(false);
   
   const [audioOn, setAudioOn] = useState(false);
   const [talking, setTalking] = useState(false);
@@ -39,6 +27,7 @@ function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDesktopRec, setIsDesktopRec] = useState(false);
   const desktopRecRef = useRef<MediaRecorder | null>(null);
+  const livekitRoomRef = useRef<any>(null);
   
   const [recordings, setRecordings] = useState<any[]>([]);
   const [deviceStatus, setDeviceStatus] = useState<any>(null);
@@ -48,7 +37,6 @@ function Dashboard() {
   const [showGallery, setShowGallery] = useState(false);
   const [videoError, setVideoError] = useState(false);
 
-  const connected = state === ConnectionState.Connected;
   const isRecordingLocal = deviceStatus?.is_recording || false;
   const storageFree = deviceStatus?.storage_free_gb ?? null;
   const recTime = deviceStatus?.recording_time ?? 0;
@@ -75,6 +63,44 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    let player: any = null;
+    let isMounted = true;
+    import("mpegts.js").then((mpegtsModule) => {
+      if (!isMounted) return;
+      const mpegts = mpegtsModule.default;
+      if (mpegts.getFeatureList().mseLivePlayback) {
+        const videoElement = videoRef.current;
+        if (!videoElement) return;
+        player = mpegts.createPlayer({
+          type: 'flv',
+          isLive: true,
+          url: '/api/device/live/livestream.flv'
+        });
+        player.attachMediaElement(videoElement);
+        player.load();
+        const playPromise = player.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => setConnected(true)).catch((e: any) => console.log("Auto-play failed:", e));
+        } else {
+          setConnected(true);
+        }
+        mpegtsPlayerRef.current = player;
+      }
+    }).catch(err => console.log("Failed to load mpegts", err));
+    
+    return () => {
+      isMounted = false;
+      if (player) {
+        player.destroy();
+      }
+      if (livekitRoomRef.current) {
+        livekitRoomRef.current.disconnect();
+      }
+      setConnected(false);
+    };
+  }, []);
+
   const liveTime = useMemo(() => {
     const d = new Date();
     return d.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -89,11 +115,36 @@ function Dashboard() {
   }
 
   async function toggleTalk() { 
-    try { 
-      await room.localParticipant.setMicrophoneEnabled(!talking); 
-      setTalking(!talking); 
-      toast(!talking ? "Live Talk Active" : "Live Talk Ended"); 
-    } catch (e) { toast(`Mic failed: ${(e as Error).message}`); } 
+    if (talking) {
+      if (livekitRoomRef.current) {
+        await livekitRoomRef.current.localParticipant.setMicrophoneEnabled(false);
+      }
+      setTalking(false);
+      toast("Live talk disabled");
+    } else {
+      toast("Connecting live talk...");
+      try {
+        if (!livekitRoomRef.current) {
+          const { Room } = await import("livekit-client");
+          const room = new Room();
+          livekitRoomRef.current = room;
+          
+          const tokenRes = await fetch('/api/token');
+          const tokenData = await tokenRes.json();
+          if (!tokenData.token) throw new Error("No token returned");
+          
+          const url = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://streaming-rpi-2jtqu2qo.livekit.cloud';
+          await room.connect(url, tokenData.token);
+        }
+        await livekitRoomRef.current.localParticipant.setMicrophoneEnabled(true);
+        setTalking(true);
+        toast("Live talk active!");
+      } catch (e: any) {
+        console.error("LiveKit Talk Error:", e);
+        toast("Failed to connect live talk");
+        setTalking(false);
+      }
+    }
   }
 
   async function startRec() { 
@@ -204,15 +255,7 @@ function Dashboard() {
       {/* ===== SIDEBAR ===== */}
       <aside className="sidebar">
         <div className="brand-header">
-          <svg viewBox="0 0 40 40" className="brand-logo" fill="none">
-            <circle cx="20" cy="20" r="18" stroke="#fff" strokeWidth="2" fill="none"/>
-            <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-            <path d="M14 25h12" stroke="#06B6D4" strokeWidth="2.5" strokeLinecap="round"/>
-          </svg>
-          <div className="brand-title">
-            <h2>Aspire Smart Vision</h2>
-            <span>Live Monitoring & Analytics</span>
-          </div>
+          <img src="/logo.jpeg" alt="Aspire AI Smart Video Recorder" className="brand-image" />
         </div>
 
         <nav className="nav-section">
@@ -315,15 +358,9 @@ function Dashboard() {
             {/* Video Player */}
             <div className="video-card">
               <div className="video-frame">
-                {video ? (
-                  <div style={{width: '100%', height: '100%'}}>
-                    <VideoTrack trackRef={video} />
+                  <div style={{width: '100%', height: '100%', background: '#000'}}>
+                    <video ref={videoRef} style={{width: '100%', height: '100%', objectFit: 'contain'}} muted={!audioOn} />
                   </div>
-                ) : (
-                  <div style={{color: 'var(--text-muted)', textAlign: 'center', paddingTop: '20%', fontSize: '14px'}}>
-                    Waiting for LiveKit video stream...
-                  </div>
-                )}
 
                 {isRecordingLocal && (
                   <div className="video-dim-overlay">
@@ -641,28 +678,11 @@ function Dashboard() {
         </div>
       )}
 
-      <RoomAudioRenderer muted={!audioOn} volume={1} />
+
     </div>
   );
 }
 
 export default function Home() {
-  const [token, setToken] = useState("");
-  useEffect(() => {
-    fetch("/api/token").then(async r => { setToken((await r.json() as TokenResponse).token || ""); }).catch(() => {});
-  }, []);
-  if (!token) return (
-    <main style={{ display: 'grid', placeItems: 'center', height: '100vh', background: '#0a0e17', color: '#fff', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{textAlign: 'center'}}>
-        <div style={{width: '32px', height: '32px', border: '3px solid #2563EB', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 16px'}}></div>
-        <p style={{fontSize: '14px', color: '#94a3b8'}}>Connecting to LiveKit...</p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    </main>
-  );
-  return (
-    <LiveKitRoom token={token} serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL} connect video={false} audio={false}>
-      <Dashboard />
-    </LiveKitRoom>
-  );
+  return <Dashboard />;
 }

@@ -34,7 +34,7 @@ export default function Login() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f172a', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
       <div style={{ width: '100%', maxWidth: '400px', padding: '32px', backgroundColor: '#1e293b', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <img src="/aspire-logo.jpg" alt="Aspire Logo" style={{ height: '64px', width: 'auto', margin: '0 auto 16px', objectFit: 'contain' }} />
