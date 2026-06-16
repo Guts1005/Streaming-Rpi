@@ -194,7 +194,7 @@ function Dashboard() {
         const rtcUrl = `${window.location.protocol}//${window.location.host}/api/device/api/srs_webrtc_publish`;
         const payload = {
           api: rtcUrl,
-          streamurl: "webrtc://localhost/live/talkback",
+          streamurl: `webrtc://${window.location.hostname}/live/talkback`,
           sdp: offer.sdp
         };
 
@@ -205,7 +205,7 @@ function Dashboard() {
         });
         
         const data = await res.json();
-        if (data.code !== 0) throw new Error(data.server + " error");
+        if (data.code !== 0) throw new Error(data.message || "SRS Error " + data.code);
         
         await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
 
