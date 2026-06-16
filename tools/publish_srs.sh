@@ -10,6 +10,9 @@ rpicam-vid \
   --height 720 \
   --framerate 24 \
   --codec h264 \
+  --profile baseline \
+  --level 4.1 \
+  --intra 15 \
   --inline \
   --nopreview \
   --timeout 0 \
