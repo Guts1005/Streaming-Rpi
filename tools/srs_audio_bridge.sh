@@ -8,6 +8,9 @@ echo "Starting SRS Audio Bridge..."
 # -fflags nobuffer -flags low_delay: Optimize for ultra-low latency audio
 # -f flv: Force FLV container format (RTMP output)
 
+export SDL_AUDIODRIVER="alsa"
+export AUDIODEV="plughw:3,0"
+
 while true; do
   ffplay -nodisp -fflags nobuffer -flags low_delay -f flv "rtmp://localhost/live/talkback"
   # Sleep briefly to prevent tight loops if SRS is restarting
