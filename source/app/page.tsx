@@ -56,6 +56,20 @@ function Dashboard() {
     } catch (e) { toast("Could not reach device"); }
   };
 
+  const shutdownPi = async () => {
+    if (!window.confirm("Are you sure you want to completely shut down the Raspberry Pi? You will physically need to turn the power back on.")) return;
+    try {
+      const res = await fetch("/api/device/api/shutdown", { method: "POST" });
+      if (res.ok) {
+        toast("Shutdown command sent successfully");
+      } else {
+        toast("Shutdown command failed");
+      }
+    } catch (e) {
+      toast("Could not reach device");
+    }
+  };
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [playerKey, setPlayerKey] = useState(0);
 
@@ -607,6 +621,12 @@ function Dashboard() {
                     {talking && <div className="rec-pulse" style={{background: 'var(--status-cyan)', boxShadow: '0 0 6px var(--status-cyan)'}}></div>}
                   </div>
                   <div><h4>Live Talk</h4><p>{talking ? 'Tap to stop' : 'Talk to site'}</p></div>
+                </button>
+                <button className="action-btn" onClick={shutdownPi}>
+                  <div className="action-icon c-red">
+                    <SvgIcon path="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
+                  </div>
+                  <div><h4>Power Off</h4><p>Shutdown Raspberry Pi</p></div>
                 </button>
               </div>
             </div>
