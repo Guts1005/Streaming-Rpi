@@ -106,11 +106,6 @@ function Dashboard() {
             type: 'flv',
             isLive: true,
             url: '/api/device/live/livestream.flv'
-          }, {
-            enableStashBuffer: false,
-            liveBufferLatencyChasing: true,
-            liveBufferLatencyMaxLatency: 2.0,
-            liveBufferLatencyMinRemain: 0.5
           });
           player.attachMediaElement(videoElement);
           player.load();
