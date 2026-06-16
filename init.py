@@ -821,25 +821,37 @@ def start_record():
         if not record_proc:
             import subprocess, time
             subprocess.run(["sudo", "systemctl", "stop", "srs-publisher.service"], check=False)
-            time.sleep(1.5)
+            time.sleep(3.0)
             os.makedirs(RECORD_FOLDER, exist_ok=True)
             subprocess.run(["sudo", "chmod", "777", RECORD_FOLDER], check=False)
+            
+            # Create a flag file to tell gpio_offline_capture.py to turn on the LED
+            try:
+                open(os.path.join(RECORD_FOLDER, ".ui_recording"), "w").close()
+            except Exception:
+                pass
+                
             ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             abs_record_folder = os.path.abspath(RECORD_FOLDER)
-            path_h264 = os.path.join(abs_record_folder, f"video_{ts}_raw.h264")
             path_mp4 = os.path.join(abs_record_folder, f"video_{ts}_chunk000.mp4")
-            # Save raw h264 directly to disk with logging
-            cmd = f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --inline --timeout 0 --nopreview -o '{path_h264}' > '{os.path.join(abs_record_folder, 'camera.log')}' 2>&1"
+            log_path = os.path.join(abs_record_folder, 'camera.log')
+            
+            # Use same high quality settings and pipe to ffmpeg to mux with audio!
+            cmd = (
+                f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --profile high "
+                f"--bitrate 4000000 --denoise cdn_hq --inline --timeout 0 --nopreview -o - | "
+                f"ffmpeg -y -use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f h264 -i - "
+                f"-use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f alsa -channels 1 -i hw:3,0 "
+                f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 '{path_mp4}' > '{log_path}' 2>&1"
+            )
             record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
-            # Store paths globally so stop_record can convert it
-            global current_record_h264, current_record_mp4
-            current_record_h264 = path_h264
+            global current_record_mp4
             current_record_mp4 = path_mp4
     return "OK"
 
 @app.route('/api/stop_record', methods=['POST'])
 def stop_record():
-    global record_proc, is_recording_active, current_record_h264, current_record_mp4
+    global record_proc, is_recording_active, current_record_mp4
     if is_recording_active:
         is_recording_active = False
         if record_proc:
@@ -851,16 +863,13 @@ def stop_record():
                 pass
             record_proc = None
             
-            # Convert the raw .h264 file to a playable .mp4 file instantly
-            if 'current_record_h264' in globals() and os.path.exists(current_record_h264):
-                subprocess.run(f"ffmpeg -y -framerate 24 -i '{current_record_h264}' -c:v copy '{current_record_mp4}'", shell=True)
-                # Cleanup the raw file only if mp4 was actually created
-                try:
-                    if os.path.exists(current_record_mp4) and os.path.getsize(current_record_mp4) > 1000:
-                        os.remove(current_record_h264)
-                except:
-                    pass
-                    
+            try:
+                flag_file = os.path.join(RECORD_FOLDER, ".ui_recording")
+                if os.path.exists(flag_file):
+                    os.remove(flag_file)
+            except Exception:
+                pass
+            
             subprocess.run(["sudo", "systemctl", "start", "srs-publisher.service"], check=False)
     return "OK"
 

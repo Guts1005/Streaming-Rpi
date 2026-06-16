@@ -25,6 +25,14 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   const targetPath = path.map((part) => encodeURIComponent(part)).join("/");
   const targetUrl = `${base}/${targetPath}${request.nextUrl.search}`;
 
+  // If this is a file download, redirect the browser directly to the device URL
+  // This bypasses Vercel's 10-second timeout and 4.5MB response size limits
+  if (path[0] === "download") {
+    const redirectUrl = new URL(targetUrl);
+    redirectUrl.searchParams.set("ngrok-skip-browser-warning", "1");
+    return Response.redirect(redirectUrl.toString(), 302);
+  }
+
   const headers = new Headers();
   const contentType = request.headers.get("content-type");
   const accept = request.headers.get("accept");

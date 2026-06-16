@@ -56,6 +56,9 @@ function Dashboard() {
     } catch (e) { toast("Could not reach device"); }
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [playerKey, setPlayerKey] = useState(0);
+
   useEffect(() => {
     fetchMedia();
     fetchStatus();
@@ -66,40 +69,71 @@ function Dashboard() {
   useEffect(() => {
     let player: any = null;
     let isMounted = true;
-    import("mpegts.js").then((mpegtsModule) => {
-      if (!isMounted) return;
-      const mpegts = mpegtsModule.default;
-      if (mpegts.getFeatureList().mseLivePlayback) {
-        const videoElement = videoRef.current;
-        if (!videoElement) return;
-        player = mpegts.createPlayer({
-          type: 'flv',
-          isLive: true,
-          url: '/api/device/live/livestream.flv'
-        });
-        player.attachMediaElement(videoElement);
-        player.load();
-        const playPromise = player.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => setConnected(true)).catch((e: any) => console.log("Auto-play failed:", e));
-        } else {
-          setConnected(true);
+    let reconnectTimeout: any = null;
+
+    const initPlayer = () => {
+      import("mpegts.js").then((mpegtsModule) => {
+        if (!isMounted) return;
+        const mpegts = mpegtsModule.default;
+        if (mpegts.getFeatureList().mseLivePlayback) {
+          const videoElement = videoRef.current;
+          if (!videoElement) return;
+
+          if (player) {
+            try { player.destroy(); } catch(e) {}
+            player = null;
+          }
+
+          player = mpegts.createPlayer({
+            type: 'flv',
+            isLive: true,
+            url: '/api/device/live/livestream.flv'
+          });
+          player.attachMediaElement(videoElement);
+          player.load();
+
+          player.on(mpegts.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
+            console.log("Mpegts error:", errorType, errorDetail);
+            setConnected(false);
+            if (isMounted) {
+              clearTimeout(reconnectTimeout);
+              reconnectTimeout = setTimeout(initPlayer, 3000);
+            }
+          });
+
+          const playPromise = player.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              if (isMounted) setConnected(true);
+            }).catch((e: any) => {
+              console.log("Auto-play failed:", e);
+              if (isMounted) {
+                clearTimeout(reconnectTimeout);
+                reconnectTimeout = setTimeout(initPlayer, 3000);
+              }
+            });
+          } else {
+            setConnected(true);
+          }
+          mpegtsPlayerRef.current = player;
         }
-        mpegtsPlayerRef.current = player;
-      }
-    }).catch(err => console.log("Failed to load mpegts", err));
+      }).catch(err => console.log("Failed to load mpegts", err));
+    };
+
+    initPlayer();
     
     return () => {
       isMounted = false;
+      clearTimeout(reconnectTimeout);
       if (player) {
-        player.destroy();
+        try { player.destroy(); } catch(e) {}
       }
       if (livekitRoomRef.current) {
         livekitRoomRef.current.disconnect();
       }
       setConnected(false);
     };
-  }, []);
+  }, [playerKey]);
 
   const liveTime = useMemo(() => {
     const d = new Date();
@@ -151,12 +185,14 @@ function Dashboard() {
     toast("Live stream paused - recording on device...");
     await device("/api/start_record"); 
     fetchStatus(); 
+    setTimeout(() => setPlayerKey(prev => prev + 1), 1000);
   }
   async function stopRec() { 
     toast("Recording saved. Resuming live stream...");
     await device("/api/stop_record", { method: "POST" }); 
     fetchStatus(); 
     setTimeout(fetchMedia, 2500); 
+    setTimeout(() => setPlayerKey(prev => prev + 1), 2000);
   }
 
   async function snap() { 
@@ -164,28 +200,56 @@ function Dashboard() {
     await device("/api/capture_photo"); 
     toast("Snapshot saved!"); 
     fetchMedia(); 
+    setTimeout(() => setPlayerKey(prev => prev + 1), 2000);
   }
   
   async function startDesktopRec() {
     try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      if (!videoRef.current) {
+        toast("No video available to record");
+        return;
+      }
+      const videoEl = videoRef.current as any;
+      const stream = videoEl.captureStream ? videoEl.captureStream() : (videoEl.mozCaptureStream ? videoEl.mozCaptureStream() : null);
+      if (!stream) {
+        toast("Stream capture not supported in this browser");
+        return;
+      }
+
+      let options = { mimeType: 'video/webm;codecs=vp8,opus' };
+      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+        options = { mimeType: 'video/webm' };
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
       const chunks: Blob[] = [];
-      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
       mediaRecorder.onstop = () => {
-        const url = URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }));
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const filename = `stream-capture-${Date.now()}.webm`;
+        
         const a = document.createElement('a');
-        a.href = url; a.download = `desktop-capture-${Date.now()}.mp4`; a.click();
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = filename; a.click();
+        
+        const newLocal = {
+          name: filename,
+          type: 'video',
+          size: blob.size,
+          date: new Date().toISOString(),
+          isLocal: true,
+          url: url
+        };
+        setRecordings(prev => [newLocal, ...prev]);
+        
         setIsDesktopRec(false);
-        toast("Desktop recording saved");
+        toast("Stream recording saved");
       };
-      mediaRecorder.start();
+      mediaRecorder.start(1000);
       desktopRecRef.current = mediaRecorder;
       setIsDesktopRec(true);
-      toast("Desktop recording started");
-      stream.getVideoTracks()[0].onended = () => { mediaRecorder.stop(); };
-    } catch (e) { toast("Desktop recording cancelled"); }
+      toast("Stream recording started");
+    } catch (e) { toast("Recording failed"); console.error(e); }
   }
 
   function stopDesktopRec() {
@@ -253,7 +317,8 @@ function Dashboard() {
       {msg && <div className="toast">{msg}</div>}
       
       {/* ===== SIDEBAR ===== */}
-      <aside className="sidebar">
+      <div className={`sidebar-overlay ${sidebarOpen ? 'sidebar-open' : ''}`} onClick={() => setSidebarOpen(false)}></div>
+      <aside className={`sidebar ${sidebarOpen ? 'sidebar-open' : ''}`}>
         <div className="brand-header">
           <img src="/logo.jpeg" alt="Aspire AI Smart Video Recorder" className="brand-image" />
         </div>
@@ -328,9 +393,17 @@ function Dashboard() {
       {/* ===== MAIN CONTENT ===== */}
       <main className="main-area">
         <header className="topbar">
-          <div className="page-title">
-            <h1>Live Stream</h1>
-            <p>Real-time stream from Camera #CAM-1023</p>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
+              <SvgIcon path="M4 6h16M4 12h16M4 18h16" />
+            </button>
+            <div className="mobile-logo">
+              <img src="/logo.jpeg" alt="Aspire AI" />
+            </div>
+            <div className="page-title">
+              <h1>Live Stream</h1>
+              <p className="desktop-only">Real-time stream from Camera #CAM-1023</p>
+            </div>
           </div>
           <div className="topbar-actions">
             <div className="topbar-icon">
@@ -619,19 +692,20 @@ function Dashboard() {
                   <video 
                     controls autoPlay
                     style={{width: '100%', maxHeight: '65vh', display: 'block'}} 
-                    src={`/api/device/data/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}`}
+                    src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}`}
                     onError={() => setVideoError(true)}
                   />
                 )}
               </div>
             ) : (
               <div style={{width: '100%', textAlign: 'center'}}>
-                <img src={`/api/device/data/${selectedMedia.name}`} style={{maxWidth: '100%', maxHeight: '65vh', borderRadius: 'var(--radius-sm)'}} alt="Captured" />
+                <img src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name}`} style={{maxWidth: '100%', maxHeight: '65vh', borderRadius: 'var(--radius-sm)'}} alt="Captured" />
               </div>
             )}
             <div style={{marginTop: '14px', display: 'flex', justifyContent: 'flex-end'}}>
-              <a href={`/api/device/download/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}`} target="_blank" rel="noopener noreferrer" className="download-link">
-                <SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /> Download instead
+              <a href={selectedMedia.isLocal ? selectedMedia.url : `/api/device/download/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}`} target="_blank" rel="noopener noreferrer" className="download-link" download={selectedMedia.isLocal ? selectedMedia.name : undefined}>
+                <SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                Download Original File
               </a>
             </div>
           </div>
