@@ -29,7 +29,10 @@ function Dashboard() {
   const desktopRecRef = useRef<MediaRecorder | null>(null);
   const livekitRoomRef = useRef<any>(null);
   
-  const [recordings, setRecordings] = useState<any[]>([]);
+  const [piRecordings, setPiRecordings] = useState<any[]>([]);
+  const [desktopRecordings, setDesktopRecordings] = useState<any[]>([]);
+  const recordings = [...desktopRecordings, ...piRecordings].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const [galleryMode, setGalleryMode] = useState<'all' | 'pi'>('all');
   const [deviceStatus, setDeviceStatus] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [geminiAnalysis, setGeminiAnalysis] = useState<any>(null);
@@ -51,7 +54,7 @@ function Dashboard() {
   const fetchMedia = async () => {
     try {
       const res = await device("/api/list_media");
-      if (res.ok) setRecordings(await res.json());
+      if (res.ok) setPiRecordings(await res.json());
       else toast("Failed to fetch media list");
     } catch (e) { toast("Could not reach device"); }
   };
@@ -254,7 +257,7 @@ function Dashboard() {
           isLocal: true,
           url: url
         };
-        setRecordings(prev => [newLocal, ...prev]);
+        setDesktopRecordings(prev => [newLocal, ...prev]);
         
         setIsDesktopRec(false);
         toast("Stream recording saved");
@@ -295,6 +298,10 @@ function Dashboard() {
 
   async function deleteMedia(item: any) {
     if (!confirm(`Are you sure you want to delete ${item.name || item.base}?`)) return;
+    if (item.isLocal) {
+      setDesktopRecordings(prev => prev.filter(r => r !== item));
+      return;
+    }
     try {
       const isBatch = !!item.base;
       const endpoint = isBatch ? '/api/delete_batch' : '/api/delete_file';
@@ -309,18 +316,29 @@ function Dashboard() {
       
       if (res.ok) {
         toast("Deleted successfully");
+        setPiRecordings(prev => prev.filter(r => r !== item));
         if (selectedMedia && (selectedMedia.name === item.name || selectedMedia.base === item.base)) {
           setSelectedMedia(null);
         }
-        fetchMedia();
         fetchStatus();
       } else {
-        toast("Failed to delete file");
+        toast("Delete failed");
       }
     } catch (e) {
-      toast("Error deleting file");
+      toast("Could not reach device");
     }
   }
+
+  const handleDownload = (item: any) => {
+    if (item.isLocal) {
+      const a = document.createElement('a');
+      a.href = item.url;
+      a.download = item.name;
+      a.click();
+    } else {
+      window.open(`/api/device/download/${item.name || item.chunks?.[0]?.name}?ngrok-skip-browser-warning=1`, '_blank');
+    }
+  };
 
   const totalStorage = 64; // assuming 64GB card based on free space
   const storagePercent = storageFree !== null ? Math.max(0, Math.min(100, Math.round(((totalStorage - storageFree) / totalStorage) * 100))) : 25;
@@ -344,7 +362,7 @@ function Dashboard() {
           <button className="nav-item">
             <SvgIcon path="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /> Dashboard
           </button>
-          <button className="nav-item" onClick={() => setShowGallery(true)}>
+          <button className={`nav-item ${showGallery && galleryMode === 'all' ? 'active' : ''}`} onClick={() => {setGalleryMode('all'); setShowGallery(true);}}>
             <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" /> Recordings
           </button>
           <button className="nav-item">
@@ -355,9 +373,9 @@ function Dashboard() {
           </button>
 
           <div className="nav-group-title">LIBRARY</div>
-          <button className="nav-item" onClick={fetchMedia}>
-            <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> Local Files
-          </button>
+            <button className={`nav-item ${showGallery && galleryMode === 'pi' ? 'active' : ''}`} onClick={() => {setGalleryMode('pi'); setShowGallery(true);}}>
+              <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> Local Files
+            </button>
           <button className="nav-item">
             <SvgIcon path="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /> Server Files
           </button>
@@ -631,14 +649,14 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Recent Recordings */}
+            {/* Desktop Recordings */}
             <div className="panel">
-              <div className="section-header">
-                <h3 className="section-title" style={{margin: 0}}>Recent Recordings</h3>
-                <span className="view-all" onClick={() => setShowGallery(true)}>View All</span>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
+                <h3 className="section-title" style={{margin: 0}}>Desktop Recordings</h3>
+                <span style={{fontSize: '11px', color: 'var(--text-muted)'}}>{desktopRecordings.length} files</span>
               </div>
               <div className="recordings-list">
-                {recordings.length > 0 ? recordings.slice(0, 3).map((item: any, idx: number) => (
+                {desktopRecordings.length > 0 ? desktopRecordings.slice(0, 3).map((item: any, idx: number) => (
                   <div key={idx} className="rec-item" onClick={() => openMedia(item)}>
                     <div className="rec-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`} : {}}>
                       {item.type !== 'image' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />}
@@ -647,7 +665,7 @@ function Dashboard() {
                       <h5>{item.name || item.base}</h5>
                       <p>{item.size || item.total_size} MB</p>
                     </div>
-                    <button className="rec-download" onClick={(e) => { e.stopPropagation(); window.open(`/api/device/download/${item.name || item.chunks?.[0]?.name}`, '_blank'); }}>
+                    <button className="rec-download" onClick={(e) => { e.stopPropagation(); handleDownload(item); }}>
                       <SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </button>
                     <button className="rec-download" style={{color: '#ef4444', marginLeft: '8px'}} onClick={(e) => { e.stopPropagation(); deleteMedia(item); }}>
@@ -658,7 +676,7 @@ function Dashboard() {
                   <div style={{textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '12px'}}>No recordings found on device</div>
                 )}
               </div>
-              <button className="btn-outline" onClick={() => setShowGallery(true)}>
+              <button className="btn-outline" onClick={() => {setGalleryMode('all'); setShowGallery(true);}}>
                 <SvgIcon path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" style={{width: '14px', height: '14px'}} />
                 View All Recordings
               </button>
@@ -737,14 +755,14 @@ function Dashboard() {
         <div className="modal-backdrop" onClick={() => setShowGallery(false)}>
           <div className="modal-content" style={{width: '90%', maxWidth: '1000px'}} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>All Media ({recordings.length})</h3>
+              <h3>{galleryMode === 'pi' ? 'Local Media (Pi)' : 'All Media'} ({galleryMode === 'pi' ? piRecordings.length : recordings.length})</h3>
               <button className="modal-close" onClick={() => setShowGallery(false)}>
                 <SvgIcon path="M6 18L18 6M6 6l12 12" />
               </button>
             </div>
-            {recordings.length > 0 ? (
+            {(galleryMode === 'pi' ? piRecordings : recordings).length > 0 ? (
               <div className="gallery-grid">
-                {recordings.map((item: any, idx: number) => (
+                {(galleryMode === 'pi' ? piRecordings : recordings).map((item: any, idx: number) => (
                   <div key={idx} className="gallery-card">
                     <div 
                       className="gallery-thumb"
@@ -758,7 +776,7 @@ function Dashboard() {
                       <p>{item.size || item.total_size} MB</p>
                       <div className="gallery-actions">
                         <button className="gallery-btn primary" onClick={() => { setShowGallery(false); openMedia(item); }}>Play</button>
-                        <button className="gallery-btn secondary" onClick={() => window.open(`/api/device/download/${item.name || item.chunks?.[0]?.name}`, '_blank')}>Download</button>
+                        <button className="gallery-btn secondary" onClick={() => handleDownload(item)}>Download</button>
                         <button className="gallery-btn" style={{color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.3)'}} onClick={(e) => { e.stopPropagation(); deleteMedia(item); }}>Delete</button>
                       </div>
                     </div>

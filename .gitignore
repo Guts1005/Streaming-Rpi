@@ -49,3 +49,4 @@ dist/
 *.zip
 source.rar
 
+.vercel
