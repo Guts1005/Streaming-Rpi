@@ -18,8 +18,7 @@ rpicam-vid \
   -f h264 \
   -i - \
   -f alsa \
-  -channels 1 \
-  -i hw:3,0 \
+  -i plughw:3,0 \
   -c:v copy \
   -c:a aac -ar 44100 -b:a 128k \
   -f flv \
