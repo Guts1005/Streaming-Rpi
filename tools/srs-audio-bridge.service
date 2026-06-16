@@ -1,0 +1,16 @@
+[Unit]
+Description=SRS Audio Talkback Bridge
+After=network.target srs.service
+
+[Service]
+ExecStart=/bin/bash /home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/tools/srs_audio_bridge.sh
+WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/tools
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=trc
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/trc/.Xauthority"
+
+[Install]
+WantedBy=multi-user.target

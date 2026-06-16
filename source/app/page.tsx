@@ -27,7 +27,8 @@ function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDesktopRec, setIsDesktopRec] = useState(false);
   const desktopRecRef = useRef<MediaRecorder | null>(null);
-  const livekitRoomRef = useRef<any>(null);
+  const webrtcRef = useRef<RTCPeerConnection | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
   
   const [piRecordings, setPiRecordings] = useState<any[]>([]);
   const [desktopRecordings, setDesktopRecordings] = useState<any[]>([]);
@@ -145,8 +146,8 @@ function Dashboard() {
       if (player) {
         try { player.destroy(); } catch(e) {}
       }
-      if (livekitRoomRef.current) {
-        livekitRoomRef.current.disconnect();
+      if (webrtcRef.current) {
+        webrtcRef.current.close();
       }
       setConnected(false);
     };
@@ -167,33 +168,55 @@ function Dashboard() {
 
   async function toggleTalk() { 
     if (talking) {
-      if (livekitRoomRef.current) {
-        await livekitRoomRef.current.localParticipant.setMicrophoneEnabled(false);
+      if (webrtcRef.current) {
+        webrtcRef.current.close();
+        webrtcRef.current = null;
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach(t => t.stop());
+        audioStreamRef.current = null;
       }
       setTalking(false);
       toast("Live talk disabled");
     } else {
       toast("Connecting live talk...");
       try {
-        if (!livekitRoomRef.current) {
-          const { Room } = await import("livekit-client");
-          const room = new Room();
-          livekitRoomRef.current = room;
-          
-          const tokenRes = await fetch('/api/token');
-          const tokenData = await tokenRes.json();
-          if (!tokenData.token) throw new Error("No token returned");
-          
-          const url = process.env.NEXT_PUBLIC_LIVEKIT_URL || 'wss://streaming-rpi-2jtqu2qo.livekit.cloud';
-          await room.connect(url, tokenData.token);
-        }
-        await livekitRoomRef.current.localParticipant.setMicrophoneEnabled(true);
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        audioStreamRef.current = stream;
+
+        const pc = new RTCPeerConnection();
+        webrtcRef.current = pc;
+        stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        const rtcUrl = `${window.location.protocol}//${window.location.host}/api/device/api/srs_webrtc_publish`;
+        const payload = {
+          api: rtcUrl,
+          streamurl: "webrtc://localhost/live/talkback",
+          sdp: offer.sdp
+        };
+
+        const res = await fetch(rtcUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        if (data.code !== 0) throw new Error(data.server + " error");
+        
+        await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+
         setTalking(true);
         toast("Live talk active!");
       } catch (e: any) {
-        console.error("LiveKit Talk Error:", e);
+        console.error("SRS Talk Error:", e);
         toast("Failed to connect live talk");
         setTalking(false);
+        if (webrtcRef.current) { webrtcRef.current.close(); webrtcRef.current = null; }
+        if (audioStreamRef.current) { audioStreamRef.current.getTracks().forEach(t => t.stop()); audioStreamRef.current = null; }
       }
     }
   }

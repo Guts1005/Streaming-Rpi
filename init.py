@@ -1646,6 +1646,16 @@ def list_logs():
 @app.route('/api/download_log/<filename>')
 def download_log(filename):
     return send_from_directory(LOG_DIR, filename, as_attachment=True)
+
+@app.route('/api/srs_webrtc_publish', methods=['POST'])
+def srs_webrtc_publish():
+    try:
+        import requests
+        srs_url = "http://localhost:1985/rtc/v1/publish/"
+        resp = requests.post(srs_url, json=request.json, timeout=5)
+        return jsonify(resp.json()), resp.status_code
+    except Exception as e:
+        return jsonify({"code": 500, "server": "flask", "message": str(e)}), 500
 if __name__ == '__main__':
     from werkzeug.serving import WSGIRequestHandler
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
