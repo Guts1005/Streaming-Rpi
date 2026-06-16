@@ -1651,6 +1651,18 @@ def download_log(filename):
 def srs_webrtc_publish():
     try:
         import requests
+        
+        # 1. Kick any existing publisher for the talkback stream to prevent 400 Bad Request
+        try:
+            streams_resp = requests.get("http://localhost:1985/api/v1/streams/", timeout=2)
+            for stream in streams_resp.json().get("streams", []):
+                if stream.get("name") == "talkback" and stream.get("publish", {}).get("active"):
+                    cid = stream["publish"]["cid"]
+                    requests.delete(f"http://localhost:1985/api/v1/clients/{cid}", timeout=2)
+        except Exception as e:
+            print("Failed to kick existing publisher:", e)
+
+        # 2. Proxy the new WebRTC publish request
         srs_url = "http://localhost:1985/rtc/v1/publish/"
         resp = requests.post(srs_url, json=request.json, timeout=5)
         return jsonify(resp.json()), resp.status_code
