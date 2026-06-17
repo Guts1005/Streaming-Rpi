@@ -30,6 +30,34 @@ function Dashboard() {
   const desktopRecRef = useRef<MediaRecorder | null>(null);
   const webrtcRef = useRef<RTCPeerConnection | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = () => {
+    const container = playerContainerRef.current as any;
+    const videoElem = videoRef.current as any;
+    
+    if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+      if (container?.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container?.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      } else if (container?.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      } else if (videoElem?.webkitEnterFullscreen) {
+        // iOS Safari fallback (only video element can go fullscreen)
+        videoElem.webkitEnterFullscreen();
+      }
+    } else {
+      const doc = document as any;
+      if (doc.exitFullscreen) {
+        doc.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        doc.webkitExitFullscreen();
+      } else if (doc.msExitFullscreen) {
+        doc.msExitFullscreen();
+      }
+    }
+  };
   
   const [piRecordings, setPiRecordings] = useState<any[]>([]);
   const [desktopRecordings, setDesktopRecordings] = useState<any[]>([]);
@@ -497,7 +525,7 @@ function Dashboard() {
           {/* ===== LEFT COLUMN ===== */}
           <div className="left-col">
             {/* Video Player */}
-            <div className="video-card">
+            <div className="video-card" ref={playerContainerRef}>
               <div className="video-frame">
                   <div style={{width: '100%', height: '100%', background: '#000'}}>
                     <video ref={videoRef} style={{width: '100%', height: '100%', objectFit: 'contain'}} muted={!audioOn} />
@@ -521,9 +549,6 @@ function Dashboard() {
                   <div className="badge-group">
                     <span className="badge grey">
                       <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> 1080p
-                    </span>
-                    <span className="badge grey" style={{cursor: 'pointer'}}>
-                      <SvgIcon path="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" style={{width: '12px', height: '12px'}} />
                     </span>
                   </div>
                 </div>
@@ -549,7 +574,7 @@ function Dashboard() {
                 <button className="ctrl-icon" title="Settings">
                   <SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </button>
-                <button className="ctrl-icon" title="Fullscreen">
+                <button className="ctrl-icon" title="Fullscreen" onClick={toggleFullscreen}>
                   <SvgIcon path="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </button>
               </div>
