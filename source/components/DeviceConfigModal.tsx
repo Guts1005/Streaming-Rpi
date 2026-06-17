@@ -89,8 +89,12 @@ function WifiSetup({ toast }: { toast: (msg: string) => void }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ssid: wifiSsid, password: wifiPass })
       });
-      if (res.ok) toast('Wi-Fi config sent to device!');
-      else toast('Failed to send config');
+      if (res.ok) {
+        toast('Wi-Fi config sent to device!');
+      } else {
+        const err = await res.json();
+        toast(err.error || 'Failed to send config');
+      }
     } catch (e) {
       toast('Error communicating with device');
     }
@@ -173,6 +177,7 @@ function WifiSetup({ toast }: { toast: (msg: string) => void }) {
         <div style={{ textAlign: 'center', background: '#fff', padding: '24px', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <QRCodeSVG value={`WIFI:T:WPA;S:${ssid};P:${password};;`} size={200} />
           <p style={{ color: '#0f172a', fontSize: '14px', marginTop: '16px', fontWeight: 500 }}>Hold this code in front of the Pi's camera</p>
+          <p style={{ color: '#64748b', fontSize: '12px', marginTop: '4px', maxWidth: '250px' }}>Note: The Pi only scans for QR codes during boot when disconnected from Wi-Fi.</p>
           <button onClick={() => setQrMode('none')} style={{ background: '#0f172a', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', marginTop: '12px' }}>Back</button>
         </div>
       )}
@@ -201,7 +206,8 @@ function BluetoothSetup({ toast }: { toast: (msg: string) => void }) {
         setDevices(data.devices || []);
         toast(`Found ${data.devices?.length || 0} devices`);
       } else {
-        toast('Failed to scan for devices');
+        const err = await res.json();
+        toast(err.error || 'Failed to scan for devices');
       }
     } catch (e) {
       toast('Error communicating with device');
@@ -217,8 +223,12 @@ function BluetoothSetup({ toast }: { toast: (msg: string) => void }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mac })
       });
-      if (res.ok) toast('Connected successfully!');
-      else toast('Failed to connect to device');
+      if (res.ok) {
+        toast('Connected successfully!');
+      } else {
+        const err = await res.json();
+        toast(err.error || 'Failed to connect to device');
+      }
     } catch (e) {
       toast('Error communicating with device');
     }
@@ -272,7 +282,8 @@ function HotspotSetup({ toast }: { toast: (msg: string) => void }) {
         const data = await res.json();
         toast(`Found device at ${data.ip}`);
       } else {
-        toast('Device not found on this network');
+        const err = await res.json();
+        toast(err.error || 'Device not found on this network');
       }
     } catch (e) {
       toast('Error pinging network');
