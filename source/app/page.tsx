@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
+import DeviceConfigModal from '../components/DeviceConfigModal';
 
 type TokenResponse = { token?: string; error?: string };
 
@@ -41,6 +42,7 @@ function Dashboard() {
   const [showGallery, setShowGallery] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [recordingsDropdownOpen, setRecordingsDropdownOpen] = useState(false);
+  const [showDeviceConfigModal, setShowDeviceConfigModal] = useState(false);
 
   const isRecordingLocal = deviceStatus?.is_recording || false;
   const storageFree = deviceStatus?.storage_free_gb ?? null;
@@ -674,6 +676,12 @@ function Dashboard() {
                   </div>
                   <div><h4>Live Talk</h4><p>{talking ? 'Tap to stop' : 'Talk to site'}</p></div>
                 </button>
+                <button className="action-btn" onClick={() => setShowDeviceConfigModal(true)}>
+                  <div className="action-icon" style={{color: '#8b5cf6', background: 'rgba(139, 92, 246, 0.1)'}}>
+                    <SvgIcon path="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                  </div>
+                  <div><h4>Network & Audio</h4><p>Wi-Fi, Bluetooth, Setup</p></div>
+                </button>
                 <button className="action-btn" onClick={shutdownPi}>
                   <div className="action-icon c-red">
                     <SvgIcon path="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
@@ -824,7 +832,7 @@ function Dashboard() {
         </div>
       )}
 
-
+      {showDeviceConfigModal && <DeviceConfigModal onClose={() => setShowDeviceConfigModal(false)} />}
     </div>
   );
 }

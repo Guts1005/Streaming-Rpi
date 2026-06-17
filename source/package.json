@@ -14,10 +14,12 @@
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.10.0",
     "cookie": "^1.1.1",
+    "html5-qrcode": "^2.3.8",
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.15.3",
     "mpegts.js": "^1.8.0",
     "next": "16.2.6",
+    "qrcode.react": "^4.2.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
