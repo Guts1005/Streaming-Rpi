@@ -227,13 +227,10 @@ body {
 }
 
 /* Video Badges */
-.video-badges-left {
-    position: absolute; top: 16px; left: 16px;
-    display: flex; gap: 8px; z-index: 4; pointer-events: none;
-}
-.video-badges-right {
-    position: absolute; top: 16px; right: 24px;
-    display: flex; gap: 8px; z-index: 4; pointer-events: none;
+.video-badges {
+    position: absolute; top: 16px; left: 16px; right: 16px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    pointer-events: none; z-index: 4; flex-wrap: wrap; gap: 8px;
 }
 .badge-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .badge {
