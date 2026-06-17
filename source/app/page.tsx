@@ -184,9 +184,27 @@ function Dashboard() {
     };
   }, [playerKey]);
 
-  const liveTime = useMemo(() => {
-    const d = new Date();
-    return d.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const [liveTime, setLiveTime] = useState("00:00:00");
+  const [resolution, setResolution] = useState("1080p");
+
+  useEffect(() => {
+    const videoElem = videoRef.current;
+    if (!videoElem) return;
+
+    const onTimeUpdate = () => {
+      const sec = Math.floor(videoElem.currentTime || 0);
+      const h = Math.floor(sec / 3600).toString().padStart(2, '0');
+      const m = Math.floor((sec % 3600) / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      setLiveTime(`${h}:${m}:${s}`);
+
+      if (videoElem.videoHeight) {
+        setResolution(`${videoElem.videoHeight}p`);
+      }
+    };
+
+    videoElem.addEventListener('timeupdate', onTimeUpdate);
+    return () => videoElem.removeEventListener('timeupdate', onTimeUpdate);
   }, []);
 
   function toast(text: string) { setMsg(text); setTimeout(() => setMsg(""), 3000); }
@@ -548,7 +566,7 @@ function Dashboard() {
                   </div>
                   <div className="badge-group">
                     <span className="badge grey">
-                      <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> 1080p
+                      <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> {resolution}
                     </span>
                   </div>
                 </div>
@@ -564,9 +582,8 @@ function Dashboard() {
                     : <SvgIcon path="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
                   }
                 </button>
-                <div className="progress-bar">
+                <div className="progress-bar" style={{visibility: 'hidden'}}>
                   <div className="progress-fill"></div>
-                  <div className="progress-thumb"></div>
                 </div>
                 <button className="ctrl-icon" onClick={snap} title="Capture snapshot">
                   <SvgIcon path="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
