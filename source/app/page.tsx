@@ -564,11 +564,11 @@ function Dashboard() {
                       {connected ? 'Connected' : 'Disconnected'}
                     </span>
                   </div>
-                  <div className="badge-group">
-                    <span className="badge grey">
-                      <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> {resolution}
-                    </span>
-                  </div>
+                    <div className="badge-group" style={{ marginRight: '32px' }}>
+                      <span className="badge grey">
+                        <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> {resolution}
+                      </span>
+                    </div>
                 </div>
               </div>
               
