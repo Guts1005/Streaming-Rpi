@@ -15,11 +15,12 @@ rpicam-vid \
   --timeout 0 \
   -o - \
 | ffmpeg \
-  -f h264 \
+  -y \
+  -use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f h264 \
   -i - \
-  -f alsa \
+  -use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f alsa \
   -i plughw:3,0 \
   -c:v copy \
-  -c:a aac -ar 44100 -b:a 128k \
+  -c:a aac -ar 44100 -b:a 128k -async 1 \
   -f flv \
   "rtmp://localhost/live/livestream"
