@@ -1,0 +1,15 @@
+[Unit]
+Description=BLE Beacon Indoor Positioning Service
+After=network.target bluetooth.target
+Requires=bluetooth.target
+
+[Service]
+Type=simple
+User=trc
+WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases
+ExecStart=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/venv/bin/python /home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/ble_locator.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
