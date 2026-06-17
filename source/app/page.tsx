@@ -555,21 +555,23 @@ function Dashboard() {
                   </div>
                 )}
                 
-                <div className="video-badges">
-                  <div className="badge-group">
-                    <span className="badge red">🔴 LIVE</span>
-                    <span className="badge grey">{liveTime}</span>
-                    <span className="badge grey">
-                      <span className={`dot ${connected ? 'green' : 'grey'}`} style={{marginRight: '4px'}}></span>
-                      {connected ? 'Connected' : 'Disconnected'}
-                    </span>
+                  <div className="video-badges-left">
+                    <div className="badge-group">
+                      <span className="badge red">🔴 LIVE</span>
+                      <span className="badge grey">{liveTime}</span>
+                      <span className="badge grey">
+                        <span className={`dot ${connected ? 'green' : 'grey'}`} style={{marginRight: '4px'}}></span>
+                        {connected ? 'Connected' : 'Disconnected'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="badge-group">
-                    <span className="badge grey">
-                      <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> {resolution}
-                    </span>
+                  <div className="video-badges-right">
+                    <div className="badge-group">
+                      <span className="badge grey">
+                        <SvgIcon path="M3 17v-5m4 5v-8m4 8V7m4 10V4" style={{width: '12px', height: '12px'}} /> {resolution}
+                      </span>
+                    </div>
                   </div>
-                </div>
               </div>
               
               <div className="video-controls">
