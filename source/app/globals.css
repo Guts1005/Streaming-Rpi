@@ -228,7 +228,7 @@ body {
 
 /* Video Badges */
 .video-badges {
-    position: absolute; top: 16px; left: 16px; right: 24px;
+    position: absolute; top: 24px; left: 24px; right: 32px;
     display: flex; justify-content: space-between; align-items: flex-start;
     pointer-events: none; z-index: 4;
 }
