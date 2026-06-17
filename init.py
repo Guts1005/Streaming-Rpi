@@ -1668,6 +1668,67 @@ def srs_webrtc_publish():
         return jsonify(resp.json()), resp.status_code
     except Exception as e:
         return jsonify({"code": 500, "server": "flask", "message": str(e)}), 500
+
+# --- Device Configuration Endpoints ---
+
+@app.route('/api/wifi/connect', methods=['POST'])
+def wifi_connect():
+    data = request.json
+    ssid = data.get('ssid')
+    password = data.get('password')
+    if not ssid or not password:
+        return jsonify({"success": False, "error": "Missing ssid or password"}), 400
+    try:
+        result = subprocess.run(["nmcli", "dev", "wifi", "connect", ssid, "password", password], capture_output=True, text=True)
+        if result.returncode == 0:
+            return jsonify({"success": True, "message": "Connected successfully"})
+        else:
+            return jsonify({"success": False, "error": result.stderr}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/bluetooth/scan', methods=['GET'])
+def bluetooth_scan():
+    try:
+        subprocess.run(["timeout", "5", "bluetoothctl", "scan", "on"], capture_output=True)
+        result = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True)
+        devices = []
+        for line in result.stdout.splitlines():
+            parts = line.split(" ", 2)
+            if len(parts) >= 3 and parts[0] == "Device":
+                devices.append({"mac": parts[1], "name": parts[2]})
+        return jsonify({"success": True, "devices": devices})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/bluetooth/connect', methods=['POST'])
+def bluetooth_connect():
+    mac = request.json.get('mac')
+    if not mac:
+        return jsonify({"success": False, "error": "Missing mac"}), 400
+    try:
+        subprocess.run(["bluetoothctl", "pair", mac], capture_output=True)
+        result = subprocess.run(["bluetoothctl", "connect", mac], capture_output=True, text=True)
+        if "Successful" in result.stdout or result.returncode == 0:
+            return jsonify({"success": True, "message": "Connected successfully"})
+        else:
+            return jsonify({"success": False, "error": result.stdout}), 400
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/hotspot/discover', methods=['POST'])
+def hotspot_discover():
+    try:
+        result = subprocess.run(["hostname", "-I"], capture_output=True, text=True)
+        ips = result.stdout.strip().split()
+        if ips:
+            return jsonify({"success": True, "ip": ips[0]})
+        return jsonify({"success": False, "error": "No IP found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# --------------------------------------
+
 if __name__ == '__main__':
     from werkzeug.serving import WSGIRequestHandler
     WSGIRequestHandler.protocol_version = "HTTP/1.1"
