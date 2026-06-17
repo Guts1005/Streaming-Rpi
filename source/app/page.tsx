@@ -40,6 +40,7 @@ function Dashboard() {
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
   const [showGallery, setShowGallery] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [recordingsDropdownOpen, setRecordingsDropdownOpen] = useState(false);
 
   const isRecordingLocal = deviceStatus?.is_recording || false;
   const storageFree = deviceStatus?.storage_free_gb ?? null;
@@ -385,9 +386,22 @@ function Dashboard() {
           <button className="nav-item">
             <SvgIcon path="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /> Dashboard
           </button>
-          <button className={`nav-item ${showGallery && galleryMode === 'all' ? 'active' : ''}`} onClick={() => {setGalleryMode('all'); setShowGallery(true);}}>
-            <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" /> Recordings
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <button className={`nav-item ${showGallery && galleryMode === 'all' ? 'active' : ''}`} onClick={() => { setGalleryMode('all'); setShowGallery(true); setRecordingsDropdownOpen(!recordingsDropdownOpen); }}>
+              <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" /> Recordings
+              <SvgIcon path={recordingsDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} style={{ marginLeft: 'auto', width: '14px', height: '14px' }} />
+            </button>
+            {recordingsDropdownOpen && (
+              <div style={{ paddingLeft: '28px', display: 'flex', flexDirection: 'column', marginTop: '2px', marginBottom: '4px' }}>
+                <button className={`nav-item ${showGallery && galleryMode === 'pi' ? 'active' : ''}`} onClick={() => {setGalleryMode('pi'); setShowGallery(true);}}>
+                  <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> Local Files
+                </button>
+                <button className="nav-item">
+                  <SvgIcon path="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /> Server Files
+                </button>
+              </div>
+            )}
+          </div>
           <button className="nav-item">
             <SvgIcon path="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /> AI Analytics <span className="nav-badge" style={{background: '#2563EB', color: '#fff'}}>PRO</span>
           </button>
@@ -395,13 +409,7 @@ function Dashboard() {
             <SvgIcon path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Reports
           </button>
 
-          <div className="nav-group-title">LIBRARY</div>
-            <button className={`nav-item ${showGallery && galleryMode === 'pi' ? 'active' : ''}`} onClick={() => {setGalleryMode('pi'); setShowGallery(true);}}>
-              <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> Local Files
-            </button>
-          <button className="nav-item">
-            <SvgIcon path="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" /> Server Files
-          </button>
+
 
           <div className="nav-group-title">AI FEATURES</div>
           <button className="nav-item">

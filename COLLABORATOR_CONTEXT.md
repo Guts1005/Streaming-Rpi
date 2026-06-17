@@ -23,3 +23,4 @@
 ## Recent Updates
 - Replaced the inline SVG login logo with the uploaded Aspire logo in source/app/login/page.tsx.
 - Removed the redundant "Smart Helmet" title below the Aspire logo on the login page.
+- Moved "Local Files" and "Server Files" sidebar menu items into a dropdown under the "Recordings" tab.
