@@ -1679,7 +1679,7 @@ def wifi_connect():
     if not ssid or not password:
         return jsonify({"success": False, "error": "Missing ssid or password"}), 400
     try:
-        result = subprocess.run(["nmcli", "dev", "wifi", "connect", ssid, "password", password], capture_output=True, text=True)
+        result = subprocess.run(["sudo", "nmcli", "dev", "wifi", "connect", ssid, "password", password], capture_output=True, text=True)
         if result.returncode == 0:
             return jsonify({"success": True, "message": "Connected successfully"})
         else:
@@ -1690,8 +1690,8 @@ def wifi_connect():
 @app.route('/api/bluetooth/scan', methods=['GET'])
 def bluetooth_scan():
     try:
-        subprocess.run(["timeout", "5", "bluetoothctl", "scan", "on"], capture_output=True)
-        result = subprocess.run(["bluetoothctl", "devices"], capture_output=True, text=True)
+        subprocess.run(["sudo", "timeout", "5", "bluetoothctl", "scan", "on"], capture_output=True)
+        result = subprocess.run(["sudo", "bluetoothctl", "devices"], capture_output=True, text=True)
         devices = []
         for line in result.stdout.splitlines():
             parts = line.split(" ", 2)
@@ -1707,8 +1707,8 @@ def bluetooth_connect():
     if not mac:
         return jsonify({"success": False, "error": "Missing mac"}), 400
     try:
-        subprocess.run(["bluetoothctl", "pair", mac], capture_output=True)
-        result = subprocess.run(["bluetoothctl", "connect", mac], capture_output=True, text=True)
+        subprocess.run(["sudo", "bluetoothctl", "pair", mac], capture_output=True)
+        result = subprocess.run(["sudo", "bluetoothctl", "connect", mac], capture_output=True, text=True)
         if "Successful" in result.stdout or result.returncode == 0:
             return jsonify({"success": True, "message": "Connected successfully"})
         else:
