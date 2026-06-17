@@ -387,12 +387,15 @@ function Dashboard() {
             <SvgIcon path="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /> Dashboard
           </button>
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <button className={`nav-item ${showGallery && galleryMode === 'all' ? 'active' : ''}`} onClick={() => { setGalleryMode('all'); setShowGallery(true); setRecordingsDropdownOpen(!recordingsDropdownOpen); }}>
+            <button className="nav-item" onClick={() => setRecordingsDropdownOpen(!recordingsDropdownOpen)}>
               <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" /> Recordings
               <SvgIcon path={recordingsDropdownOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"} style={{ marginLeft: 'auto', width: '14px', height: '14px' }} />
             </button>
             {recordingsDropdownOpen && (
               <div style={{ paddingLeft: '28px', display: 'flex', flexDirection: 'column', marginTop: '2px', marginBottom: '4px' }}>
+                <button className={`nav-item ${showGallery && galleryMode === 'all' ? 'active' : ''}`} onClick={() => {setGalleryMode('all'); setShowGallery(true);}}>
+                  <SvgIcon path="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /> All Recordings
+                </button>
                 <button className={`nav-item ${showGallery && galleryMode === 'pi' ? 'active' : ''}`} onClick={() => {setGalleryMode('pi'); setShowGallery(true);}}>
                   <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> Local Files
                 </button>
