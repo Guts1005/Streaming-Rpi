@@ -228,9 +228,9 @@ body {
 
 /* Video Badges */
 .video-badges {
-    position: absolute; top: 16px; left: 20px; width: calc(100% - 40px);
+    position: absolute; top: 16px; left: 16px; right: 16px;
     display: flex; justify-content: space-between; align-items: flex-start;
-    pointer-events: none; z-index: 4; box-sizing: border-box; margin: 0; padding: 0;
+    pointer-events: none; z-index: 4; flex-wrap: wrap; gap: 8px;
 }
 .badge-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 .badge {
