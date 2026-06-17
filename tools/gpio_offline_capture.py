@@ -38,16 +38,16 @@ def internet_available():
 
 
 def publisher_active():
-    return subprocess.run(["systemctl", "is-active", "--quiet", "livekit-publisher"]).returncode == 0
+    return subprocess.run(["systemctl", "is-active", "--quiet", "srs-publisher"]).returncode == 0
 
 
 def stop_publisher():
-    subprocess.run(["systemctl", "stop", "livekit-publisher"], check=False)
+    subprocess.run(["systemctl", "stop", "srs-publisher"], check=False)
 
 
 def start_publisher_if_online():
     if internet_available():
-        subprocess.run(["systemctl", "start", "livekit-publisher"], check=False)
+        subprocess.run(["systemctl", "start", "srs-publisher"], check=False)
 
 
 def get_is_recording():

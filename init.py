@@ -820,7 +820,7 @@ def start_record():
         is_recording_active = True
         if not record_proc:
             import subprocess, time
-            subprocess.run(["sudo", "systemctl", "stop", "livekit-publisher.service"], check=False)
+            subprocess.run(["sudo", "systemctl", "stop", "srs-publisher.service"], check=False)
             time.sleep(3.0)
             os.makedirs(RECORD_FOLDER, exist_ok=True)
             subprocess.run(["sudo", "chmod", "777", RECORD_FOLDER], check=False)
@@ -870,7 +870,7 @@ def stop_record():
             except Exception:
                 pass
             
-            subprocess.run(["sudo", "systemctl", "start", "livekit-publisher.service"], check=False)
+            subprocess.run(["sudo", "systemctl", "start", "srs-publisher.service"], check=False)
     return "OK"
 
 @app.route('/api/toggle_audio', methods=['POST'])
