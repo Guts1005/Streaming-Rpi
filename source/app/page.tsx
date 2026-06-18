@@ -62,7 +62,7 @@ function Dashboard() {
   const [piRecordings, setPiRecordings] = useState<any[]>([]);
   const [desktopRecordings, setDesktopRecordings] = useState<any[]>([]);
   const recordings = [...desktopRecordings, ...piRecordings].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const [galleryMode, setGalleryMode] = useState<'all' | 'pi'>('all');
+  const [galleryMode, setGalleryMode] = useState<'desktop' | 'pi'>('desktop');
   const [deviceStatus, setDeviceStatus] = useState<any>(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [geminiAnalysis, setGeminiAnalysis] = useState<any>(null);
@@ -448,8 +448,8 @@ function Dashboard() {
             </button>
             {recordingsDropdownOpen && (
               <div style={{ paddingLeft: '28px', display: 'flex', flexDirection: 'column', marginTop: '2px', marginBottom: '4px' }}>
-                <button className={`nav-item ${showGallery && galleryMode === 'all' ? 'active' : ''}`} onClick={() => {setGalleryMode('all'); setShowGallery(true);}}>
-                  <SvgIcon path="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /> All Recordings
+                <button className={`nav-item ${showGallery && galleryMode === 'desktop' ? 'active' : ''}`} onClick={() => {setGalleryMode('desktop'); setShowGallery(true);}}>
+                  <SvgIcon path="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /> Desktop Recordings
                 </button>
                 <button className={`nav-item ${showGallery && galleryMode === 'pi' ? 'active' : ''}`} onClick={() => {setGalleryMode('pi'); setShowGallery(true);}}>
                   <SvgIcon path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /> Local Files
@@ -767,9 +767,9 @@ function Dashboard() {
                   <div style={{textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '12px'}}>No recordings found on device</div>
                 )}
               </div>
-              <button className="btn-outline" onClick={() => {setGalleryMode('all'); setShowGallery(true);}}>
+              <button className="btn-outline" onClick={() => {setGalleryMode('desktop'); setShowGallery(true);}}>
                 <SvgIcon path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" style={{width: '14px', height: '14px'}} />
-                View All Recordings
+                View Desktop Recordings
               </button>
             </div>
 
@@ -846,14 +846,14 @@ function Dashboard() {
         <div className="modal-backdrop" onClick={() => setShowGallery(false)}>
           <div className="modal-content" style={{width: '90%', maxWidth: '1000px'}} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{galleryMode === 'pi' ? 'Local Media (Pi)' : 'All Media'} ({galleryMode === 'pi' ? piRecordings.length : recordings.length})</h3>
+              <h3>{galleryMode === 'pi' ? 'Local Media (Pi)' : 'Desktop Media'} ({galleryMode === 'pi' ? piRecordings.length : desktopRecordings.length})</h3>
               <button className="modal-close" onClick={() => setShowGallery(false)}>
                 <SvgIcon path="M6 18L18 6M6 6l12 12" />
               </button>
             </div>
-            {(galleryMode === 'pi' ? piRecordings : recordings).length > 0 ? (
+            {(galleryMode === 'pi' ? piRecordings : desktopRecordings).length > 0 ? (
               <div className="gallery-grid">
-                {(galleryMode === 'pi' ? piRecordings : recordings).map((item: any, idx: number) => (
+                {(galleryMode === 'pi' ? piRecordings : desktopRecordings).map((item: any, idx: number) => (
                   <div key={idx} className="gallery-card">
                     <div 
                       className="gallery-thumb"
