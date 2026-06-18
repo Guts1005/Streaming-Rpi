@@ -213,6 +213,35 @@ body {
 }
 .video-frame video, .video-frame > div { width: 100% !important; height: 100% !important; }
 .video-frame > div > video { object-fit: cover !important; }
+
+/* Fullscreen Overrides */
+.video-card:fullscreen {
+    border: none;
+    border-radius: 0;
+    background: #000;
+}
+.video-card:fullscreen .video-frame {
+    flex: 1;
+    aspect-ratio: auto;
+    background: #000;
+}
+.video-card:fullscreen .video-frame > div > video {
+    object-fit: contain !important;
+}
+.video-card:-webkit-full-screen {
+    border: none;
+    border-radius: 0;
+    background: #000;
+}
+.video-card:-webkit-full-screen .video-frame {
+    flex: 1;
+    aspect-ratio: auto;
+    background: #000;
+}
+.video-card:-webkit-full-screen .video-frame > div > video {
+    object-fit: contain !important;
+}
+
 .video-dim-overlay {
     position: absolute; inset: 0;
     background: rgba(0,0,0,0.65);
