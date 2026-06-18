@@ -40,6 +40,10 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   if (accept) headers.set("accept", accept);
   if (range) headers.set("range", range);
   
+  // Bypass tunnel warning screens (ngrok, localtunnel, etc)
+  headers.set("ngrok-skip-browser-warning", "1");
+  headers.set("Bypass-Tunnel-Reminder", "true");
+  
 
 
   const method = request.method.toUpperCase();
