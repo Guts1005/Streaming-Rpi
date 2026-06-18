@@ -29,27 +29,26 @@ Do not assume these are still current if the user says the Pi/network changed. V
 
 ## Current Architecture
 
-- Camera livestream uses LiveKit.
-- Vercel/Next.js subscribes to LiveKit video/audio.
-- Browser-to-Pi talkback uses LiveKit microphone publishing.
-- Pi audio bridge publishes Pi USB/default mic to LiveKit and plays browser audio on the Pi speaker.
+- Camera livestream uses SRS with HTTP-FLV.
+- Vercel/Next.js subscribes to SRS FLV video.
+- Browser-to-Pi talkback uses WebRTC to SRS.
+- Pi audio bridge plays browser audio on the Pi speaker.
 - Pi local GPIO offline capture uses a separate service.
 - Flask backend manages media listing, local recording APIs, capture APIs, upload, delete, Gemini analysis, and AI summary.
-- Vercel device proxy uses `/api/device/...`; it only works if `DEVICE_API_BASE` points to a publicly reachable Pi/backend URL.
+- Vercel device proxy uses `/api/device/...`; it must connect directly to the Pi's IP or a proxy, NOT ngrok.
 
-Important: Vercel cannot directly reach a private LAN IP such as `192.168.x.x` from the cloud.
+Important: Vercel cloud cannot reach a local IP. For local testing, ensure the phone or PC is on the same LAN as the Pi.
 
 ## Key Services On The Pi
 
-- `livekit-publisher.service`: publishes camera video to LiveKit.
-- `livekit-audio-bridge.service`: two-way LiveKit audio bridge.
+- `srs-publisher.service`: publishes camera video to SRS.
 - `gpio-offline-capture.service`: GPIO local recording/photo capture and auto-sync.
 - `wifi-qr-connect.service`: boot-time WiFi QR scanner when no internet is available.
 
 Check status with:
 
 ```bash
-systemctl is-active livekit-publisher livekit-audio-bridge gpio-offline-capture wifi-qr-connect
+systemctl is-active srs-publisher gpio-offline-capture wifi-qr-connect
 ```
 
 ## GPIO Defaults
@@ -66,7 +65,7 @@ Behavior:
 - `GPIO19` stays ON when streaming/connected status is active.
 - `GPIO26` stays ON during local recording.
 - `GPIO26` blinks once on image capture.
-- Local recording may stop LiveKit streaming temporarily because the Pi camera cannot be owned by two processes at the same time.
+- Local recording may stop SRS streaming temporarily because the Pi camera cannot be owned by two processes at the same time.
 
 ## WiFi / Offline Flow
 
@@ -94,10 +93,6 @@ Deploy the current frontend from `source/` unless the user explicitly says to us
 
 Required Vercel environment variables:
 
-- `LIVEKIT_API_KEY`
-- `LIVEKIT_API_SECRET`
-- `LIVEKIT_ROOM`
-- `NEXT_PUBLIC_LIVEKIT_URL`
 - `DEVICE_API_BASE` if device APIs must work from Vercel
 - `GEMINI_API_KEY` if Gemini calls run through Vercel routes
 
@@ -177,17 +172,15 @@ python -m py_compile init.py tools/*.py
 Pi service health:
 
 ```bash
-systemctl is-active livekit-publisher livekit-audio-bridge gpio-offline-capture
-journalctl -u livekit-publisher -n 50 --no-pager
-journalctl -u livekit-audio-bridge -n 50 --no-pager
+systemctl is-active srs-publisher gpio-offline-capture
+journalctl -u srs-publisher -n 50 --no-pager
 journalctl -u gpio-offline-capture -n 50 --no-pager
 ```
 
 Demo checklist:
 
-1. LiveKit video appears on Vercel.
-2. Browser can hear Pi mic after enabling audio.
-3. Browser mic talkback plays through Pi speaker.
+1. Video appears on Vercel via SRS.
+2. Browser mic talkback plays through Pi speaker.
 4. GPIO local recording starts/stops.
 5. GPIO photo capture saves a file.
 6. Offline files sync after internet returns.
@@ -210,10 +203,10 @@ When UI and functionality conflict, preserve working stream/audio/talk logic fir
 
 ## Known Pitfalls
 
-- Static HTML LiveKit code was fragile. Prefer React LiveKit components in `source/app/page.tsx`.
+- Static HTML LiveKit code was fragile, we now use SRS.
 - Vercel cannot call a private Pi IP directly.
 - The Pi camera cannot be shared by `rpicam-vid`, Picamera2, and `rpicam-still` simultaneously.
-- GPIO local recording may need to stop `livekit-publisher` to access the camera.
+- GPIO local recording may need to stop `srs-publisher` to access the camera.
 - Browser audio playback often requires a user click.
 - Do not assume the Pi has a monitor, keyboard, mouse, HDMI, or LAN at demo sites.
 - Always account for hotspot/client WiFi instability.

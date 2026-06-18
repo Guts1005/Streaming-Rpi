@@ -29,7 +29,6 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   // This bypasses Vercel's 10-second timeout and 4.5MB response size limits
   if (path[0] === "download") {
     const redirectUrl = new URL(`${base}/api/${targetPath}${request.nextUrl.search}`);
-    redirectUrl.searchParams.set("ngrok-skip-browser-warning", "1");
     return Response.redirect(redirectUrl.toString(), 302);
   }
 
@@ -41,8 +40,7 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   if (accept) headers.set("accept", accept);
   if (range) headers.set("range", range);
   
-  // Bypass ngrok browser warning screen for API proxy requests
-  headers.set("ngrok-skip-browser-warning", "1");
+
 
   const method = request.method.toUpperCase();
   const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();

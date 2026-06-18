@@ -750,54 +750,7 @@ def health():
         "camera_error": camera_error
     })
 
-@app.route('/api/livekit_audio_status')
-def livekit_audio_status():
-    bridge_service_active = False
-    bridge_process_running = False
-    receiver_service_active = False
-    receiver_process_running = False
 
-    try:
-        result = subprocess.run(
-            ["systemctl", "is-active", "--quiet", "livekit-audio-bridge"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        bridge_service_active = result.returncode == 0
-    except Exception:
-        bridge_service_active = False
-
-    try:
-        result = subprocess.run(
-            ["pgrep", "-f", "tools/livekit_audio_bridge.py"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        bridge_process_running = result.returncode == 0
-    except Exception:
-        bridge_process_running = False
-
-    try:
-        result = subprocess.run(
-            ["systemctl", "is-active", "--quiet", "livekit-audio-receiver"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        receiver_service_active = result.returncode == 0
-    except Exception:
-        receiver_service_active = False
-
-    try:
-        result = subprocess.run(
-            ["pgrep", "-f", "tools/livekit_audio_receiver.py"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        receiver_process_running = result.returncode == 0
-    except Exception:
-        receiver_process_running = False
-
-    bridge_running = bridge_service_active or bridge_process_running
     receiver_running = receiver_service_active or receiver_process_running
 
     return jsonify({

@@ -18,19 +18,8 @@ echo "  2) IMX219 (Requires specific config)"
 read -p "Enter choice (1 or 2): " CAMERA_CHOICE
 
 echo ""
-echo "--- 2. Ngrok Configuration ---"
-echo "Ngrok Auth Token and Domain automatically injected."
-NGROK_CHOICE="y"
-NGROK_TOKEN="3F0EsMSM4jMAntOrXYlKSkBi4Vn_47Fpv8Sc1TeMqWCNBpppg"
-NGROK_DOMAIN="unwell-creamer-anytime.ngrok-free.dev"
-
-echo ""
 echo "--- 3. Environment Variables ---"
-echo "Setting up LiveKit and Github credentials..."
-LK_URL="wss://streaming-rpi-2jtqu2qo.livekit.cloud"
-LK_KEY="APIA9ZvbR8nPx9p"
-LK_SECRET="Eg0Z0JTjwZlo1fYZb8OEe8O8pWQ4HHNEQHiQbM6MfRgB"
-LK_ROOM="helmet-live"
+echo "Setting up Github credentials..."
 GITHUB_PAT="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"
 
 echo ""
@@ -42,16 +31,7 @@ echo "[1/7] Updating system and installing dependencies..."
 sudo apt update
 sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git rpicam-apps curl wget
 
-if [ "$NGROK_CHOICE" == "y" ]; then
-    echo "Installing Ngrok..."
-    curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
-      | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null \
-      && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" \
-      | sudo tee /etc/apt/sources.list.d/ngrok.list \
-      && sudo apt update \
-      && sudo apt install -y ngrok
-    ngrok config add-authtoken "$NGROK_TOKEN"
-fi
+
 
 # 5. Clone Repository
 echo "[2/7] Cloning repository..."
@@ -72,10 +52,7 @@ sudo chmod 777 recordings
 # 6. Generate .env file
 echo "[3/7] Generating .env file..."
 cat <<EOF > .env
-LIVEKIT_URL=$LK_URL
-LIVEKIT_API_KEY=$LK_KEY
-LIVEKIT_API_SECRET=$LK_SECRET
-LIVEKIT_ROOM=$LK_ROOM
+# Environment variables go here
 EOF
 
 # 7. Fix permissions and Windows line endings
@@ -90,7 +67,6 @@ source venv/bin/activate
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 [ -f requirements-host.txt ] && pip install -r requirements-host.txt
-[ -f requirements-livekit-audio.txt ] && pip install -r requirements-livekit-audio.txt
 
 # 9. Configure Camera Boot options
 echo "[6/7] Configuring camera settings in /boot/firmware/config.txt..."
@@ -136,25 +112,7 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable smart-helmet-backend.service
 
-if [ "$NGROK_CHOICE" == "y" ]; then
-    cat <<EOF | sudo tee /etc/systemd/system/ngrok.service > /dev/null
-[Unit]
-Description=Ngrok Tunnel
-After=network.target smart-helmet-backend.service
 
-[Service]
-Type=simple
-User=$USER
-ExecStart=$(which ngrok) http --domain=$NGROK_DOMAIN --config=/home/$USER/.config/ngrok/ngrok.yml 5001
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-EOF
-    sudo systemctl daemon-reload
-    sudo systemctl enable ngrok.service
-fi
 
 # Note: Any .service files found in the tools/ directory will be registered with systemd
 for service in tools/*.service; do
@@ -172,8 +130,8 @@ rm -f ~/.config/autostart/hm-updater.desktop
 echo "==================================================="
 echo "  Setup Complete! "
 echo "==================================================="
-echo "Your Raspberry Pi is now 100% turnkey. The backend, GPIO buttons, "
-echo "and Ngrok tunnel will start automatically on every boot!"
+echo "Your Raspberry Pi is now 100% turnkey. The backend and GPIO buttons"
+echo "will start automatically on every boot!"
 echo ""
 echo "Please reboot your Raspberry Pi for all changes to take effect."
 echo "Command: sudo reboot"

@@ -140,10 +140,7 @@ function Dashboard() {
           }, {
             enableWorker: true,
             enableStashBuffer: false,
-            stashInitialSize: 128,
-            liveBufferLatencyChasing: true,
-            liveBufferLatencyMaxLatency: 1.5,
-            liveBufferLatencyMinRemain: 0.2
+            stashInitialSize: 128
           });
           player.attachMediaElement(videoElement);
           player.load();
@@ -415,7 +412,7 @@ function Dashboard() {
       a.download = item.name;
       a.click();
     } else {
-      window.open(`/api/device/download/${item.name || item.chunks?.[0]?.name}?ngrok-skip-browser-warning=1`, '_blank');
+      window.open(`/api/device/download/${item.name || item.chunks?.[0]?.name}`, '_blank');
     }
   };
 
