@@ -92,7 +92,7 @@ function Dashboard() {
   };
 
   const shutdownPi = async () => {
-    if (!window.confirm("Are you sure you want to completely shut down the Helmet? You will physically need to turn the power back on.")) return;
+    if (!window.confirm("Are you sure you want to completely shut down the Streaming Device? You will physically need to turn the power back on.")) return;
     try {
       const res = await fetch("/api/device/api/shutdown", { method: "POST" });
       if (res.ok) {
@@ -732,7 +732,7 @@ function Dashboard() {
                   <div className="action-icon c-red">
                     <SvgIcon path="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
                   </div>
-                  <div><h4>Power Off</h4><p>Shutdown Helmet</p></div>
+                  <div><h4>Power Off</h4><p>Shutdown Streaming Device</p></div>
                 </button>
               </div>
             </div>
@@ -843,7 +843,7 @@ function Dashboard() {
         <div className="modal-backdrop" onClick={() => setShowGallery(false)}>
           <div className="modal-content" style={{width: '90%', maxWidth: '1000px'}} onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>{galleryMode === 'pi' ? 'Helmet Media' : 'Desktop Media'} ({galleryMode === 'pi' ? piRecordings.length : desktopRecordings.length})</h3>
+              <h3>{galleryMode === 'pi' ? 'Streaming Device Media' : 'Desktop Media'} ({galleryMode === 'pi' ? piRecordings.length : desktopRecordings.length})</h3>
               <button className="modal-close" onClick={() => setShowGallery(false)}>
                 <SvgIcon path="M6 18L18 6M6 6l12 12" />
               </button>
