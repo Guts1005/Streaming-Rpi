@@ -139,8 +139,11 @@ function Dashboard() {
             url: '/api/device/live/livestream.flv'
           }, {
             enableWorker: true,
-            enableStashBuffer: false,
-            stashInitialSize: 128
+            enableStashBuffer: true,
+            stashInitialSize: 128,
+            liveBufferLatencyChasing: true,
+            liveBufferLatencyMaxLatency: 2.0,
+            liveBufferLatencyMinRemain: 0.5
           });
           player.attachMediaElement(videoElement);
           player.load();
@@ -490,9 +493,9 @@ function Dashboard() {
         <div className="device-status-sidebar">
           <div className="ds-header">
             <span>Device Status</span>
-            <span style={{color: connected ? 'var(--status-active)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px'}}>
-              <span className={`dot ${connected ? 'green' : 'grey'}`}></span>
-              {connected ? 'Online' : 'Offline'}
+            <span style={{color: deviceStatus ? 'var(--status-active)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px'}}>
+              <span className={`dot ${deviceStatus ? 'green' : 'grey'}`}></span>
+              {deviceStatus ? 'Online' : 'Offline'}
             </span>
           </div>
           <div className="ds-id">Device ID</div>
