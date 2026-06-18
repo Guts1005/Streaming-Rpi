@@ -29,15 +29,18 @@ Do not assume these are still current if the user says the Pi/network changed. V
 
 ## Current Architecture
 
-- Camera livestream uses SRS with HTTP-FLV.
-- Vercel/Next.js subscribes to SRS FLV video.
-- Browser-to-Pi talkback uses WebRTC to SRS.
-- Pi audio bridge plays browser audio on the Pi speaker.
-- Pi local GPIO offline capture uses a separate service.
-- Flask backend manages media listing, local recording APIs, capture APIs, upload, delete, Gemini analysis, and AI summary.
-- Vercel device proxy uses `/api/device/...`; it must connect directly to the Pi's IP or a proxy, NOT ngrok.
+- **Camera livestream:** Uses SRS (Simple Realtime Server) via HTTP-FLV.
+- **Vercel/Next.js:** Subscribes to the SRS FLV video stream using `mpegts.js`.
+- **Talkback (Browser to Pi):** Uses WebRTC to publish the browser's mic to SRS.
+- **Audio Output:** Pi runs `webrtc_audio_player.py` to play the talkback audio out of its speaker.
+- **BLE Scanner:** Runs `ble_locator.py` to update location (Note: briefly pauses Wi-Fi, which can cause network jitter).
+- **Backend APIs:** Flask manages media listing, recording APIs, captures, uploads, deletions, and Gemini analysis.
+- **Vercel proxy:** The `/api/device/...` proxy in Next.js relies on `DEVICE_API_BASE`.
 
-Important: Vercel cloud cannot reach a local IP. For local testing, ensure the phone or PC is on the same LAN as the Pi.
+**Important Networking Context:**
+- **NO NGROK or LIVEKIT.** These are fully deprecated. Do not attempt to use or restore them.
+- If deployed to Vercel Cloud, Vercel **cannot** reach a private LAN IP (e.g., `192.168.x.x`). `DEVICE_API_BASE` must be a publicly accessible URL (like Cloudflare Tunnel or static IP) for cloud proxies to work.
+- If using local IPs, the Next.js app must be run locally on the same LAN, or the frontend must bypass the Vercel proxy and hit the Pi directly via CORS.
 
 ## Key Services On The Pi
 
