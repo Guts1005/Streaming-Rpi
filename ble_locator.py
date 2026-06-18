@@ -12,8 +12,8 @@ from bleak import BleakScanner
 BEACONS_FILE = "beacons.json"
 LOG_FILE = "beacon_logs.csv"
 BACKEND_URL = "http://localhost:5000/api/update_gps"
-SCAN_ACTIVE_SEC = 1.5
-SCAN_SLEEP_SEC = 3.5
+SCAN_ACTIVE_SEC = 0.5
+SCAN_SLEEP_SEC = 4.5
 HYSTERESIS_DB = 5.0
 
 # Extract Device ID from init.py or environment
