@@ -733,14 +733,14 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Desktop Recordings */}
+            {/* Recent Recordings */}
             <div className="panel">
               <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px'}}>
-                <h3 className="section-title" style={{margin: 0}}>Desktop Recordings</h3>
-                <span style={{fontSize: '11px', color: 'var(--text-muted)'}}>{desktopRecordings.length} files</span>
+                <h3 className="section-title" style={{margin: 0}}>Recent Recordings</h3>
+                <span style={{fontSize: '11px', color: 'var(--text-muted)'}}>{recordings.length} files</span>
               </div>
               <div className="recordings-list">
-                {desktopRecordings.length > 0 ? desktopRecordings.slice(0, 3).map((item: any, idx: number) => (
+                {recordings.length > 0 ? recordings.slice(0, 3).map((item: any, idx: number) => (
                   <div key={idx} className="rec-item" onClick={() => openMedia(item)}>
                     <div className="rec-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`} : {}}>
                       {item.type !== 'image' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />}
@@ -760,9 +760,9 @@ function Dashboard() {
                   <div style={{textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '12px'}}>No recordings found on device</div>
                 )}
               </div>
-              <button className="btn-outline" onClick={() => {setGalleryMode('desktop'); setShowGallery(true);}}>
+              <button className="btn-outline" onClick={() => {setGalleryMode('pi'); setShowGallery(true);}}>
                 <SvgIcon path="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" style={{width: '14px', height: '14px'}} />
-                View Desktop Recordings
+                View All Recordings
               </button>
             </div>
 
