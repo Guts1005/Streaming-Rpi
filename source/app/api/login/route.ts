@@ -11,32 +11,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Local dev fallback for Windows sqlite issues
+    // Local dev fallback
     if (username === 'admin' && password === 'admin123') {
-      const token = signToken({ id: 1, username: 'admin', company_id: 'HQ' });
-      const response = NextResponse.json({ success: true, user: { id: 1, username: 'admin', company_id: 'HQ' } });
+      const token = signToken({ id: 1, username: 'admin', company_id: '8.0', ac: 'Admin' });
+      const response = NextResponse.json({ success: true, user: { id: 1, username: 'admin', company_id: '8.0', ac: 'Admin' } });
       response.headers.append('Set-Cookie', setAuthCookie(token));
       return response;
     }
 
-    const user = await getQuery('SELECT * FROM users WHERE username = ? AND status = ?', [username, 'active']) as any;
+    const sql = `SELECT * FROM users WHERE username = ?`;
+    const user = await getQuery(sql, [username]) as any;
 
     if (!user) {
-      return NextResponse.json({ error: 'Invalid credentials or inactive user' }, { status: 401 });
+      return NextResponse.json({ error: 'USER_NOT_FOUND' }, { status: 401 });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password_hash);
+    if (user.actv !== 'y') {
+      return NextResponse.json({ error: 'USER_INACTIVE' }, { status: 401 });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.pw);
+
     if (!isMatch) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+      return NextResponse.json({ error: 'PASSWORD_MISMATCH' }, { status: 401 });
     }
 
-    const token = signToken({ id: user.id, username: user.username, company_id: user.company_id });
+    const validRoles = ['Admin', 'Sports', 'Surveyor', 'Site'];
+    if (!user.ac || !validRoles.includes(user.ac)) {
+      return NextResponse.json({ error: 'ROLE_NOT_FOUND' }, { status: 403 });
+    }
+
+    let token;
+    try {
+      token = signToken({ id: user.id, username: user.username, company_id: user.company_id, ac: user.ac });
+    } catch (e) {
+      return NextResponse.json({ error: 'SESSION_CREATION_FAILED' }, { status: 500 });
+    }
     
-    const response = NextResponse.json({ success: true, user: { id: user.id, username: user.username, company_id: user.company_id } });
+    const response = NextResponse.json({ success: true, user: { id: user.id, username: user.username, company_id: user.company_id, ac: user.ac } });
     response.headers.append('Set-Cookie', setAuthCookie(token));
 
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'UNKNOWN_LOGIN_FAILURE' }, { status: 500 });
   }
 }

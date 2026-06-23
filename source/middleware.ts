@@ -4,10 +4,13 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value;
 
-  // Protect all routes except /login, /api/login, /api/logout, /api/device, /api/token
+  // Protect all routes except /login, /api/login, /api/logout, /api/device, /api/token, and registration routes
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
                       request.nextUrl.pathname.startsWith('/api/login') ||
-                      request.nextUrl.pathname.startsWith('/api/logout');
+                      request.nextUrl.pathname.startsWith('/api/logout') ||
+                      request.nextUrl.pathname.startsWith('/register-user') ||
+                      request.nextUrl.pathname.startsWith('/api/users/register') ||
+                      request.nextUrl.pathname.startsWith('/api/mdm/companies');
 
   const isDeviceRoute = request.nextUrl.pathname.startsWith('/api/device');
   const isTokenRoute = request.nextUrl.pathname.startsWith('/api/token');

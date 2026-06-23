@@ -22,7 +22,18 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        router.push('/');
+        const role = data.user.ac;
+        if (role === 'Admin') {
+          router.push('/admin');
+        } else if (role === 'Sports') {
+          router.push('/sports');
+        } else if (role === 'Surveyor') {
+          router.push('/surveyor');
+        } else if (role === 'Site') {
+          router.push('/');
+        } else {
+          setError('Invalid role assignment');
+        }
       } else {
         setError(data.error || 'Login failed');
       }
