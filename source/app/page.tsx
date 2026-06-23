@@ -545,7 +545,7 @@ function Dashboard() {
             <div className="page-title">
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <h1>{currentUser?.ac ? (currentUser.ac.toLowerCase() === 'surveyor' ? 'Survey' : currentUser.ac) : 'Site'} Live Streaming</h1>
-                {currentUser && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser?.company_name || currentUser?.company_id || currentUser?.organization_name || currentUser?.username || 'Account'}</span>}
+                {currentUser && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser?.company_name || currentUser?.organization_name || currentUser?.username || 'Account'}</span>}
               </div>
               <p className="desktop-only">Real-time stream from Camera #CAM-1023</p>
             </div>
@@ -563,7 +563,7 @@ function Dashboard() {
                 <SvgIcon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </div>
               <span className="user-name">
-                {currentUser?.company_name || currentUser?.company_id || currentUser?.organization_name || currentUser?.username || 'Account'}
+                {currentUser?.company_name || currentUser?.organization_name || currentUser?.username || 'Account'}
                 <SvgIcon path="M19 9l-7 7-7-7" />
               </span>
             </div>
