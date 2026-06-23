@@ -127,9 +127,9 @@ async function initDb() {
       )
     `).run();
 
-    const companyQuery = db.prepare("SELECT * FROM ks_companies WHERE id = 8 OR cnm = '8.0'").get();
+    const companyQuery = db.prepare("SELECT * FROM ks_companies WHERE id = 8 OR cnm = 'Aspire Smart Vision'").get();
     if (!companyQuery) {
-      db.prepare("INSERT INTO ks_companies (id, cnm) VALUES (8, '8.0')").run();
+      db.prepare("INSERT INTO ks_companies (id, cnm) VALUES (8, 'Aspire Smart Vision')").run();
     }
   } catch (error) {
     console.warn('Vercel Read-Only environment detected, skipping DB writes.');

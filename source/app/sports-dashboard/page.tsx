@@ -67,6 +67,11 @@ export default function SportsDashboard() {
       .then(data => {
         if (data.authenticated) {
           setCurrentUser(data.user);
+          const headerValue = data.user.company_name || data.user.organization_name || 'Account';
+          console.log("User Data:", data.user);
+          console.log("Company ID:", data.user.company_id);
+          console.log("Company Name:", data.user.company_name);
+          console.log("Displayed Header Value:", headerValue);
         }
       })
       .catch(() => {});
