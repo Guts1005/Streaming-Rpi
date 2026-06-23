@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
-    const roomName = 'talkback';
+    const roomName = 'helmet-live';
     const participantName = `dashboard-user-${Math.floor(Math.random() * 100000)}`;
 
     const apiKey = process.env.LIVEKIT_API_KEY;
