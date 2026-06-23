@@ -399,7 +399,7 @@ export default function SportsDashboard() {
             <div className="sd-page-title">
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <h1>{currentUser?.ac ? (currentUser.ac.toLowerCase() === 'surveyor' ? 'Survey' : currentUser.ac) : 'Site'} Live Streaming</h1>
-                {currentUser?.company_id && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser.company_id}</span>}
+                {currentUser && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser?.company_name || currentUser?.company_id || currentUser?.organization_name || currentUser?.username || 'Account'}</span>}
               </div>
             <p>Tripod Unit - {deviceStatus?.id || 'Unknown'}</p>
           </div>
@@ -417,7 +417,7 @@ export default function SportsDashboard() {
                 <SvgIcon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </div>
               <div className="sd-user-info">
-                Coach / Surveyor
+                {currentUser?.company_name || currentUser?.company_id || currentUser?.organization_name || currentUser?.username || 'Account'}
                 <SvgIcon path="M19 9l-7 7-7-7" />
               </div>
             </div>
