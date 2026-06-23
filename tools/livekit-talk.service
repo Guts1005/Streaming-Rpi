@@ -1,0 +1,16 @@
+[Unit]
+Description=LiveKit Audio Talkback Bridge
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=trc
+WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases
+Environment="SDL_AUDIODRIVER=alsa"
+Environment="AUDIODEV=plughw:2,0"
+ExecStart=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/venv/bin/python tools/livekit_audio_bridge.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

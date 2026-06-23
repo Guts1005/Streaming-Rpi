@@ -20,7 +20,7 @@ import cv2
 import numpy as np
 import subprocess
 import requests
-from flask import Flask, Response, render_template, request, jsonify, send_from_directory
+from flask import Flask, Response, render_template, request, jsonify, send_from_directory, send_file
 from dotenv import load_dotenv
 import google.generativeai as genai
 
@@ -1617,8 +1617,32 @@ def srs_webrtc_publish():
 
         # 2. Proxy the new WebRTC publish request
         srs_url = "http://localhost:1985/rtc/v1/publish/"
-        resp = requests.post(srs_url, json=request.json, timeout=5)
-        return jsonify(resp.json()), resp.status_code
+        payload = request.json
+        if "streamurl" in payload:
+            payload["streamurl"] = "webrtc://localhost/live/talkback"
+            
+        resp = requests.post(srs_url, json=payload, timeout=5)
+        
+        # 3. Mangle the SDP to ensure the browser connects to the Pi's local IP, not localhost or Docker IP
+        data = resp.json()
+        if "sdp" in data:
+            import socket
+            import re
+            def get_local_ip():
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                try:
+                    s.connect(('10.255.255.255', 1))
+                    return s.getsockname()[0]
+                except Exception:
+                    return '127.0.0.1'
+                finally:
+                    s.close()
+            local_ip = get_local_ip()
+            # Replace ANY IPv4 address in the SDP with the Pi's actual LAN IP
+            data["sdp"] = re.sub(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b', local_ip, data["sdp"])
+            data["sdp"] = data["sdp"].replace("localhost", local_ip)
+            
+        return jsonify(data), resp.status_code
     except Exception as e:
         return jsonify({"code": 500, "server": "flask", "message": str(e)}), 500
 
@@ -1643,7 +1667,7 @@ def wifi_connect():
 @app.route('/api/bluetooth/scan', methods=['GET'])
 def bluetooth_scan():
     try:
-        subprocess.run(["sudo", "timeout", "5", "bluetoothctl", "scan", "on"], capture_output=True)
+        subprocess.run(["sudo", "timeout", "12", "bluetoothctl", "scan", "on"], capture_output=True)
         result = subprocess.run(["sudo", "bluetoothctl", "devices"], capture_output=True, text=True)
         devices = []
         for line in result.stdout.splitlines():
@@ -1679,6 +1703,49 @@ def hotspot_discover():
         return jsonify({"success": False, "error": "No IP found"}), 404
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+# --------------------------------------
+# BEACON APIs
+# --------------------------------------
+
+@app.route('/api/beacons/config', methods=['GET', 'POST'])
+def beacon_config():
+    if request.method == 'GET':
+        if os.path.exists('beacons.json'):
+            with open('beacons.json', 'r') as f:
+                return jsonify({"success": True, "config": json.load(f)})
+        return jsonify({"success": True, "config": {}})
+    elif request.method == 'POST':
+        data = request.json
+        if data and 'config' in data:
+            with open('beacons.json', 'w') as f:
+                json.dump(data['config'], f, indent=4)
+            return jsonify({"success": True})
+        return jsonify({"success": False, "error": "Invalid data"}), 400
+
+@app.route('/api/beacons/scan', methods=['GET'])
+def beacon_scan():
+    try:
+        if os.path.exists('seen_beacons.json'):
+            with open('seen_beacons.json', 'r') as f:
+                discovered = json.load(f)
+                discovered.sort(key=lambda x: x['rssi'], reverse=True)
+                return jsonify({"success": True, "devices": discovered})
+        return jsonify({"success": True, "devices": []})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/beacons/logs', methods=['GET'])
+def beacon_logs():
+    if os.path.exists('beacon_logs.csv'):
+        return send_file('beacon_logs.csv', as_attachment=True, download_name='beacon_logs.csv', mimetype='text/csv')
+    return jsonify({"success": False, "error": "No logs found"}), 404
+
+@app.route('/api/beacons/master_logs', methods=['GET'])
+def beacon_master_logs():
+    if os.path.exists('beacon_master.csv'):
+        return send_file('beacon_master.csv', as_attachment=True, download_name='beacon_master.csv', mimetype='text/csv')
+    return jsonify({"success": False, "error": "No master logs found"}), 404
 
 # --------------------------------------
 

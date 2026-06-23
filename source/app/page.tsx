@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
+import { Room } from 'livekit-client';
 import DeviceConfigModal from '../components/DeviceConfigModal';
 
 type TokenResponse = { token?: string; error?: string };
@@ -28,7 +29,7 @@ function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDesktopRec, setIsDesktopRec] = useState(false);
   const desktopRecRef = useRef<MediaRecorder | null>(null);
-  const webrtcRef = useRef<RTCPeerConnection | null>(null);
+  const livekitRoomRef = useRef<Room | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -171,14 +172,33 @@ function Dashboard() {
 
     initPlayer();
     
+    // Manual latency chasing to prevent stream freezing over time
+    let lagCheckInterval = setInterval(() => {
+      if (videoRef.current && mpegtsPlayerRef.current) {
+        try {
+          const video = videoRef.current;
+          if (video.buffered.length > 0) {
+            const end = video.buffered.end(video.buffered.length - 1);
+            // If we fall more than 3 seconds behind the live edge, skip forward
+            if (end - video.currentTime > 3.0) {
+              video.currentTime = end - 0.5;
+            }
+          }
+        } catch (e) {
+          // Ignore buffer read errors
+        }
+      }
+    }, 2000);
+
     return () => {
       isMounted = false;
       clearTimeout(reconnectTimeout);
+      clearInterval(lagCheckInterval);
       if (player) {
         try { player.destroy(); } catch(e) {}
       }
-      if (webrtcRef.current) {
-        webrtcRef.current.close();
+      if (livekitRoomRef.current) {
+        livekitRoomRef.current.disconnect();
       }
       setConnected(false);
     };
@@ -217,55 +237,30 @@ function Dashboard() {
 
   async function toggleTalk() { 
     if (talking) {
-      if (webrtcRef.current) {
-        webrtcRef.current.close();
-        webrtcRef.current = null;
-      }
-      if (audioStreamRef.current) {
-        audioStreamRef.current.getTracks().forEach(t => t.stop());
-        audioStreamRef.current = null;
+      if (livekitRoomRef.current) {
+        livekitRoomRef.current.disconnect();
+        livekitRoomRef.current = null;
       }
       setTalking(false);
       toast("Live talk disabled");
     } else {
       toast("Connecting live talk...");
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-        audioStreamRef.current = stream;
+        const tokenRes = await fetch('/api/livekit/token');
+        const tokenData = await tokenRes.json();
+        if (!tokenData.token || !tokenData.url) throw new Error("Failed to get LiveKit token or URL");
 
-        const pc = new RTCPeerConnection();
-        webrtcRef.current = pc;
-        stream.getTracks().forEach(track => pc.addTrack(track, stream));
-
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-
-        const rtcUrl = `${window.location.protocol}//${window.location.host}/api/device/api/srs_webrtc_publish`;
-        const payload = {
-          api: rtcUrl,
-          streamurl: `webrtc://${window.location.hostname}/live/talkback`,
-          sdp: offer.sdp
-        };
-
-        const res = await fetch(rtcUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        
-        const data = await res.json();
-        if (data.code !== 0) throw new Error(data.message || "SRS Error " + data.code);
-        
-        await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+        const room = new Room();
+        await room.connect(tokenData.url, tokenData.token);
+        await room.localParticipant.setMicrophoneEnabled(true);
+        livekitRoomRef.current = room;
 
         setTalking(true);
         toast("Live talk active!");
       } catch (e: any) {
-        console.error("SRS Talk Error:", e);
+        console.error("LiveKit Talk Error:", e);
         toast("Failed to connect live talk");
         setTalking(false);
-        if (webrtcRef.current) { webrtcRef.current.close(); webrtcRef.current = null; }
-        if (audioStreamRef.current) { audioStreamRef.current.getTracks().forEach(t => t.stop()); audioStreamRef.current = null; }
       }
     }
   }
@@ -458,6 +453,12 @@ function Dashboard() {
           </button>
           <button className="nav-item">
             <SvgIcon path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Reports
+          </button>
+          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/logs', '_blank')}>
+            <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Location Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
+          </button>
+          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/master_logs', '_blank')}>
+            <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Master Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
 
 

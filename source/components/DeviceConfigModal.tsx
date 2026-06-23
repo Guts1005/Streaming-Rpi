@@ -12,7 +12,7 @@ function SvgIcon({ path, className, style }: { path: string, className?: string,
 }
 
 export default function DeviceConfigModal({ onClose }: { onClose: () => void }) {
-  const [activeTab, setActiveTab] = useState<'wifi' | 'bluetooth' | 'hotspot'>('wifi');
+  const [activeTab, setActiveTab] = useState<'wifi' | 'bluetooth' | 'hotspot' | 'beacons'>('wifi');
   const [msg, setMsg] = useState("");
 
   const toast = (text: string) => {
@@ -57,12 +57,19 @@ export default function DeviceConfigModal({ onClose }: { onClose: () => void }) 
             }}
             onClick={() => setActiveTab('hotspot')}
           >Hotspot</button>
+          <button 
+            style={{ flex: 1, padding: '8px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 500,
+              background: activeTab === 'beacons' ? '#2563eb' : 'transparent', color: activeTab === 'beacons' ? '#fff' : '#94a3b8'
+            }}
+            onClick={() => setActiveTab('beacons')}
+          >Beacons</button>
         </div>
 
         <div style={{ minHeight: '300px' }}>
           {activeTab === 'wifi' && <WifiSetup toast={toast} />}
           {activeTab === 'bluetooth' && <BluetoothSetup toast={toast} />}
           {activeTab === 'hotspot' && <HotspotSetup toast={toast} />}
+          {activeTab === 'beacons' && <BeaconSetup toast={toast} />}
         </div>
 
         {msg && <div style={{
@@ -309,6 +316,110 @@ function HotspotSetup({ toast }: { toast: (msg: string) => void }) {
         onClick={discoverDevice} disabled={searching}
         style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '10px', borderRadius: '6px', cursor: searching ? 'not-allowed' : 'pointer', fontWeight: 600, marginTop: '8px', opacity: searching ? 0.7 : 1 }}
       >{searching ? 'Searching...' : 'Find Device IP'}</button>
+    </div>
+  );
+}
+
+function BeaconRow({ dev, config, updateLocation }: { dev: any, config: any, updateLocation: (mac: string, name: string, siteId: string, lat: string, lon: string) => void }) {
+  const isConfigured = config[dev.mac];
+  const [roomName, setRoomName] = useState(isConfigured ? isConfigured.name : "");
+  const [siteId, setSiteId] = useState(isConfigured && isConfigured.site_id ? isConfigured.site_id : "");
+  const [lat, setLat] = useState(isConfigured ? isConfigured.lat : "");
+  const [lon, setLon] = useState(isConfigured ? isConfigured.lon : "");
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#0f172a', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '14px', fontWeight: 500 }}>{dev.name || 'Unknown'} <span style={{fontSize: '11px', color: '#94a3b8', background: '#1e293b', padding: '2px 6px', borderRadius: '12px', marginLeft: '6px'}}>{dev.rssi} dBm</span></span>
+          <span style={{ fontSize: '12px', color: '#64748b' }}>{dev.mac}</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+        <input type="text" placeholder="Location Name (e.g. Kitchen)" value={roomName} onChange={e => setRoomName(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
+        <input type="text" placeholder="Site Name / ID" value={siteId} onChange={e => setSiteId(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #22c55e', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <input type="number" placeholder="Latitude" value={lat} onChange={e => setLat(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
+        <input type="number" placeholder="Longitude" value={lon} onChange={e => setLon(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
+        <button onClick={() => updateLocation(dev.mac, roomName, siteId, lat, lon)} style={{ background: '#22c55e', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 500 }}>{isConfigured ? 'Update' : 'Add'}</button>
+      </div>
+    </div>
+  );
+}
+
+function BeaconSetup({ toast }: { toast: (msg: string) => void }) {
+  const [devices, setDevices] = useState<{name: string, mac: string, rssi: number}[]>([]);
+  const [scanning, setScanning] = useState(false);
+  const [config, setConfig] = useState<Record<string, any>>({});
+  
+  useEffect(() => {
+    fetch('/api/device/api/beacons/config')
+      .then(r => r.json())
+      .then(d => { if (d.success) setConfig(d.config || {}); })
+      .catch(e => console.error(e));
+  }, []);
+
+  const scanBeacons = async () => {
+    setScanning(true);
+    toast('Scanning for Beacons (3-4 sec)...');
+    try {
+      const res = await fetch('/api/device/api/beacons/scan');
+      if (res.ok) {
+        const data = await res.json();
+        setDevices(data.devices || []);
+        toast(`Found ${data.devices?.length || 0} beacons`);
+      } else {
+        toast('Failed to scan for beacons');
+      }
+    } catch (e) {
+      toast('Error communicating with device');
+    }
+    setScanning(false);
+  };
+
+  const updateLocation = async (mac: string, locationName: string, siteId: string, latStr: string, lonStr: string) => {
+    if (!locationName.trim()) {
+      toast('Please enter a location name');
+      return;
+    }
+    const lat = parseFloat(latStr) || 0.0;
+    const lon = parseFloat(lonStr) || 0.0;
+    const newConfig = { ...config, [mac]: { name: locationName, site_id: siteId, lat, lon } };
+    try {
+      const res = await fetch('/api/device/api/beacons/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config: newConfig })
+      });
+      if (res.ok) {
+        setConfig(newConfig);
+        toast(`Assigned ${locationName} to beacon!`);
+      } else {
+        toast('Failed to save config');
+      }
+    } catch (e) {
+      toast('Error communicating with device');
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <p style={{ color: '#94a3b8', fontSize: '14px', margin: 0 }}>Configure Location Beacons for indoor positioning. Scan nearby beacons and assign them to rooms.</p>
+      
+      <button 
+        onClick={scanBeacons} disabled={scanning}
+        style={{ background: '#2563eb', color: '#fff', border: 'none', padding: '10px', borderRadius: '6px', cursor: scanning ? 'not-allowed' : 'pointer', fontWeight: 600, opacity: scanning ? 0.7 : 1 }}
+      >{scanning ? 'Scanning...' : 'Scan Nearby Beacons'}</button>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+        {devices.length === 0 && !scanning && (
+          <div style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>No beacons found nearby.</div>
+        )}
+        {devices.map((dev, i) => (
+          <BeaconRow key={i} dev={dev} config={config} updateLocation={updateLocation} />
+        ))}
+      </div>
     </div>
   );
 }

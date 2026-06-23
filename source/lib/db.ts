@@ -4,7 +4,12 @@ import os from 'os';
 import bcrypt from 'bcryptjs';
 
 const dbPath = path.join(os.tmpdir(), 'helmet.db');
-const db = new Database(dbPath);
+let db: any = null;
+try {
+  db = new Database(dbPath);
+} catch (e) {
+  console.warn('Could not load better-sqlite3. Using mocked DB locally.');
+}
 
 let initPromise: Promise<void> | null = null;
 

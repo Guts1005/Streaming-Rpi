@@ -65,8 +65,8 @@ body {
 .sidebar-close-btn svg { width: 20px; height: 20px; }
 .sidebar-close-btn:hover { background: rgba(255,255,255,0.06); color: #fff; }
 
-.brand-header { display: flex; align-items: center; justify-content: center; padding: 0 4px; margin-bottom: 24px; width: 100%; }
-.brand-image { width: 100%; height: 85px; object-fit: contain; object-position: center; mix-blend-mode: screen; border-radius: 6px; }
+.brand-header { display: flex; align-items: center; justify-content: center; padding: 0 4px; margin-bottom: 24px; width: 100%; position: relative; aspect-ratio: 2.5/1; overflow: hidden; }
+.brand-image { width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 6px; }
 
 .nav-section { flex: 1; display: flex; flex-direction: column; }
 .nav-group-title {

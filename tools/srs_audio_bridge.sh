@@ -9,7 +9,7 @@ echo "Starting SRS Audio Bridge..."
 # -f flv: Force FLV container format (RTMP output)
 
 export SDL_AUDIODRIVER="alsa"
-export AUDIODEV="plughw:3,0"
+export AUDIODEV="plughw:2,0"
 
 while true; do
   ffplay -nodisp -fflags nobuffer -flags low_delay -f flv "rtmp://localhost/live/talkback"
