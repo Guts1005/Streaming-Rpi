@@ -75,6 +75,18 @@ function Dashboard() {
   const [videoError, setVideoError] = useState(false);
   const [recordingsDropdownOpen, setRecordingsDropdownOpen] = useState(false);
   const [showDeviceConfigModal, setShowDeviceConfigModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated) {
+          setCurrentUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const isRecordingLocal = deviceStatus?.is_recording || false;
   const storageFree = deviceStatus?.storage_free_gb ?? null;
@@ -531,7 +543,10 @@ function Dashboard() {
               <img src="/logo.jpeg" alt="Aspire AI" />
             </div>
             <div className="page-title">
-              <h1>Live Stream</h1>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <h1>{currentUser?.ac ? (currentUser.ac.toLowerCase() === 'surveyor' ? 'Survey' : currentUser.ac) : 'Site'} Live Streaming</h1>
+                {currentUser?.company_id && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser.company_id}</span>}
+              </div>
               <p className="desktop-only">Real-time stream from Camera #CAM-1023</p>
             </div>
           </div>

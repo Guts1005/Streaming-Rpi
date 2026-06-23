@@ -23,17 +23,15 @@ export default function Login() {
       const data = await res.json();
       if (res.ok && data.success) {
         const role = data.user.ac;
-        if (role === 'Admin') {
-          window.location.href = '/admin';
-        } else if (role === 'Sports') {
-          window.location.href = '/sports-dashboard';
-        } else if (role === 'Surveyor') {
-          window.location.href = '/surveyor';
-        } else if (role === 'Site') {
-          window.location.href = '/site';
-        } else {
-          setError('Invalid role assignment');
-        }
+        const roleKey = data.user.ac.toLowerCase();
+        const dashboardMap: Record<string, string> = {
+          surveyor: "/survey-dashboard",
+          survey: "/survey-dashboard",
+          sports: "/sports-dashboard",
+          site: "/dashboard",
+          admin: "/admin-dashboard"
+        };
+        window.location.href = dashboardMap[roleKey] || '/dashboard';
       } else {
         setError(data.error || 'Login failed');
       }

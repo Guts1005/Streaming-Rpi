@@ -29,6 +29,7 @@ export default function SportsDashboard() {
   const [talking, setTalking] = useState(false);
   const [msg, setMsg] = useState("");
   const [isPlaying, setIsPlaying] = useState(true);
+
   const webrtcRef = useRef<RTCPeerConnection | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
   
@@ -60,9 +61,18 @@ export default function SportsDashboard() {
     fetchMedia();
     fetchStatus();
     const interval = setInterval(() => { fetchMedia(); fetchStatus(); }, 10000);
+    
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        if (data.authenticated) {
+          setCurrentUser(data.user);
+        }
+      })
+      .catch(() => {});
+      
     return () => clearInterval(interval);
   }, []);
-
   const [playerKey, setPlayerKey] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -387,7 +397,10 @@ export default function SportsDashboard() {
               <SvgIcon path="M4 6h16M4 12h16M4 18h16" />
             </button>
             <div className="sd-page-title">
-            <h1>Live Stream</h1>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <h1>{currentUser?.ac ? (currentUser.ac.toLowerCase() === 'surveyor' ? 'Survey' : currentUser.ac) : 'Site'} Live Streaming</h1>
+                {currentUser?.company_id && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser.company_id}</span>}
+              </div>
             <p>Tripod Unit - {deviceStatus?.id || 'Unknown'}</p>
           </div>
           </div>
