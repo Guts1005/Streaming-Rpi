@@ -23,13 +23,7 @@ export default function Login() {
       const data = await res.json();
       if (res.ok && data.success) {
         const role = data.user.ac;
-        if (role === 'Admin') {
-          window.location.href = '/admin';
-        } else if (role === 'Sports') {
-          window.location.href = '/sports';
-        } else if (role === 'Surveyor') {
-          window.location.href = '/surveyor';
-        } else if (role === 'Site') {
+        if (role === 'Admin' || role === 'Sports' || role === 'Surveyor' || role === 'Site') {
           window.location.href = '/';
         } else {
           setError('Invalid role assignment');
