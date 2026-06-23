@@ -24,13 +24,13 @@ export default function Login() {
       if (res.ok && data.success) {
         const role = data.user.ac;
         if (role === 'Admin') {
-          router.push('/admin');
+          window.location.href = '/admin';
         } else if (role === 'Sports') {
-          router.push('/sports');
+          window.location.href = '/sports';
         } else if (role === 'Surveyor') {
-          router.push('/surveyor');
+          window.location.href = '/surveyor';
         } else if (role === 'Site') {
-          router.push('/');
+          window.location.href = '/';
         } else {
           setError('Invalid role assignment');
         }

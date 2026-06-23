@@ -98,11 +98,18 @@ async function initDb() {
   // Ensure 'y' status for testing
   db.prepare(`UPDATE users SET actv = 'y' WHERE actv IS NULL OR actv = ''`).run();
 
-  const adminQuery = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
-  if (!adminQuery) {
-    const adminPw = await bcrypt.hash('admin123', 10);
-    db.prepare('INSERT INTO users (username, pw, ac, company_id, actv) VALUES (?, ?, ?, ?, ?)').run('admin', adminPw, 'Admin', '8.0', 'y');
-  }
+  const seedUser = async (user: string, role: string) => {
+    const query = db.prepare('SELECT * FROM users WHERE username = ?').get(user);
+    if (!query) {
+      const pw = await bcrypt.hash(user + '123', 10);
+      db.prepare('INSERT INTO users (username, pw, ac, company_id, actv) VALUES (?, ?, ?, ?, ?)').run(user, pw, role, '8.0', 'y');
+    }
+  };
+
+  await seedUser('admin', 'Admin');
+  await seedUser('site', 'Site');
+  await seedUser('sports', 'Sports');
+  await seedUser('surveyor', 'Surveyor');
 
   db.prepare(`
     CREATE TABLE IF NOT EXISTS ks_companies (
