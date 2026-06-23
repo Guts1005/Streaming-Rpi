@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { runQuery, getQuery } from '@/lib/db';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const id = (await params).id;
     const body = await request.json();
     const {
       cnm, company_name_on_bill, company_address, csd, ced,
@@ -40,9 +40,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const id = (await params).id;
     
     const companyExists = await getQuery(`SELECT id FROM ks_companies WHERE id = ?`, [id]);
     if (!companyExists) {

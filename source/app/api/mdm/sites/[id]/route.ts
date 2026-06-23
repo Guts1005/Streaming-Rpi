@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { runQuery, getQuery } from '@/lib/db';
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const id = (await params).id;
     const body = await request.json();
     const {
       user_id, company_id, customer_id, site_name, address, dlvry_address, client_mail,
@@ -47,9 +47,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const id = params.id;
+    const id = (await params).id;
     
     const siteExists = await getQuery(`SELECT id FROM ks_sites WHERE id = ?`, [id]);
     if (!siteExists) {
