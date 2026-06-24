@@ -35,7 +35,7 @@ echo "==================================================="
 # 4. System update and dependencies
 echo "[1/9] Updating system and installing dependencies..."
 sudo apt update
-sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git rpicam-apps curl wget nginx docker.io
+sudo apt install -y python3-venv python3-pip libzbar0 libcamera-dev libcap-dev ffmpeg python3-rpi.gpio libasound2-dev portaudio19-dev git rpicam-apps curl wget nginx docker.io python3-numpy python3-opencv
 
 # 5. Clone Repository
 echo "[2/9] Cloning repository..."
