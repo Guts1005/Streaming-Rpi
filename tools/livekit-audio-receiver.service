@@ -1,0 +1,18 @@
+[Unit]
+Description=Smart Helmet LiveKit Talkback Audio Receiver
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=trc
+WorkingDirectory=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases
+ExecStart=/home/trc/Desktop/Projects/Streaming-Rpi/hm_releases/venv/bin/python livekit_audio_receiver.py
+Restart=always
+RestartSec=5
+
+# Necessary for audio output without gui
+Environment="XDG_RUNTIME_DIR=/run/user/1000"
+
+[Install]
+WantedBy=multi-user.target

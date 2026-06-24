@@ -8,7 +8,8 @@ echo "Starting SRS video stream..."
 rpicam-vid \
   --width 1280 \
   --height 720 \
-  --framerate 24 \
+  --framerate 15 \
+  --bitrate 1500000 \
   --codec h264 \
   --inline \
   --nopreview \
