@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import { Room } from 'livekit-client';
+import { useRouter } from 'next/navigation';
+import { QRCodeSVG } from 'qrcode.react';
 import DeviceConfigModal from '../components/DeviceConfigModal';
 import CompaniesScreen from '../components/mdm/CompaniesScreen';
 import CustomersScreen from '../components/mdm/CustomersScreen';
@@ -76,22 +78,134 @@ function Dashboard() {
   const [recordingsDropdownOpen, setRecordingsDropdownOpen] = useState(false);
   const [showDeviceConfigModal, setShowDeviceConfigModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [activeSiteId, setActiveSiteId] = useState<string | null>(null);
+  const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null);
+  
+  const router = useRouter();
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [savedAccounts, setSavedAccounts] = useState<any[]>([]);
+  
+  const [showPairModal, setShowPairModal] = useState(false);
+  const [pairSsid, setPairSsid] = useState('');
+  const [pairWifiPassword, setPairWifiPassword] = useState('');
+  const [showPairWifiPassword, setShowPairWifiPassword] = useState(false);
+  const [pairQrData, setPairQrData] = useState<string | null>(null);
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem('savedAccounts');
+      if (stored) setSavedAccounts(JSON.parse(stored));
+    } catch(e) {}
+
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => {
         if (data.authenticated) {
           setCurrentUser(data.user);
-          const headerValue = data.user.company_name || data.user.organization_name || 'Account';
-          console.log("User Data:", data.user);
-          console.log("Company ID:", data.user.company_id);
-          console.log("Company Name:", data.user.company_name);
-          console.log("Displayed Header Value:", headerValue);
+          // Check for existing cookies
+          const matchSite = document.cookie.match(new RegExp('(^| )active_site_id=([^;]+)'));
+          const matchDevice = document.cookie.match(new RegExp('(^| )active_device_id=([^;]+)'));
+          
+          let selectedSiteId = matchSite ? matchSite[2] : null;
+          let selectedDeviceId = matchDevice ? matchDevice[2] : null;
+
+          if (!selectedSiteId && data.user.sites && data.user.sites.length > 0) {
+            selectedSiteId = data.user.sites[0].id.toString();
+            document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
+          }
+
+          if (selectedSiteId) {
+            setActiveSiteId(selectedSiteId);
+            
+            // Auto-select first device in the selected site if no device cookie or invalid device
+            const activeSite = data.user.sites?.find((s: any) => s.id.toString() === selectedSiteId);
+            if (activeSite && activeSite.devices && activeSite.devices.length > 0) {
+              const deviceExists = activeSite.devices.some((d: any) => d.id.toString() === selectedDeviceId);
+              if (!selectedDeviceId || !deviceExists) {
+                selectedDeviceId = activeSite.devices[0].id.toString();
+                document.cookie = `active_device_id=${selectedDeviceId}; path=/; max-age=86400`;
+              }
+            } else {
+              selectedDeviceId = null;
+              document.cookie = `active_device_id=; path=/; max-age=0`; // clear
+            }
+            
+            if (selectedDeviceId) {
+              setActiveDeviceId(selectedDeviceId);
+            }
+          }
         }
       })
       .catch(() => {});
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' });
+      
+      if (currentUser?.id) {
+        const stored = localStorage.getItem('savedAccounts');
+        if (stored) {
+          let accounts = JSON.parse(stored);
+          accounts = accounts.filter((a: any) => a.id !== currentUser.id);
+          localStorage.setItem('savedAccounts', JSON.stringify(accounts));
+        }
+      }
+      
+      window.location.href = '/login';
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleSwitchAccount = async (token: string) => {
+    try {
+      const res = await fetch('/api/switch-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      if (res.ok) {
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const generatePairingCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser?.id) return;
+    const qrString = `WIFI:S:${pairSsid};T:WPA;P:${pairWifiPassword};; PAIR:${currentUser.id}`;
+    setPairQrData(qrString);
+  };
+
+  const handleSiteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newSiteId = e.target.value;
+    setActiveSiteId(newSiteId);
+    document.cookie = `active_site_id=${newSiteId}; path=/; max-age=86400`;
+    
+    // Auto-select first device for the new site
+    const activeSite = currentUser?.sites?.find((s: any) => s.id.toString() === newSiteId);
+    if (activeSite && activeSite.devices && activeSite.devices.length > 0) {
+      const firstDevice = activeSite.devices[0].id.toString();
+      setActiveDeviceId(firstDevice);
+      document.cookie = `active_device_id=${firstDevice}; path=/; max-age=86400`;
+    } else {
+      setActiveDeviceId(null);
+      document.cookie = `active_device_id=; path=/; max-age=0`;
+    }
+    
+    // Need to reload stream or UI data if necessary
+    window.location.reload();
+  };
+
+  const handleDeviceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newDeviceId = e.target.value;
+    setActiveDeviceId(newDeviceId);
+    document.cookie = `active_device_id=${newDeviceId}; path=/; max-age=86400`;
+    window.location.reload();
+  };
 
   const isRecordingLocal = deviceStatus?.is_recording || false;
   const storageFree = deviceStatus?.storage_free_gb ?? null;
@@ -556,6 +670,62 @@ function Dashboard() {
             </div>
           </div>
           <div className="topbar-actions">
+            {currentUser?.sites && currentUser.sites.some((s: any) => s.devices && s.devices.length > 0) && (
+              <div style={{ marginRight: '16px', display: 'flex', alignItems: 'center' }}>
+                <select
+                  value={activeDeviceId || ''}
+                  onChange={(e) => {
+                    const devId = e.target.value;
+                    const site = currentUser.sites.find((s: any) => s.devices?.some((d: any) => d.id.toString() === devId));
+                    if (site) {
+                      setActiveSiteId(site.id.toString());
+                      setActiveDeviceId(devId);
+                      document.cookie = `active_device_id=${devId}; path=/; max-age=86400`;
+                      document.cookie = `active_site_id=${site.id}; path=/; max-age=86400`;
+                      window.location.reload();
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#f8fafc',
+                    border: '1px solid #334155',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {currentUser.sites.flatMap((site: any) => 
+                    (site.devices || []).map((device: any) => (
+                      <option key={device.id} value={device.id}>
+                        {device.device_name || `Helmet ${device.id}`}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+            )}
+            <button
+              onClick={() => setShowPairModal(true)}
+              style={{
+                backgroundColor: '#3b82f6',
+                color: '#fff',
+                border: 'none',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                marginRight: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+            >
+              <SvgIcon path="M12 4v16m8-8H4" style={{ width: '14px' }} />
+              Pair Helmet
+            </button>
             <div className="topbar-icon">
               <SvgIcon path="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               <div className="notif-dot"></div>
@@ -563,14 +733,87 @@ function Dashboard() {
             <div className="topbar-icon">
               <SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </div>
-            <div className="user-profile">
-              <div className="user-avatar" style={{background: '#2563EB'}}>
-                <SvgIcon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <div className="user-profile" style={{ position: 'relative' }}>
+              <div 
+                style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
+                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              >
+                <div className="user-avatar" style={{background: '#2563EB'}}>
+                  <SvgIcon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </div>
+                <span className="user-name">
+                  {currentUser?.company_name || currentUser?.organization_name || currentUser?.username || 'Account'}
+                  <SvgIcon path="M19 9l-7 7-7-7" />
+                </span>
               </div>
-              <span className="user-name">
-                {currentUser?.company_name || currentUser?.organization_name || currentUser?.username || 'Account'}
-                <SvgIcon path="M19 9l-7 7-7-7" />
-              </span>
+
+              {profileDropdownOpen && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0, marginTop: '8px',
+                  backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)', width: '240px', zIndex: 100,
+                  overflow: 'hidden', animation: 'fadeIn 0.15s ease-out'
+                }}>
+                  <div style={{ padding: '12px 16px', borderBottom: '1px solid #334155' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#f8fafc' }}>{currentUser?.username}</div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>{currentUser?.ac}</div>
+                  </div>
+                  
+                  <div style={{ padding: '8px 0' }}>
+                    {savedAccounts.filter(a => a.id !== currentUser?.id).map(acc => (
+                      <button 
+                        key={acc.id}
+                        onClick={() => handleSwitchAccount(acc.token)}
+                        style={{
+                          width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
+                          border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '13px',
+                          display: 'flex', alignItems: 'center', gap: '8px'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <SvgIcon path="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" style={{ width: '14px' }} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ color: '#fff' }}>{acc.username}</span>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>{acc.company_name}</span>
+                        </div>
+                      </button>
+                    ))}
+                    
+                    <button 
+                      onClick={() => { window.location.href = '/login?addAccount=true'; }}
+                      style={{
+                        width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
+                        border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '13px',
+                        display: 'flex', alignItems: 'center', gap: '8px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <SvgIcon path="M12 4v16m8-8H4" style={{ width: '16px' }} />
+                      Add another account
+                    </button>
+                  </div>
+
+                  <div style={{ padding: '8px 0', borderTop: '1px solid #334155' }}>
+                    <button 
+                      onClick={handleLogout}
+                      style={{
+                        width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
+                        border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px',
+                        display: 'flex', alignItems: 'center', gap: '8px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.1)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <SvgIcon path="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" style={{ width: '16px' }} />
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </header>
@@ -598,7 +841,7 @@ function Dashboard() {
             <div className="video-card" ref={playerContainerRef}>
               <div className="video-frame">
                   <div style={{width: '100%', height: '100%', background: '#000'}}>
-                    <video ref={videoRef} style={{width: '100%', height: '100%', objectFit: 'contain'}} muted={!audioOn} />
+                    <video ref={videoRef} suppressHydrationWarning style={{width: '100%', height: '100%', objectFit: 'contain'}} muted={!audioOn} />
                   </div>
 
                 {isRecordingLocal && (
@@ -926,7 +1169,69 @@ function Dashboard() {
         </div>
       )}
 
-      {showDeviceConfigModal && <DeviceConfigModal onClose={() => setShowDeviceConfigModal(false)} />}
+      {showDeviceConfigModal && <DeviceConfigModal onClose={() => setShowDeviceConfigModal(false)} sites={currentUser?.sites || []} />}
+      
+      {showPairModal && (
+        <div className="modal-backdrop" onClick={() => setShowPairModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: pairQrData ? '600px' : '450px', animation: 'fadeIn 0.2s ease-out' }}>
+            <div className="modal-header">
+              <h3>{pairQrData ? 'Pair Your Helmet' : 'Pair New Helmet'}</h3>
+              <button className="modal-close" onClick={() => setShowPairModal(false)}>
+                <SvgIcon path="M6 18L18 6M6 6l12 12" />
+              </button>
+            </div>
+            <div className="modal-body" style={{ padding: '24px' }}>
+              {!pairQrData ? (
+                <form onSubmit={generatePairingCode} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <p style={{ margin: 0, color: '#94a3b8', fontSize: '14px', textAlign: 'center' }}>
+                    Enter the Wi-Fi credentials that the helmet will use to connect to the internet.
+                  </p>
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#cbd5e1', fontWeight: 500 }}>Wi-Fi Network Name (SSID)</label>
+                    <input type="text" value={pairSsid} onChange={e => setPairSsid(e.target.value)} required style={{ width: '100%', padding: '12px 14px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '15px' }} placeholder="Your Home Wi-Fi Name" />
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', color: '#cbd5e1', fontWeight: 500 }}>Wi-Fi Password</label>
+                    <input type={showPairWifiPassword ? "text" : "password"} value={pairWifiPassword} onChange={e => setPairWifiPassword(e.target.value)} required style={{ width: '100%', padding: '12px 14px', backgroundColor: '#0f172a', border: '1px solid #334155', borderRadius: '8px', color: '#fff', outline: 'none', fontSize: '15px' }} placeholder="Your Wi-Fi Password" />
+                    <button type="button" onClick={() => setShowPairWifiPassword(!showPairWifiPassword)} style={{ position: 'absolute', right: '14px', top: '38px', background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', padding: 0, outline: 'none' }}>
+                      {showPairWifiPassword ? (
+                        <SvgIcon path="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" style={{ width: '20px', height: '20px' }} />
+                      ) : (
+                        <SvgIcon path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" style={{ width: '20px', height: '20px' }} />
+                      )}
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
+                    <button type="button" onClick={() => setShowPairModal(false)} style={{ flex: 1, padding: '14px', backgroundColor: 'transparent', color: '#cbd5e1', border: '1px solid #334155', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s' }}>
+                      Cancel
+                    </button>
+                    <button type="submit" style={{ flex: 1, padding: '14px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s' }}>
+                      Generate Pairing Code
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
+                  <div style={{ padding: '24px', backgroundColor: '#fff', borderRadius: '16px', border: '4px solid #3b82f6' }}>
+                    <QRCodeSVG value={pairQrData} size={300} level="M" />
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ color: '#94a3b8', fontSize: '15px', marginBottom: '24px', maxWidth: '400px', lineHeight: '1.5' }}>
+                      1. Turn on the Helmet<br/>
+                      2. Wait for the blue light to flash<br/>
+                      3. Point the camera at this screen<br/>
+                      4. Listen for the success chime!
+                    </p>
+                    <button onClick={() => { setShowPairModal(false); setPairQrData(null); }} style={{ padding: '14px 32px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', transition: 'background-color 0.2s' }}>
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

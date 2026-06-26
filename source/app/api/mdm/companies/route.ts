@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       ]
     );
     
-    return NextResponse.json({ success: true, id: result.id, message: 'Company created successfully' });
+    return NextResponse.json({ success: true, id: typeof result === 'object' && result ? (result as any).id : null, message: 'Company created successfully' });
   } catch (error) {
     console.error('Error creating company:', error);
     return NextResponse.json({ error: 'Failed to create company' }, { status: 500 });

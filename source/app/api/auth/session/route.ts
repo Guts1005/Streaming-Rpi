@@ -12,10 +12,11 @@ export async function GET(req: NextRequest) {
   const u = user as any;
   if (!u.company_name && u.company_id) {
     try {
+      const compIdInt = parseInt(u.company_id, 10);
       if (u.username === 'admin' && u.company_id === '8.0') {
         u.company_name = 'Aspire Smart Vision';
-      } else {
-        const comp = await getQuery('SELECT cnm FROM ks_companies WHERE id = ?', [u.company_id]) as any;
+      } else if (!isNaN(compIdInt)) {
+        const comp = await getQuery('SELECT cnm FROM ks_companies WHERE id = $1', [compIdInt]) as any;
         if (comp && comp.cnm) {
           u.company_name = comp.cnm;
         }
@@ -23,6 +24,25 @@ export async function GET(req: NextRequest) {
     } catch (e) {
       console.error("Failed to fetch company name in session route:", e);
     }
+  }
+
+  try {
+    const { allQuery } = await import('@/lib/db');
+    // For admins, maybe load all sites, but for now just load user's sites or sites matching company
+    if (u.ac === 'Admin') {
+       u.sites = await allQuery('SELECT id, site_name FROM ks_sites WHERE company_id = $1', [parseInt(u.company_id, 10)]);
+    } else {
+       u.sites = await allQuery('SELECT id, site_name FROM ks_sites WHERE user_id = $1', [u.id]);
+    }
+    
+    // Fetch devices for each site
+    if (u.sites && u.sites.length > 0) {
+      for (const site of u.sites) {
+        site.devices = await allQuery('SELECT id, device_name, status FROM ks_devices WHERE site_id = $1', [site.id]);
+      }
+    }
+  } catch (e) {
+    u.sites = [];
   }
 
   return NextResponse.json({ authenticated: true, user: u });

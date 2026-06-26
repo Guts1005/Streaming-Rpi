@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       ]
     );
     
-    return NextResponse.json({ success: true, id: result.id, message: 'Site created successfully' });
+    return NextResponse.json({ success: true, id: (result as any)?.id || null, message: 'Site created successfully' });
   } catch (error) {
     console.error('Error creating site:', error);
     return NextResponse.json({ error: 'Failed to create site' }, { status: 500 });

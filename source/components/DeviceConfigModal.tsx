@@ -11,7 +11,7 @@ function SvgIcon({ path, className, style }: { path: string, className?: string,
   );
 }
 
-export default function DeviceConfigModal({ onClose }: { onClose: () => void }) {
+export default function DeviceConfigModal({ onClose, sites = [] }: { onClose: () => void, sites?: any[] }) {
   const [activeTab, setActiveTab] = useState<'wifi' | 'bluetooth' | 'hotspot' | 'beacons'>('wifi');
   const [msg, setMsg] = useState("");
 
@@ -69,7 +69,7 @@ export default function DeviceConfigModal({ onClose }: { onClose: () => void }) 
           {activeTab === 'wifi' && <WifiSetup toast={toast} />}
           {activeTab === 'bluetooth' && <BluetoothSetup toast={toast} />}
           {activeTab === 'hotspot' && <HotspotSetup toast={toast} />}
-          {activeTab === 'beacons' && <BeaconSetup toast={toast} />}
+          {activeTab === 'beacons' && <BeaconSetup toast={toast} sites={sites} />}
         </div>
 
         {msg && <div style={{
@@ -320,7 +320,7 @@ function HotspotSetup({ toast }: { toast: (msg: string) => void }) {
   );
 }
 
-function BeaconRow({ dev, config, updateLocation }: { dev: any, config: any, updateLocation: (mac: string, name: string, siteId: string, lat: string, lon: string) => void }) {
+function BeaconRow({ dev, config, updateLocation, sites }: { dev: any, config: any, updateLocation: (mac: string, name: string, siteId: string, lat: string, lon: string) => void, sites: any[] }) {
   const isConfigured = config[dev.mac];
   const [roomName, setRoomName] = useState(isConfigured ? isConfigured.name : "");
   const [siteId, setSiteId] = useState(isConfigured && isConfigured.site_id ? isConfigured.site_id : "");
@@ -337,7 +337,13 @@ function BeaconRow({ dev, config, updateLocation }: { dev: any, config: any, upd
       </div>
       <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
         <input type="text" placeholder="Location Name (e.g. Kitchen)" value={roomName} onChange={e => setRoomName(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
-        <input type="text" placeholder="Site Name / ID" value={siteId} onChange={e => setSiteId(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #22c55e', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
+        <select value={siteId} onChange={e => setSiteId(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #22c55e', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }}>
+          <option value="">Select Site</option>
+          {sites?.map((s: any) => <option key={s.id} value={s.site_name}>{s.site_name}</option>)}
+          <option value="Kalyan">Kalyan</option>
+          <option value="Thane">Thane</option>
+          <option value="Pune">Pune</option>
+        </select>
       </div>
       <div style={{ display: 'flex', gap: '8px' }}>
         <input type="number" placeholder="Latitude" value={lat} onChange={e => setLat(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
@@ -348,7 +354,7 @@ function BeaconRow({ dev, config, updateLocation }: { dev: any, config: any, upd
   );
 }
 
-function BeaconSetup({ toast }: { toast: (msg: string) => void }) {
+function BeaconSetup({ toast, sites }: { toast: (msg: string) => void, sites: any[] }) {
   const [devices, setDevices] = useState<{name: string, mac: string, rssi: number}[]>([]);
   const [scanning, setScanning] = useState(false);
   const [config, setConfig] = useState<Record<string, any>>({});
@@ -416,9 +422,7 @@ function BeaconSetup({ toast }: { toast: (msg: string) => void }) {
         {devices.length === 0 && !scanning && (
           <div style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>No beacons found nearby.</div>
         )}
-        {devices.map((dev, i) => (
-          <BeaconRow key={i} dev={dev} config={config} updateLocation={updateLocation} />
-        ))}
+        {devices.map(d => <BeaconRow key={d.mac} dev={d} config={config} updateLocation={updateLocation} sites={sites} />)}
       </div>
     </div>
   );

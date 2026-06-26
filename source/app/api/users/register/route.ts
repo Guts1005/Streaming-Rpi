@@ -26,21 +26,21 @@ export async function POST(request: Request) {
 
     // Resolve or Create Company
     let company_id;
-    const existingCompany = await getQuery(`SELECT id FROM ks_companies WHERE LOWER(cnm) = LOWER(?)`, [company_name]);
+    const existingCompany = await getQuery(`SELECT id FROM ks_companies WHERE LOWER(cnm) = LOWER($1)`, [company_name]);
     if (existingCompany) {
       company_id = existingCompany.id;
     } else {
-      const insertResult = await runQuery(`INSERT INTO ks_companies (cnm, tdate) VALUES (?, CURRENT_TIMESTAMP)`, [company_name]);
-      company_id = insertResult.id;
+      const insertResult = await getQuery(`INSERT INTO ks_companies (cnm) VALUES ($1) RETURNING id`, [company_name]);
+      company_id = insertResult?.id;
     }
 
     // Hash the password
     const pw = await bcrypt.hash(password, 10);
 
     // Insert new user
-    const result = await runQuery(
-      `INSERT INTO users (username, pw, company_id, ac, User_for, added_date, actv)
-       VALUES (?, ?, ?, ?, NULL, CURRENT_TIMESTAMP, 'y')`,
+    const result = await getQuery(
+      `INSERT INTO users (username, pw, company_id, ac, actv)
+       VALUES ($1, $2, $3, $4, 'y') RETURNING id`,
       [username, pw, company_id, ac]
     );
 

@@ -8,9 +8,11 @@ export function middleware(request: NextRequest) {
   const isAuthRoute = request.nextUrl.pathname.startsWith('/login') || 
                       request.nextUrl.pathname.startsWith('/api/login') ||
                       request.nextUrl.pathname.startsWith('/api/logout') ||
+                      request.nextUrl.pathname.startsWith('/register') ||
                       request.nextUrl.pathname.startsWith('/register-user') ||
                       request.nextUrl.pathname.startsWith('/api/users/register') ||
-                      request.nextUrl.pathname.startsWith('/api/mdm/companies');
+                      request.nextUrl.pathname.startsWith('/api/mdm/companies') ||
+                      request.nextUrl.pathname.startsWith('/api/migrate-db');
 
   const isDeviceRoute = request.nextUrl.pathname.startsWith('/api/device');
   const isTokenRoute = request.nextUrl.pathname.startsWith('/api/token');
@@ -23,7 +25,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (token && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/', request.url));
+    if (request.nextUrl.searchParams.get('addAccount') !== 'true') {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
   }
 
   return NextResponse.next();

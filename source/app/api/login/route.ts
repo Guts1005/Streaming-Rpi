@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     // Local dev fallback
     if (username === 'admin' && password === 'admin123') {
       const token = signToken({ id: 1, username: 'admin', company_id: '8.0', company_name: 'Aspire Smart Vision', ac: 'Admin' });
-      const response = NextResponse.json({ success: true, user: { id: 1, username: 'admin', company_id: '8.0', company_name: 'Aspire Smart Vision', ac: 'Admin' } });
+      const response = NextResponse.json({ success: true, token: token, user: { id: 1, username: 'admin', company_id: '8.0', company_name: 'Aspire Smart Vision', ac: 'Admin' } });
       response.headers.append('Set-Cookie', setAuthCookie(token));
       return response;
     }
@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
     
     const response = NextResponse.json({ 
       success: true, 
+      token: token,
       user: { 
         id: user.id, 
         username: user.username, 
