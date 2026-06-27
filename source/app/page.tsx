@@ -80,6 +80,7 @@ function Dashboard() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [activeSiteId, setActiveSiteId] = useState<string | null>(null);
   const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null);
+  const [beaconsList, setBeaconsList] = useState<any[]>([]);
   
   const router = useRouter();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -134,6 +135,15 @@ function Dashboard() {
               setActiveDeviceId(selectedDeviceId);
             }
           }
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/beacons/master')
+      .then(res => res.json())
+      .then(data => {
+        if (data.beacons) {
+          setBeaconsList(data.beacons);
         }
       })
       .catch(() => {});
@@ -892,45 +902,33 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Construction Progress Comparison */}
+            {/* Site Location and Progress */}
             <div className="progress-card">
-              <div className="progress-header">
-                <div>
-                  <h3 className="section-title" style={{margin: '0 0 4px'}}>Construction Progress Comparison</h3>
-                  <p style={{margin: 0, fontSize: '11px', color: 'var(--text-secondary)'}}>Compare site progress between two selected dates</p>
-                </div>
-                <button className="btn-primary" onClick={runGemini} disabled={analyzing}>
-                  <SvgIcon path="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" style={{width: '14px', height: '14px'}} />
-                  {analyzing ? "Generating..." : "Generate AI Report"}
-                </button>
-              </div>
-
               <div className="compare-container">
-                <div className="compare-box">
-                  <div className="compare-img">
-                    <span className="compare-date orange">1st May 2024</span>
-                    <img src="https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=800" alt="Previous Progress" />
-                  </div>
-                  <div className="compare-stats">
-                    <h5>Previous Progress</h5>
-                    <div className="stat-row"><span className="stat-label">Foundation Work</span><span className="stat-val" style={{color: 'var(--status-warning)'}}>42%</span><div className="stat-bar-bg"><div className="stat-bar-fill orange" style={{width: '42%'}}></div></div></div>
-                    <div className="stat-row"><span className="stat-label">Columns Completed</span><span className="stat-val" style={{color: 'var(--status-warning)'}}>18</span></div>
-                    <div className="stat-row"><span className="stat-label">Workers Detected</span><span className="stat-val" style={{color: 'var(--status-active)'}}>26</span></div>
+                {/* Left Half: Site Location List */}
+                <div className="compare-box" style={{ padding: '20px' }}>
+                  <h3 className="section-title" style={{margin: '0 0 16px'}}>Site Location List</h3>
+                  <div className="compare-stats" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    {beaconsList.length === 0 ? (
+                      <div className="stat-row" style={{justifyContent: 'center'}}><span className="stat-label">No locations available</span></div>
+                    ) : (
+                      beaconsList.map((beacon, i) => (
+                        <div className="stat-row" key={i} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
+                          <span className="stat-label" style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{beacon.location_name || 'Unknown Location'}</span>
+                          <span className="stat-val" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{beacon.beacon_mac}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
 
-                <div className="vs-circle">VS</div>
+                <div className="vs-circle" style={{ visibility: 'hidden' }}>VS</div>
 
-                <div className="compare-box">
-                  <div className="compare-img">
-                    <span className="compare-date green">15th May 2024</span>
-                    <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&q=80&w=800" alt="Current Progress" />
-                  </div>
-                  <div className="compare-stats">
-                    <h5>Current Progress</h5>
-                    <div className="stat-row"><span className="stat-label">Foundation Work</span><span className="stat-val" style={{color: 'var(--status-active)'}}>85%</span><div className="stat-bar-bg"><div className="stat-bar-fill green" style={{width: '85%'}}></div></div></div>
-                    <div className="stat-row"><span className="stat-label">Columns Completed</span><span className="stat-val" style={{color: 'var(--status-active)'}}>41</span></div>
-                    <div className="stat-row"><span className="stat-label">Workers Detected</span><span className="stat-val" style={{color: 'var(--status-active)'}}>38</span></div>
+                {/* Right Half: Site Progress (Placeholder) */}
+                <div className="compare-box" style={{ padding: '20px' }}>
+                  <h3 className="section-title" style={{margin: '0 0 16px'}}>Site Progress</h3>
+                  <div className="compare-stats" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '200px' }}>
+                    <span style={{ color: 'var(--text-secondary)' }}>Coming Soon...</span>
                   </div>
                 </div>
               </div>
