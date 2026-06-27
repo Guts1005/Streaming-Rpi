@@ -1,8 +1,6 @@
 const { Pool } = require('pg');
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 const pool = new Pool({ connectionString: 'postgres://postgres.rydzwvgilyobcixfhfxu:vg4kO0zUiEnL2wPL@aws-1-ap-south-1.pooler.supabase.com:5432/postgres' });
-const query = "UPDATE ks_devices SET api_base_url = 'https://api.aspire-vision.co.in' WHERE id = 2";
-pool.query(query)
-  .then(res => console.log('Updated rows:', res.rowCount))
-  .then(() => process.exit(0))
+pool.query("SELECT * FROM ks_devices;")
+  .then(res => { console.table(res.rows); process.exit(0); })
   .catch(err => { console.error(err); process.exit(1); });
