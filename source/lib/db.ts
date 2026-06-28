@@ -118,23 +118,39 @@ async function initDb() {
     // Ensure 'y' status for testing
     await pool.query(`UPDATE users SET actv = 'y' WHERE actv IS NULL OR actv = ''`);
 
-    const seedUser = async (user: string, role: string) => {
-      const res = await pool.query('SELECT * FROM users WHERE username = $1', [user]);
+    const seedCompany = async (id: number, name: string) => {
+      const res = await pool.query('SELECT * FROM ks_companies WHERE id = $1', [id]);
       if (res.rows.length === 0) {
-        const pw = await bcrypt.hash(user + '123', 10);
-        await pool.query('INSERT INTO users (username, pw, ac, company_id, actv) VALUES ($1, $2, $3, $4, $5)', [user, pw, role, '8.0', 'y']);
+        // Also check if name exists to avoid UNIQUE constraint violations
+        const nameRes = await pool.query('SELECT * FROM ks_companies WHERE cnm = $1', [name]);
+        if (nameRes.rows.length === 0) {
+          await pool.query('INSERT INTO ks_companies (id, cnm) VALUES ($1, $2)', [id, name]);
+        }
+      } else {
+        // Update name if it's currently Aspire Smart Vision or outdated
+        await pool.query('UPDATE ks_companies SET cnm = $2 WHERE id = $1', [id, name]);
       }
     };
 
-    await seedUser('admin', 'Admin');
-    await seedUser('site', 'Site');
-    await seedUser('sports', 'Sports');
-    await seedUser('surveyor', 'Surveyor');
+    await seedCompany(6, 'Aspire Sports');
+    await seedCompany(7, 'Aspire Survey');
+    await seedCompany(8, 'Aspire Projects');
 
-    const companyQuery = await pool.query("SELECT * FROM ks_companies WHERE id = 8 OR cnm = 'Aspire Smart Vision'");
-    if (companyQuery.rows.length === 0) {
-      await pool.query("INSERT INTO ks_companies (id, cnm) VALUES (8, 'Aspire Smart Vision')");
-    }
+    const seedUser = async (user: string, role: string, companyId: string) => {
+      const res = await pool.query('SELECT * FROM users WHERE username = $1', [user]);
+      if (res.rows.length === 0) {
+        const pw = await bcrypt.hash(user + '123', 10);
+        await pool.query('INSERT INTO users (username, pw, ac, company_id, actv) VALUES ($1, $2, $3, $4, $5)', [user, pw, role, companyId, 'y']);
+      } else {
+        // Force update company id to correct one for seed users
+        await pool.query('UPDATE users SET company_id = $2 WHERE username = $1', [user, companyId]);
+      }
+    };
+
+    await seedUser('admin', 'Admin', '8');
+    await seedUser('site', 'Site', '8');
+    await seedUser('sports', 'Sports', '6');
+    await seedUser('surveyor', 'Surveyor', '7');
   } catch (error) {
     console.error('Database initialization error:', error);
   }
