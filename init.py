@@ -1667,8 +1667,15 @@ def wifi_connect():
 @app.route('/api/bluetooth/scan', methods=['GET'])
 def bluetooth_scan():
     try:
+        # Auto-pause video stream to prevent 2.4GHz Wi-Fi interference killing Bluetooth
+        subprocess.run(["sudo", "systemctl", "stop", "srs-publisher"], capture_output=True)
+        
         subprocess.run(["sudo", "timeout", "12", "bluetoothctl", "scan", "on"], capture_output=True)
         result = subprocess.run(["sudo", "bluetoothctl", "devices"], capture_output=True, text=True)
+        
+        # Auto-resume the video stream
+        subprocess.run(["sudo", "systemctl", "start", "srs-publisher"], capture_output=True)
+        
         devices = []
         for line in result.stdout.splitlines():
             parts = line.split(" ", 2)
@@ -1676,6 +1683,7 @@ def bluetooth_scan():
                 devices.append({"mac": parts[1], "name": parts[2]})
         return jsonify({"success": True, "devices": devices})
     except Exception as e:
+        subprocess.run(["sudo", "systemctl", "start", "srs-publisher"], capture_output=True)
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/bluetooth/connect', methods=['POST'])
@@ -1684,13 +1692,22 @@ def bluetooth_connect():
     if not mac:
         return jsonify({"success": False, "error": "Missing mac"}), 400
     try:
+        # Auto-pause stream to ensure clean pairing signal
+        subprocess.run(["sudo", "systemctl", "stop", "srs-publisher"], capture_output=True)
+        
+        subprocess.run(["sudo", "bluetoothctl", "trust", mac], capture_output=True)
         subprocess.run(["sudo", "bluetoothctl", "pair", mac], capture_output=True)
         result = subprocess.run(["sudo", "bluetoothctl", "connect", mac], capture_output=True, text=True)
+        
+        # Auto-resume stream
+        subprocess.run(["sudo", "systemctl", "start", "srs-publisher"], capture_output=True)
+        
         if "Successful" in result.stdout or result.returncode == 0:
             return jsonify({"success": True, "message": "Connected successfully"})
         else:
             return jsonify({"success": False, "error": result.stdout}), 400
     except Exception as e:
+        subprocess.run(["sudo", "systemctl", "start", "srs-publisher"], capture_output=True)
         return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/hotspot/discover', methods=['POST'])
