@@ -944,10 +944,10 @@ function Dashboard() {
                 <div className="compare-box" style={{ padding: '20px' }}>
                   <h3 className="section-title" style={{margin: '0 0 16px'}}>Site Location List</h3>
                   <div className="compare-stats" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    {beaconsList.length === 0 ? (
-                      <div className="stat-row" style={{justifyContent: 'center'}}><span className="stat-label">No locations available</span></div>
+                    {beaconsList.filter(b => b.site_id && b.site_id === activeSiteId).length === 0 ? (
+                      <div className="stat-row" style={{justifyContent: 'center'}}><span className="stat-label">No locations available for this site</span></div>
                     ) : (
-                      beaconsList.map((beacon, i) => (
+                      beaconsList.filter(b => b.site_id && b.site_id === activeSiteId).map((beacon, i) => (
                         <div className="stat-row" key={i} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
                           <span className="stat-label" style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{beacon.location_name || 'Unknown Location'}</span>
                           <span className="stat-val" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{beacon.beacon_mac}</span>
