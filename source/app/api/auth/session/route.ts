@@ -31,11 +31,11 @@ export async function GET(req: NextRequest) {
 
   try {
     const { allQuery } = await import('@/lib/db');
-    // For admins, maybe load all sites, but for now just load user's sites or sites matching company
-    if (u.ac === 'Admin') {
-       u.sites = await allQuery('SELECT id, site_name FROM ks_sites WHERE company_id = $1', [parseInt(u.company_id, 10)]);
+    // Always fetch sites belonging to the logged-in user's company
+    if (u.company_id) {
+      u.sites = await allQuery("SELECT id, site_name FROM ks_sites WHERE company_id = $1 AND (actv = 'Y' OR actv = 'y') ORDER BY site_name", [parseInt(u.company_id, 10)]);
     } else {
-       u.sites = await allQuery('SELECT id, site_name FROM ks_sites WHERE user_id = $1', [u.id]);
+      u.sites = [];
     }
     
     // Fetch devices for each site (existing logic)

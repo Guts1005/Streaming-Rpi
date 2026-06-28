@@ -109,7 +109,10 @@ function Dashboard() {
           let selectedSiteId = matchSite ? matchSite[2] : null;
           let selectedDeviceId = matchDevice ? matchDevice[2] : null;
 
-          if (!selectedSiteId && data.user.all_devices && data.user.all_devices.length > 0) {
+          if (!selectedSiteId && data.user.sites && data.user.sites.length === 1) {
+            selectedSiteId = data.user.sites[0].id.toString();
+            document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
+          } else if (!selectedSiteId && data.user.all_devices && data.user.all_devices.length > 0) {
             selectedSiteId = data.user.all_devices[0].site_id?.toString() || '0';
             document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
           }
@@ -707,7 +710,7 @@ function Dashboard() {
               <img src="/logo.jpeg" alt="Aspire AI" />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <select
                   value={activeDeviceId || 'default'}
                   onChange={(e) => {
@@ -751,6 +754,38 @@ function Dashboard() {
                   ))}
                   <option disabled>--------------------</option>
                   <option value="pair">+ Pair New Helmet</option>
+                </select>
+
+                <select
+                  value={activeSiteId || 'default'}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'default') return;
+                    setActiveSiteId(val);
+                    document.cookie = `active_site_id=${val}; path=/; max-age=86400`;
+                    window.location.reload();
+                  }}
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#f8fafc',
+                    border: '1px solid #334155',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {!currentUser?.sites || currentUser.sites.length === 0 ? (
+                    <option value="default" disabled>No Sites Available</option>
+                  ) : !activeSiteId || !currentUser?.sites?.some((s: any) => s.id.toString() === activeSiteId) ? (
+                    <option value="default" disabled>Select Site ▼</option>
+                  ) : null}
+                  {(currentUser?.sites || []).map((site: any) => (
+                    <option key={site.id} value={site.id.toString()}>
+                      {site.site_name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
