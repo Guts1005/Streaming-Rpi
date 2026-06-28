@@ -16,9 +16,11 @@ interface DynamicTableProps {
   onAdd: () => void;
   onSearch: (query: string) => void;
   title: string;
+  alignControlsLeft?: boolean;
+  onClose?: () => void;
 }
 
-export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title }: DynamicTableProps) {
+export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose }: DynamicTableProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -37,7 +39,13 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
 
   return (
     <div style={{ padding: '20px', background: 'var(--bg-panel)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: alignControlsLeft ? 'flex-start' : 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '20px',
+        gap: alignControlsLeft ? '20px' : '0'
+      }}>
         <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{title}</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           <input 
@@ -58,6 +66,17 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
             }}>
             Add New
           </button>
+          {onClose && (
+            <button 
+              onClick={onClose}
+              style={{ 
+                background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', 
+                padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500,
+                display: 'flex', alignItems: 'center', gap: '6px'
+              }}>
+              ✕ Close
+            </button>
+          )}
         </div>
       </div>
 

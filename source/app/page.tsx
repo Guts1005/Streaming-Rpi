@@ -873,7 +873,7 @@ function Dashboard() {
         )}
         {activeTab === 'sites' && (
           <div style={{ padding: '24px' }}>
-            <SitesScreen />
+            <SitesScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
           </div>
         )}
 

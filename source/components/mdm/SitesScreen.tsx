@@ -81,7 +81,7 @@ const formColumns: ColumnDef[] = [
   { key: 'device_id', label: 'Device ID', type: 'varchar', hidden: true }
 ];
 
-export default function SitesScreen() {
+export default function SitesScreen({ currentUser, onClose }: { currentUser?: any, onClose?: () => void }) {
   const [data, setData] = useState<any[]>([]);
   const [companies, setCompanies] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
@@ -165,28 +165,32 @@ export default function SitesScreen() {
     fetchData();
   };
 
+  const isAdmin = currentUser?.account_type === 'admin';
+
   return (
     <div>
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <label style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Filter:</label>
-        <select 
-          value={selectedCompany} 
-          onChange={e => setSelectedCompany(e.target.value)}
-          style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
-        >
-          <option value="">All Companies</option>
-          {companies.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
-        </select>
-        
-        <select 
-          value={selectedCustomer} 
-          onChange={e => setSelectedCustomer(e.target.value)}
-          style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
-        >
-          <option value="">All Customers</option>
-          {customers.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
-        </select>
-      </div>
+      {isAdmin && (
+        <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <label style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Filter:</label>
+          <select 
+            value={selectedCompany} 
+            onChange={e => setSelectedCompany(e.target.value)}
+            style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
+          >
+            <option value="">All Companies</option>
+            {companies.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
+          </select>
+          
+          <select 
+            value={selectedCustomer} 
+            onChange={e => setSelectedCustomer(e.target.value)}
+            style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
+          >
+            <option value="">All Customers</option>
+            {customers.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
+          </select>
+        </div>
+      )}
 
       <DynamicTable 
         title="Sites Master"
@@ -196,6 +200,8 @@ export default function SitesScreen() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onSearch={setSearch}
+        alignControlsLeft={!isAdmin}
+        onClose={onClose}
       />
       
       {showForm && (
