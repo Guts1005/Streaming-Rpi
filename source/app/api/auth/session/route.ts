@@ -38,14 +38,18 @@ export async function GET(req: NextRequest) {
        u.sites = await allQuery('SELECT id, site_name FROM ks_sites WHERE user_id = $1', [u.id]);
     }
     
-    // Fetch devices for each site
+    // Fetch devices for each site (existing logic)
     if (u.sites && u.sites.length > 0) {
       for (const site of u.sites) {
         site.devices = await allQuery('SELECT id, device_name, status FROM ks_devices WHERE site_id = $1', [site.id]);
       }
     }
+    
+    // Fetch all active devices globally since ks_devices doesn't have company_id
+    u.all_devices = await allQuery("SELECT id, device_name, status, site_id FROM ks_devices WHERE status != 'deleted' OR status IS NULL");
   } catch (e) {
     u.sites = [];
+    u.all_devices = [];
   }
 
   const response = NextResponse.json({ authenticated: true, user: u });
