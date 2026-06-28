@@ -706,71 +706,65 @@ function Dashboard() {
             <div className="mobile-logo">
               <img src="/logo.jpeg" alt="Aspire AI" />
             </div>
-            <div className="page-title">
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <h1>{currentUser?.ac ? (currentUser.ac.toLowerCase() === 'surveyor' ? 'Survey' : currentUser.ac) : 'Site'} Live Streaming</h1>
-                {currentUser && <span style={{ fontSize: '14px', color: '#94a3b8', marginTop: '-4px' }}>{currentUser?.company_name || currentUser?.organization_name || currentUser?.username || 'Account'}</span>}
-              </div>
-              <p className="desktop-only">Real-time stream from Camera #CAM-1023</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
+              {currentUser?.sites && currentUser.sites.some((s: any) => s.devices && s.devices.length > 0) && (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <select
+                    value={activeDeviceId || ''}
+                    onChange={(e) => {
+                      const devId = e.target.value;
+                      const site = currentUser.sites.find((s: any) => s.devices?.some((d: any) => d.id.toString() === devId));
+                      if (site) {
+                        setActiveSiteId(site.id.toString());
+                        setActiveDeviceId(devId);
+                        document.cookie = `active_device_id=${devId}; path=/; max-age=86400`;
+                        document.cookie = `active_site_id=${site.id}; path=/; max-age=86400`;
+                        window.location.reload();
+                      }
+                    }}
+                    style={{
+                      backgroundColor: '#1e293b',
+                      color: '#f8fafc',
+                      border: '1px solid #334155',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {currentUser.sites.flatMap((site: any) => 
+                      (site.devices || []).map((device: any) => (
+                        <option key={device.id} value={device.id}>
+                          {device.device_name || `Helmet ${device.id}`}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+              )}
+              <button
+                onClick={() => setShowPairModal(true)}
+                style={{
+                  backgroundColor: '#3b82f6',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <SvgIcon path="M12 4v16m8-8H4" style={{ width: '14px' }} />
+                Pair Helmet
+              </button>
             </div>
           </div>
           <div className="topbar-actions">
-            {currentUser?.sites && currentUser.sites.some((s: any) => s.devices && s.devices.length > 0) && (
-              <div style={{ marginRight: '16px', display: 'flex', alignItems: 'center' }}>
-                <select
-                  value={activeDeviceId || ''}
-                  onChange={(e) => {
-                    const devId = e.target.value;
-                    const site = currentUser.sites.find((s: any) => s.devices?.some((d: any) => d.id.toString() === devId));
-                    if (site) {
-                      setActiveSiteId(site.id.toString());
-                      setActiveDeviceId(devId);
-                      document.cookie = `active_device_id=${devId}; path=/; max-age=86400`;
-                      document.cookie = `active_site_id=${site.id}; path=/; max-age=86400`;
-                      window.location.reload();
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#1e293b',
-                    color: '#f8fafc',
-                    border: '1px solid #334155',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {currentUser.sites.flatMap((site: any) => 
-                    (site.devices || []).map((device: any) => (
-                      <option key={device.id} value={device.id}>
-                        {device.device_name || `Helmet ${device.id}`}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-            )}
-            <button
-              onClick={() => setShowPairModal(true)}
-              style={{
-                backgroundColor: '#3b82f6',
-                color: '#fff',
-                border: 'none',
-                padding: '6px 12px',
-                borderRadius: '6px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                marginRight: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              <SvgIcon path="M12 4v16m8-8H4" style={{ width: '14px' }} />
-              Pair Helmet
-            </button>
             <div className="topbar-icon">
               <SvgIcon path="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               <div className="notif-dot"></div>
