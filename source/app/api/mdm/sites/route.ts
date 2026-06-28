@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { runQuery, allQuery } from '@/lib/db';
+import { runQuery, allQuery, getQuery } from '@/lib/db';
 
 export async function GET(request: Request) {
   try {
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Company ID, Customer ID, and Site Name are required' }, { status: 400 });
     }
     
-    const result = await runQuery(
+    const result = await getQuery(
       `INSERT INTO ks_sites (
         user_id, company_id, customer_id, site_name, address, dlvry_address, client_mail,
         contact_person1, contact_person1_mobile, contact_person1_mail, contact_person2,
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
         boq_added, sft, purchase_sft, internal, ongoing, sft_block, feedback, device_id, tdate, udate
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
-      )`,
+      ) RETURNING id`,
       [
         user_id || null, company_id, customer_id, site_name, address || null, dlvry_address || null, client_mail || null,
         contact_person1 || null, contact_person1_mobile || null, contact_person1_mail || null, contact_person2 || null,
@@ -76,7 +76,12 @@ export async function POST(request: Request) {
       ]
     );
     
-    return NextResponse.json({ success: true, id: (result as any)?.id || null, message: 'Site created successfully' });
+    const newSiteId = (result as any)?.id;
+    if (newSiteId && device_id && device_id !== '0' && device_id !== '') {
+      await runQuery('UPDATE ks_devices SET site_id = ? WHERE id = ?', [newSiteId, device_id]);
+    }
+    
+    return NextResponse.json({ success: true, id: newSiteId || null, message: 'Site created successfully' });
   } catch (error) {
     console.error('Error creating site:', error);
     return NextResponse.json({ error: 'Failed to create site' }, { status: 500 });

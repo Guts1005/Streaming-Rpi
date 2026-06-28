@@ -39,6 +39,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         boq_added || null, sft || null, purchase_sft || null, internal || null, ongoing || 'Y', sft_block || null, feedback || null, device_id || '0', id
       ]
     );
+
+    if (device_id && device_id !== '0' && device_id !== '') {
+      await runQuery('UPDATE ks_devices SET site_id = ? WHERE id = ?', [id, device_id]);
+    }
     
     return NextResponse.json({ success: true, message: 'Site updated successfully' });
   } catch (error) {

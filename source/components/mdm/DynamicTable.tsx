@@ -6,6 +6,7 @@ export interface ColumnDef {
   label: string;
   type?: 'text' | 'varchar' | 'int' | 'bigint' | 'date' | 'datetime';
   hidden?: boolean;
+  readonly?: boolean;
 }
 
 interface DynamicTableProps {

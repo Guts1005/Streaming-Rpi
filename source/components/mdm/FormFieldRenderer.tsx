@@ -26,9 +26,10 @@ export default function FormFieldRenderer({ column, value, onChange, options }: 
       <div style={{ marginBottom: '16px' }}>
         <label style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-secondary)' }}>{column.label}</label>
         <select 
-          style={commonStyle} 
+          style={{ ...commonStyle, opacity: column.readonly ? 0.6 : 1, cursor: column.readonly ? 'not-allowed' : 'pointer' }} 
           value={value || ''} 
-          onChange={e => onChange(column.key, e.target.value)}
+          onChange={e => { if (!column.readonly) onChange(column.key, e.target.value); }}
+          disabled={column.readonly}
         >
           <option value="">Select {column.label}</option>
           {options.map(opt => (

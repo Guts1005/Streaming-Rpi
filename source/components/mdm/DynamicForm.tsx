@@ -10,9 +10,10 @@ interface DynamicFormProps {
   onCancel: () => void;
   title: string;
   optionsMap?: Record<string, { label: string; value: string | number }[]>;
+  onFieldChange?: (key: string, value: any, currentFormData: any) => void;
 }
 
-export default function DynamicForm({ columns, initialData, onSubmit, onCancel, title, optionsMap = {} }: DynamicFormProps) {
+export default function DynamicForm({ columns, initialData, onSubmit, onCancel, title, optionsMap = {}, onFieldChange }: DynamicFormProps) {
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,7 +27,11 @@ export default function DynamicForm({ columns, initialData, onSubmit, onCancel, 
   }, [initialData]);
 
   const handleChange = (key: string, val: any) => {
-    setFormData(prev => ({ ...prev, [key]: val }));
+    setFormData(prev => {
+      const next = { ...prev, [key]: val };
+      if (onFieldChange) onFieldChange(key, val, next);
+      return next;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

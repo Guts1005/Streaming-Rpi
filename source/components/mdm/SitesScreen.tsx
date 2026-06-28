@@ -78,7 +78,7 @@ const formColumns: ColumnDef[] = [
   { key: 'ongoing', label: 'Ongoing', type: 'varchar', hidden: true },
   { key: 'sft_block', label: 'SFT Block', type: 'varchar', hidden: true },
   { key: 'feedback', label: 'Feedback', type: 'varchar', hidden: true },
-  { key: 'device_id', label: 'Device ID', type: 'varchar', hidden: true }
+  { key: 'device_id', label: 'Device', type: 'varchar' }
 ];
 
 export default function SitesScreen({ currentUser, onClose }: { currentUser?: any, onClose?: () => void }) {
@@ -92,6 +92,8 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   const [search, setSearch] = useState('');
   const [selectedCompany, setSelectedCompany] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState('');
+  
+  const [modalCompanyId, setModalCompanyId] = useState<string>('');
 
   const fetchCompanies = async () => {
     const res = await fetch('/api/mdm/companies');
@@ -132,11 +134,17 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   }, [search, selectedCompany, selectedCustomer]);
 
   const handleAdd = () => {
-    setEditingItem(null);
+    let initialCompany = '';
+    if (currentUser?.company_id) {
+      initialCompany = currentUser.company_id.toString();
+    }
+    setModalCompanyId(initialCompany);
+    setEditingItem({ actv: 'Y', company_id: initialCompany });
     setShowForm(true);
   };
 
   const handleEdit = (item: any) => {
+    setModalCompanyId(item.company_id ? item.company_id.toString() : '');
     setEditingItem(item);
     setShowForm(true);
   };
@@ -156,19 +164,42 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
       body: JSON.stringify(formData)
     });
     
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to save');
+    const json = await res.json();
+    if (json.success) {
+      setShowForm(false);
+      fetchData();
+      if (formData.device_id) {
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    } else {
+      throw new Error(json.error || 'Failed to save');
     }
-    
-    setShowForm(false);
-    fetchData();
   };
 
   const isAdmin = currentUser?.account_type === 'admin';
+  let deviceOptions: any[] = [];
+  if (currentUser?.all_devices) {
+    deviceOptions = currentUser.all_devices
+      .filter((d: any) => modalCompanyId ? d.company_id?.toString() === modalCompanyId : true)
+      .map((d: any) => ({ label: d.device_name || `Device ${d.id}`, value: d.id.toString() }));
+  }
+
+  const optionsMap = {
+    company_id: companies.map(c => ({ label: c.cnm, value: c.id })),
+    customer_id: customers.map(c => ({ label: c.cnm, value: c.id })),
+    actv: [ { label: 'Yes', value: 'Y' }, { label: 'No', value: 'N' } ],
+    device_id: deviceOptions
+  };
+
+  const dynamicFormColumns = formColumns.map(col => {
+    if (col.key === 'company_id') {
+      return { ...col, readonly: currentUser?.ac !== 'Admin' };
+    }
+    return col;
+  });
 
   return (
-    <div>
+    <div className="mdm-screen">
       {isAdmin && (
         <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
           <label style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Filter:</label>
@@ -206,14 +237,14 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
       
       {showForm && (
         <DynamicForm 
-          title={editingItem ? 'Edit Site' : 'Add Site'}
-          columns={formColumns}
+          title={editingItem?.id ? 'Edit Site' : 'Add Site'}
+          columns={dynamicFormColumns}
           initialData={editingItem}
           onSubmit={handleSubmit}
           onCancel={() => setShowForm(false)}
-          optionsMap={{
-            company_id: companies.map(c => ({ label: c.cnm, value: c.id })),
-            customer_id: customers.map(c => ({ label: c.cnm, value: c.id }))
+          optionsMap={optionsMap}
+          onFieldChange={(key, val) => {
+            if (key === 'company_id') setModalCompanyId(val ? val.toString() : '');
           }}
         />
       )}
