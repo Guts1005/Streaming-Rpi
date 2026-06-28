@@ -707,61 +707,51 @@ function Dashboard() {
               <img src="/logo.jpeg" alt="Aspire AI" />
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
-              {currentUser?.sites && currentUser.sites.some((s: any) => s.devices && s.devices.length > 0) && (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <select
-                    value={activeDeviceId || ''}
-                    onChange={(e) => {
-                      const devId = e.target.value;
-                      const site = currentUser.sites.find((s: any) => s.devices?.some((d: any) => d.id.toString() === devId));
-                      if (site) {
-                        setActiveSiteId(site.id.toString());
-                        setActiveDeviceId(devId);
-                        document.cookie = `active_device_id=${devId}; path=/; max-age=86400`;
-                        document.cookie = `active_site_id=${site.id}; path=/; max-age=86400`;
-                        window.location.reload();
-                      }
-                    }}
-                    style={{
-                      backgroundColor: '#1e293b',
-                      color: '#f8fafc',
-                      border: '1px solid #334155',
-                      padding: '6px 12px',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      outline: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {currentUser.sites.flatMap((site: any) => 
-                      (site.devices || []).map((device: any) => (
-                        <option key={device.id} value={device.id}>
-                          {device.device_name || `Helmet ${device.id}`}
-                        </option>
-                      ))
-                    )}
-                  </select>
-                </div>
-              )}
-              <button
-                onClick={() => setShowPairModal(true)}
-                style={{
-                  backgroundColor: '#3b82f6',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <SvgIcon path="M12 4v16m8-8H4" style={{ width: '14px' }} />
-                Pair Helmet
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <select
+                  value={activeDeviceId || 'default'}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'pair') {
+                      setShowPairModal(true);
+                      return;
+                    }
+                    if (val === 'default') return;
+
+                    const site = currentUser?.sites?.find((s: any) => s.devices?.some((d: any) => d.id.toString() === val));
+                    if (site) {
+                      setActiveSiteId(site.id.toString());
+                      setActiveDeviceId(val);
+                      document.cookie = `active_device_id=${val}; path=/; max-age=86400`;
+                      document.cookie = `active_site_id=${site.id}; path=/; max-age=86400`;
+                      window.location.reload();
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#f8fafc',
+                    border: '1px solid #334155',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {(!activeDeviceId || !currentUser?.sites?.some((s: any) => s.devices?.some((d: any) => d.id.toString() === activeDeviceId))) && (
+                    <option value="default" disabled>Helmet Selection ▼</option>
+                  )}
+                  {currentUser?.sites?.flatMap((site: any) => 
+                    (site.devices || []).map((device: any) => (
+                      <option key={device.id} value={device.id.toString()}>
+                        {device.device_name || `Helmet ${device.id}`}
+                      </option>
+                    ))
+                  )}
+                  <option disabled>--------------------</option>
+                  <option value="pair">+ Pair New Helmet</option>
+                </select>
+              </div>
             </div>
           </div>
           <div className="topbar-actions">
