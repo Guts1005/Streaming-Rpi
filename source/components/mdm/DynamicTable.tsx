@@ -39,33 +39,9 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
 
   return (
     <div style={{ padding: '20px', background: 'var(--bg-panel)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: alignControlsLeft ? 'flex-start' : 'space-between', 
-        alignItems: 'center', 
-        marginBottom: '20px',
-        gap: alignControlsLeft ? '20px' : '0'
-      }}>
-        <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{title}</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            value={search} 
-            onChange={handleSearch}
-            style={{ 
-              padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', 
-              background: 'var(--bg-input)', color: 'var(--text-primary)' 
-            }}
-          />
-          <button 
-            onClick={onAdd}
-            style={{ 
-              background: 'var(--accent-blue)', color: '#fff', border: 'none', 
-              padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500
-            }}>
-            Add New
-          </button>
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{title}</h2>
           {onClose && (
             <button 
               onClick={onClose}
@@ -77,6 +53,32 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
               ✕ Close
             </button>
           )}
+        </div>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: alignControlsLeft ? 'flex-start' : 'space-between',
+          gap: '10px'
+        }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input 
+              type="text" 
+              placeholder="Search..." 
+              value={search} 
+              onChange={handleSearch}
+              style={{ 
+                padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', 
+                background: 'var(--bg-input)', color: 'var(--text-primary)' 
+              }}
+            />
+            <button 
+              onClick={onAdd}
+              style={{ 
+                background: 'var(--accent-blue)', color: '#fff', border: 'none', 
+                padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500
+              }}>
+              Add New
+            </button>
+          </div>
         </div>
       </div>
 
