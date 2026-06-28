@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef } from "react";
-import { Room } from 'livekit-client';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
 import DeviceConfigModal from '../components/DeviceConfigModal';
@@ -34,7 +33,7 @@ function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDesktopRec, setIsDesktopRec] = useState(false);
   const desktopRecRef = useRef<MediaRecorder | null>(null);
-  const livekitRoomRef = useRef<Room | null>(null);
+  const webrtcRef = useRef<RTCPeerConnection | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -342,8 +341,11 @@ function Dashboard() {
       if (player) {
         try { player.destroy(); } catch(e) {}
       }
-      if (livekitRoomRef.current) {
-        livekitRoomRef.current.disconnect();
+      if (webrtcRef.current) {
+        webrtcRef.current.close();
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((t: any) => t.stop());
       }
       setConnected(false);
     };
@@ -382,30 +384,63 @@ function Dashboard() {
 
   async function toggleTalk() { 
     if (talking) {
-      if (livekitRoomRef.current) {
-        livekitRoomRef.current.disconnect();
-        livekitRoomRef.current = null;
+      if (webrtcRef.current) {
+        webrtcRef.current.close();
+        webrtcRef.current = null;
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((t: any) => t.stop());
+        audioStreamRef.current = null;
       }
       setTalking(false);
       toast("Live talk disabled");
     } else {
       toast("Connecting live talk...");
       try {
-        const tokenRes = await fetch('/api/livekit/token');
-        const tokenData = await tokenRes.json();
-        if (!tokenData.token || !tokenData.url) throw new Error("Failed to get LiveKit token or URL");
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        audioStreamRef.current = stream;
 
-        const room = new Room();
-        await room.connect(tokenData.url, tokenData.token);
-        await room.localParticipant.setMicrophoneEnabled(true);
-        livekitRoomRef.current = room;
+        const pc = new RTCPeerConnection();
+        webrtcRef.current = pc;
 
-        setTalking(true);
-        toast("Live talk active!");
+        pc.onconnectionstatechange = () => {
+          if (pc.connectionState === 'connected') {
+            setTalking(true);
+            toast("Live talk active!");
+          } else if (pc.connectionState === 'failed') {
+            setTalking(false);
+            toast("Talk failed");
+          }
+        };
+
+        stream.getTracks().forEach((track: any) => pc.addTrack(track, stream));
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        const rtcUrl = `${window.location.protocol}//${window.location.host}/api/device/api/srs_webrtc_publish`;
+        const payload = {
+          api: rtcUrl,
+          streamurl: "webrtc://localhost/live/talkback",
+          sdp: offer.sdp
+        };
+
+        const res = await fetch(rtcUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        if (data.code !== 0) throw new Error(data.server + " error");
+        
+        await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
       } catch (e: any) {
-        console.error("LiveKit Talk Error:", e);
+        console.error("SRS Talk Error:", e);
         toast("Failed to connect live talk");
         setTalking(false);
+        if (webrtcRef.current) { webrtcRef.current.close(); webrtcRef.current = null; }
+        if (audioStreamRef.current) { audioStreamRef.current.getTracks().forEach((t: any) => t.stop()); audioStreamRef.current = null; }
       }
     }
   }
