@@ -769,7 +769,7 @@ function Dashboard() {
               <SvgIcon path="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               <div className="notif-dot"></div>
             </div>
-            <div className="topbar-icon">
+            <div className="topbar-icon" onClick={() => setShowDeviceConfigModal(true)} style={{cursor: 'pointer'}}>
               <SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </div>
             <div className="user-profile" style={{ position: 'relative' }}>
@@ -837,6 +837,19 @@ function Dashboard() {
                   </div>
 
                   <div style={{ padding: '8px 0', borderTop: '1px solid #334155' }}>
+                    <button 
+                      onClick={shutdownPi}
+                      style={{
+                        width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
+                        border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '13px',
+                        display: 'flex', alignItems: 'center', gap: '8px'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <SvgIcon path="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" style={{ width: '16px', color: '#ef4444' }} />
+                      Power Off Device
+                    </button>
                     <button 
                       onClick={handleLogout}
                       style={{
@@ -1039,18 +1052,6 @@ function Dashboard() {
                     {talking && <div className="rec-pulse" style={{background: 'var(--status-cyan)', boxShadow: '0 0 6px var(--status-cyan)'}}></div>}
                   </div>
                   <div><h4>Live Talk</h4><p>{talking ? 'Tap to stop' : 'Talk to site'}</p></div>
-                </button>
-                <button className="action-btn" onClick={() => setShowDeviceConfigModal(true)}>
-                  <div className="action-icon" style={{color: '#8b5cf6', background: 'rgba(139, 92, 246, 0.1)'}}>
-                    <SvgIcon path="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                  </div>
-                  <div><h4>Network & Audio</h4><p>Wi-Fi, Bluetooth, Setup</p></div>
-                </button>
-                <button className="action-btn" onClick={shutdownPi}>
-                  <div className="action-icon c-red">
-                    <SvgIcon path="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" />
-                  </div>
-                  <div><h4>Power Off</h4><p>Shutdown Streaming Device</p></div>
                 </button>
               </div>
             </div>
