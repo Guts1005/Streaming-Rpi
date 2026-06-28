@@ -45,8 +45,12 @@ export async function GET(req: NextRequest) {
       }
     }
     
-    // Fetch all active devices globally since ks_devices doesn't have company_id
-    u.all_devices = await allQuery("SELECT id, device_name, status, site_id FROM ks_devices WHERE status != 'deleted' OR status IS NULL");
+    // Fetch all active devices scoped by company_id if available, otherwise fetch all
+    if (u.company_id) {
+      u.all_devices = await allQuery("SELECT id, device_name, status, site_id, company_id, mac_id, device_id FROM ks_devices WHERE (status != 'deleted' OR status IS NULL) AND (company_id = $1 OR company_id IS NULL)", [parseInt(u.company_id, 10)]);
+    } else {
+      u.all_devices = await allQuery("SELECT id, device_name, status, site_id, company_id, mac_id, device_id FROM ks_devices WHERE status != 'deleted' OR status IS NULL");
+    }
   } catch (e) {
     u.sites = [];
     u.all_devices = [];

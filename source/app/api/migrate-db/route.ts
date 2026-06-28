@@ -114,13 +114,17 @@ export async function GET() {
 
       CREATE TABLE IF NOT EXISTS ks_devices (
         id SERIAL PRIMARY KEY,
+        company_id BIGINT,
         user_id INTEGER,
         site_id INTEGER,
         device_name TEXT,
+        device_id VARCHAR(100),
+        mac_id VARCHAR(50),
         api_base_url TEXT,
         pairing_token TEXT UNIQUE,
         status TEXT DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_ks_devices_company FOREIGN KEY (company_id) REFERENCES ks_companies(id)
       );
     `);
 
