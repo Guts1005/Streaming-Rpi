@@ -1090,6 +1090,7 @@ function Dashboard() {
             </div>
 
             {/* System Status */}
+            {false && (
             <div className="panel">
               <h3 className="section-title">System Status</h3>
               <div className="sys-status-grid">
@@ -1111,6 +1112,7 @@ function Dashboard() {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
       </main>
