@@ -112,7 +112,7 @@ export default function CustomersScreen({ currentUser }: { currentUser?: any }) 
     fetchData();
   };
 
-  const isAdmin = currentUser?.account_type === 'admin';
+  const isAdmin = currentUser?.account_type === 'admin' || currentUser?.account_type === 'Admin' || currentUser?.ac === 'Admin' || currentUser?.ac === 'admin';
 
   return (
     <div>

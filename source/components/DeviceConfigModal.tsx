@@ -339,10 +339,7 @@ function BeaconRow({ dev, config, updateLocation, sites }: { dev: any, config: a
         <input type="text" placeholder="Location Name (e.g. Kitchen)" value={roomName} onChange={e => setRoomName(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #334155', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }} />
         <select value={siteId} onChange={e => setSiteId(e.target.value)} style={{ flex: 1, padding: '6px 8px', background: '#1e293b', border: '1px solid #22c55e', borderRadius: '4px', color: '#fff', outline: 'none', fontSize: '12px' }}>
           <option value="">Select Site</option>
-          {sites?.map((s: any) => <option key={s.id} value={s.site_name}>{s.site_name}</option>)}
-          <option value="Kalyan">Kalyan</option>
-          <option value="Thane">Thane</option>
-          <option value="Pune">Pune</option>
+          {sites?.map((s: any) => <option key={s.id} value={s.id.toString()}>{s.site_name}</option>)}
         </select>
       </div>
       <div style={{ display: 'flex', gap: '8px' }}>

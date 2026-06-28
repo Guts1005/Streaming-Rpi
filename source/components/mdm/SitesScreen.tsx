@@ -201,7 +201,7 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
     }
   };
 
-  const isAdmin = currentUser?.account_type === 'admin';
+  const isAdmin = currentUser?.account_type === 'admin' || currentUser?.account_type === 'Admin' || currentUser?.ac === 'Admin' || currentUser?.ac === 'admin';
   let deviceOptions: any[] = [];
   if (currentUser?.all_devices) {
     deviceOptions = currentUser.all_devices
@@ -220,7 +220,7 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
 
   const dynamicFormColumns = formColumns.map(col => {
     if (col.key === 'company_id') {
-      return { ...col, readonly: currentUser?.ac !== 'Admin' };
+      return { ...col, readonly: !isAdmin };
     }
     return col;
   });

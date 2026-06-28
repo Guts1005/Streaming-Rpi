@@ -30,10 +30,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'PASSWORD_MISMATCH' }, { status: 401 });
     }
 
-    const validRoles = ['Admin', 'Sports', 'Surveyor', 'Site'];
-    if (!user.ac || !validRoles.includes(user.ac)) {
+    const validRoles = ['Admin', 'Sports', 'Surveyor', 'Site', 'admin', 'sports', 'surveyor', 'site'];
+    const userRole = user.account_type || user.ac;
+    if (!userRole || !validRoles.includes(userRole)) {
       return NextResponse.json({ error: 'ROLE_NOT_FOUND' }, { status: 403 });
     }
+    
+    // Normalize to capitalized for legacy frontend support
+    const normalizedRole = userRole.charAt(0).toUpperCase() + userRole.slice(1).toLowerCase();
 
     let companyName = null;
     if (user.company_id) {
@@ -53,7 +57,8 @@ export async function POST(req: NextRequest) {
         id: user.id, 
         username: user.username, 
         company_id: user.company_id, 
-        ac: user.ac 
+        ac: normalizedRole,
+        account_type: user.account_type || normalizedRole 
       });
     } catch (e) {
       return NextResponse.json({ error: 'SESSION_CREATION_FAILED' }, { status: 500 });
@@ -67,7 +72,8 @@ export async function POST(req: NextRequest) {
         username: user.username, 
         company_id: user.company_id, 
         company_name: companyName,
-        ac: user.ac 
+        ac: normalizedRole,
+        account_type: user.account_type || normalizedRole
       } 
     });
     response.headers.append('Set-Cookie', setAuthCookie(token));
