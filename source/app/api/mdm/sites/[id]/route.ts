@@ -40,6 +40,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       ]
     );
 
+    // Clear old device assigned to this site
+    await runQuery('UPDATE ks_devices SET site_id = NULL WHERE site_id = ?', [id]);
+
+    // Assign new device
     if (device_id && device_id !== '0' && device_id !== '') {
       await runQuery('UPDATE ks_devices SET site_id = ? WHERE id = ?', [id, device_id]);
     }

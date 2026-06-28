@@ -144,8 +144,23 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   };
 
   const handleEdit = (item: any) => {
-    setModalCompanyId(item.company_id ? item.company_id.toString() : '');
-    setEditingItem(item);
+    console.log('Opening Edit Site');
+    console.log('Site ID:', item.id);
+    console.log('Company ID:', item.company_id);
+    console.log('Company Name:', item.company_name);
+    console.log('Assigned Device ID:', item.device_id);
+    // Find device name from currentUser.all_devices if possible
+    const assignedDevice = currentUser?.all_devices?.find((d: any) => d.id.toString() === item.device_id?.toString());
+    console.log('Assigned Device Name:', assignedDevice ? assignedDevice.device_name : 'N/A');
+
+    const formattedItem = {
+      ...item,
+      company_id: item.company_id ? item.company_id.toString() : '',
+      device_id: item.device_id ? item.device_id.toString() : ''
+    };
+
+    setModalCompanyId(formattedItem.company_id);
+    setEditingItem(formattedItem);
     setShowForm(true);
   };
 
@@ -185,8 +200,8 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   }
 
   const optionsMap = {
-    company_id: companies.map(c => ({ label: c.cnm, value: c.id })),
-    customer_id: customers.map(c => ({ label: c.cnm, value: c.id })),
+    company_id: companies.map(c => ({ label: c.cnm, value: c.id.toString() })),
+    customer_id: customers.map(c => ({ label: c.cnm, value: c.id.toString() })),
     actv: [ { label: 'Yes', value: 'Y' }, { label: 'No', value: 'N' } ],
     device_id: deviceOptions
   };
