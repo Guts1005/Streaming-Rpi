@@ -14,7 +14,7 @@ export default function SurveyLayout({ children }: { children: React.ReactNode }
   const [storagePct] = useState(25);
 
   useEffect(() => {
-    fetch('/api/auth/session')
+    fetch('/api/auth/session', { cache: 'no-store' })
       .then(r => r.json())
       .then(d => {
         if (d.user) {

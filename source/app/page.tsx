@@ -97,7 +97,7 @@ function Dashboard() {
       if (stored) setSavedAccounts(JSON.parse(stored));
     } catch(e) {}
 
-    fetch('/api/auth/session')
+    fetch('/api/auth/session', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.authenticated) {

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getUserFromRequest } from '@/lib/auth';
 import { getQuery } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 export async function GET(req: NextRequest) {
   const user = getUserFromRequest(req);
   if (!user) {
@@ -44,5 +48,9 @@ export async function GET(req: NextRequest) {
     u.sites = [];
   }
 
-  return NextResponse.json({ authenticated: true, user: u });
+  const response = NextResponse.json({ authenticated: true, user: u });
+  response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  response.headers.set('Pragma', 'no-cache');
+  response.headers.set('Expires', '0');
+  return response;
 }

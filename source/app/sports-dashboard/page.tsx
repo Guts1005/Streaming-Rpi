@@ -62,7 +62,7 @@ export default function SportsDashboard() {
     fetchStatus();
     const interval = setInterval(() => { fetchMedia(); fetchStatus(); }, 10000);
     
-    fetch('/api/auth/session')
+    fetch('/api/auth/session', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         if (data.authenticated) {

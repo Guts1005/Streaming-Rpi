@@ -11,19 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Local dev fallback
-    if (username === 'admin' && password === 'admin123') {
-      let adminCompany = null;
-      try {
-        const comp = await getQuery('SELECT cnm FROM ks_companies WHERE id = ?', [8]) as any;
-        if (comp && comp.cnm) adminCompany = comp.cnm;
-      } catch (e) {}
-      
-      const token = signToken({ id: 1, username: 'admin', company_id: '8', ac: 'Admin' });
-      const response = NextResponse.json({ success: true, token: token, user: { id: 1, username: 'admin', company_id: '8', company_name: adminCompany, ac: 'Admin' } });
-      response.headers.append('Set-Cookie', setAuthCookie(token));
-      return response;
-    }
+
 
     const sql = `SELECT * FROM users WHERE username = ?`;
     const user = await getQuery(sql, [username]) as any;
