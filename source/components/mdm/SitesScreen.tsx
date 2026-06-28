@@ -6,7 +6,7 @@ import DynamicForm from './DynamicForm';
 const columns: ColumnDef[] = [
   { key: 'id', label: 'ID', type: 'int', hidden: true },
   { key: 'company_id', label: 'Company', type: 'int', hidden: true },
-  { key: 'customer_id', label: 'Customer', type: 'int', hidden: true },
+  { key: 'customer_id', label: 'Customer', type: 'int' },
   { key: 'user_id', label: 'User ID', type: 'int', hidden: true },
   { key: 'company_name', label: 'Company Name', type: 'varchar' },
   { key: 'customer_name', label: 'Customer Name', type: 'varchar' },
@@ -47,7 +47,7 @@ const columns: ColumnDef[] = [
 const formColumns: ColumnDef[] = [
   { key: 'id', label: 'ID', type: 'int', hidden: true },
   { key: 'company_id', label: 'Company', type: 'int' },
-  { key: 'customer_id', label: 'Customer', type: 'int', hidden: true },
+  { key: 'customer_id', label: 'Customer', type: 'int' },
   { key: 'user_id', label: 'User ID', type: 'int', hidden: true },
   { key: 'site_name', label: 'Site Name', type: 'varchar' },
   { key: 'address', label: 'Address', type: 'text', hidden: true },
@@ -102,8 +102,12 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   };
 
   const fetchCustomersForFilter = async () => {
-    let url = '/api/mdm/customers';
-    if (selectedCompany) url += `?company_id=${selectedCompany}`;
+    let url = '/api/mdm/customers?';
+    if (currentUser?.account_type !== 'admin' && currentUser?.company_id) {
+      url += `company_id=${currentUser.company_id}`;
+    } else if (selectedCompany) {
+      url += `company_id=${selectedCompany}`;
+    }
     const res = await fetch(url);
     const json = await res.json();
     if (json.success) setCustomers(json.data);
@@ -112,7 +116,13 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   const fetchData = async () => {
     let url = `/api/mdm/sites?`;
     if (search) url += `search=${encodeURIComponent(search)}&`;
-    if (selectedCompany) url += `company_id=${selectedCompany}&`;
+    
+    if (currentUser?.account_type !== 'admin' && currentUser?.company_id) {
+      url += `company_id=${currentUser.company_id}&`;
+    } else if (selectedCompany) {
+      url += `company_id=${selectedCompany}&`;
+    }
+    
     if (selectedCustomer) url += `customer_id=${selectedCustomer}&`;
     
     const res = await fetch(url);
@@ -201,7 +211,9 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
 
   const optionsMap = {
     company_id: companies.map(c => ({ label: c.cnm, value: c.id.toString() })),
-    customer_id: customers.map(c => ({ label: c.cnm, value: c.id.toString() })),
+    customer_id: customers
+      .filter((c: any) => modalCompanyId ? c.company_id?.toString() === modalCompanyId : true)
+      .map(c => ({ label: c.cnm, value: c.id.toString() })),
     actv: [ { label: 'Yes', value: 'Y' }, { label: 'No', value: 'N' } ],
     device_id: deviceOptions
   };
@@ -233,7 +245,9 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
             style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
           >
             <option value="">All Customers</option>
-            {customers.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
+            {customers
+              .filter(c => selectedCompany ? c.company_id?.toString() === selectedCompany : true)
+              .map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
           </select>
         </div>
       )}

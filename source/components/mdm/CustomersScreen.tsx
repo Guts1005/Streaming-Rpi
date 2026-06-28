@@ -37,7 +37,7 @@ const formColumns: ColumnDef[] = [
   { key: 'ced', label: 'CED', type: 'date' }
 ];
 
-export default function CustomersScreen() {
+export default function CustomersScreen({ currentUser }: { currentUser?: any }) {
   const [data, setData] = useState<any[]>([]);
   const [companies, setCompanies] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -54,7 +54,12 @@ export default function CustomersScreen() {
   const fetchData = async () => {
     let url = `/api/mdm/customers?`;
     if (search) url += `search=${encodeURIComponent(search)}&`;
-    if (selectedCompany) url += `company_id=${selectedCompany}&`;
+    
+    if (currentUser?.account_type !== 'admin' && currentUser?.company_id) {
+      url += `company_id=${currentUser.company_id}&`;
+    } else if (selectedCompany) {
+      url += `company_id=${selectedCompany}&`;
+    }
     
     const res = await fetch(url);
     const json = await res.json();
@@ -70,7 +75,11 @@ export default function CustomersScreen() {
   }, [search, selectedCompany]);
 
   const handleAdd = () => {
-    setEditingItem(null);
+    let initialCompany = '';
+    if (currentUser?.company_id) {
+      initialCompany = currentUser.company_id.toString();
+    }
+    setEditingItem({ actv: 'Y', company_id: initialCompany });
     setShowForm(true);
   };
 
@@ -103,19 +112,23 @@ export default function CustomersScreen() {
     fetchData();
   };
 
+  const isAdmin = currentUser?.account_type === 'admin';
+
   return (
     <div>
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-        <label style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Filter by Company:</label>
-        <select 
-          value={selectedCompany} 
-          onChange={e => setSelectedCompany(e.target.value)}
-          style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
-        >
-          <option value="">All Companies</option>
-          {companies.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
-        </select>
-      </div>
+      {isAdmin && (
+        <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <label style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Filter by Company:</label>
+          <select 
+            value={selectedCompany} 
+            onChange={e => setSelectedCompany(e.target.value)}
+            style={{ padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)' }}
+          >
+            <option value="">All Companies</option>
+            {companies.map(c => <option key={c.id} value={c.id}>{c.cnm}</option>)}
+          </select>
+        </div>
+      )}
 
       <DynamicTable 
         title="Customers Master"
@@ -130,7 +143,12 @@ export default function CustomersScreen() {
       {showForm && (
         <DynamicForm 
           title={editingItem ? 'Edit Customer' : 'Add Customer'}
-          columns={formColumns}
+          columns={formColumns.map(col => {
+            if (col.key === 'company_id') {
+              return { ...col, readonly: !isAdmin };
+            }
+            return col;
+          })}
           initialData={editingItem}
           onSubmit={handleSubmit}
           onCancel={() => setShowForm(false)}

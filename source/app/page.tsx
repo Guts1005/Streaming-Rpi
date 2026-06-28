@@ -902,8 +902,8 @@ function Dashboard() {
           </div>
         )}
         {activeTab === 'customers' && (
-          <div style={{ padding: '24px' }}>
-            <CustomersScreen />
+          <div className="card full-width animate-fade-in">
+            <CustomersScreen currentUser={currentUser} />
           </div>
         )}
         {activeTab === 'sites' && (

@@ -28,7 +28,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         contact_person1 = ?, contact_person1_mobile = ?, contact_person1_mail = ?, contact_person2 = ?,
         contact_person2_mobile = ?, contact_person2_mail = ?, actv = ?, boq_amount = ?, pmc = ?, from_date = ?,
         end_date = ?, HOD = ?, fl = ?, company_logo = ?, PMC_logo = ?, our_logo = ?, graph = ?, max_permissible_indents = ?,
-        boq_added = ?, sft = ?, purchase_sft = ?, internal = ?, ongoing = ?, sft_block = ?, feedback = ?, device_id = ?,
+        boq_added = ?, sft = ?, purchase_sft = ?, internal = ?, ongoing = ?, sft_block = ?, feedback = ?,
         udate = CURRENT_TIMESTAMP
       WHERE id = ?`,
       [
@@ -36,7 +36,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         contact_person1 || null, contact_person1_mobile || null, contact_person1_mail || null, contact_person2 || null,
         contact_person2_mobile || null, contact_person2_mail || null, actv || null, boq_amount || '0.00', pmc || '0', from_date || null,
         end_date || null, HOD || null, fl || null, company_logo || null, PMC_logo || null, our_logo || null, graph || null, max_permissible_indents || null,
-        boq_added || null, sft || null, purchase_sft || null, internal || null, ongoing || 'Y', sft_block || null, feedback || null, device_id || '0', id
+        boq_added || null, sft || null, purchase_sft || null, internal || null, ongoing || 'Y', sft_block || null, feedback || null, id
       ]
     );
 

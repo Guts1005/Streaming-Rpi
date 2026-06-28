@@ -28,8 +28,8 @@ export async function GET(request: Request) {
     }
     
     if (search) {
-      sql += ` AND (s.site_name LIKE ? OR s.address LIKE ? OR s.device_id LIKE ?)`;
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      sql += ` AND (s.site_name LIKE ? OR s.address LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`);
     }
     
     sql += ` ORDER BY s.tdate DESC`;
@@ -63,16 +63,16 @@ export async function POST(request: Request) {
         contact_person1, contact_person1_mobile, contact_person1_mail, contact_person2,
         contact_person2_mobile, contact_person2_mail, actv, boq_amount, pmc, from_date,
         end_date, HOD, fl, company_logo, PMC_logo, our_logo, graph, max_permissible_indents,
-        boq_added, sft, purchase_sft, internal, ongoing, sft_block, feedback, device_id, tdate, udate
+        boq_added, sft, purchase_sft, internal, ongoing, sft_block, feedback, tdate, udate
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       ) RETURNING id`,
       [
         user_id || null, company_id, customer_id, site_name, address || null, dlvry_address || null, client_mail || null,
         contact_person1 || null, contact_person1_mobile || null, contact_person1_mail || null, contact_person2 || null,
         contact_person2_mobile || null, contact_person2_mail || null, actv || null, boq_amount || '0.00', pmc || '0', from_date || null,
         end_date || null, HOD || null, fl || null, company_logo || null, PMC_logo || null, our_logo || null, graph || null, max_permissible_indents || null,
-        boq_added || null, sft || null, purchase_sft || null, internal || null, ongoing || 'Y', sft_block || null, feedback || null, device_id || '0'
+        boq_added || null, sft || null, purchase_sft || null, internal || null, ongoing || 'Y', sft_block || null, feedback || null
       ]
     );
     
