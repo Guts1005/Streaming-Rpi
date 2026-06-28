@@ -599,10 +599,10 @@ function Dashboard() {
           <button className="nav-item">
             <SvgIcon path="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Reports
           </button>
-          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/logs', '_blank')}>
+          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/logs', '_blank')} style={{ display: 'none' }}>
             <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Location Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
-          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/master_logs', '_blank')}>
+          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/master_logs', '_blank')} style={{ display: 'none' }}>
             <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Master Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
 
