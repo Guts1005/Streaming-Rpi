@@ -675,7 +675,7 @@ function Dashboard() {
         </nav>
 
         {/* Device Status Panel */}
-        <div className="device-status-sidebar">
+        <div className="device-status-sidebar" style={{ display: 'none' }}>
           <div className="ds-header">
             <span>Device Status</span>
             <span style={{color: deviceStatus ? 'var(--status-active)' : 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '5px'}}>
