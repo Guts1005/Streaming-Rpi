@@ -935,7 +935,7 @@ function Dashboard() {
             </div>
 
             {/* AI Summary */}
-            <div className="ai-summary-card">
+            <div className="ai-summary-card" style={{ display: 'none' }}>
               <div className="ai-summary-header">
                 <h3>AI Summary</h3>
                 <span className="badge-auto">AUTO GENERATED</span>
