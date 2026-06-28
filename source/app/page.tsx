@@ -623,10 +623,10 @@ function Dashboard() {
           <button className="nav-item">
             <SvgIcon path="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /> Video to Text
           </button>
-          <button className="nav-item">
+          <button className="nav-item" style={{ display: 'none' }}>
             <SvgIcon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /> Object Detection
           </button>
-          <button className="nav-item">
+          <button className="nav-item" style={{ display: 'none' }}>
             <SvgIcon path="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> Face Detection
           </button>
           <button className="nav-item">
