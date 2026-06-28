@@ -52,12 +52,28 @@ export async function GET() {
         signature TEXT,
         is_android TEXT DEFAULT 'y',
         boq_rate TEXT DEFAULT 'N',
-        company_id TEXT
+        company_id INTEGER,
+        CONSTRAINT fk_users_company FOREIGN KEY (company_id) REFERENCES ks_companies(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS ks_companies (
         id SERIAL PRIMARY KEY,
         cnm TEXT UNIQUE,
+        company_name_on_bill TEXT,
+        company_address TEXT,
+        csd TEXT,
+        ced TEXT,
+        opening_bal TEXT,
+        phone TEXT,
+        phone2 TEXT,
+        "SMS" TEXT,
+        gst_number TEXT,
+        registration_no TEXT,
+        service_tax_no TEXT,
+        tin_no TEXT,
+        cst_no TEXT,
+        emails TEXT,
+        voucher_adjust_date TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -70,7 +86,8 @@ export async function GET() {
         gst_no TEXT,
         actv TEXT DEFAULT 'Y',
         tdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_customers_company FOREIGN KEY (company_id) REFERENCES ks_companies(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS ks_sites (
@@ -107,9 +124,10 @@ export async function GET() {
         ongoing TEXT DEFAULT 'Y',
         sft_block TEXT,
         feedback TEXT,
-        device_id TEXT,
         tdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_sites_company FOREIGN KEY (company_id) REFERENCES ks_companies(id) ON DELETE CASCADE,
+        CONSTRAINT fk_sites_customer FOREIGN KEY (customer_id) REFERENCES ks_customers(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS ks_devices (
@@ -162,10 +180,10 @@ export async function GET() {
         for (const s of sites) {
           try {
              await client.query(`
-               INSERT INTO ks_sites (id, user_id, company_id, customer_id, site_name, address, dlvry_address, client_mail, contact_person1, contact_person1_mobile, contact_person1_mail, contact_person2, contact_person2_mobile, contact_person2_mail, actv, boq_amount, pmc, from_date, end_date, HOD, fl, company_logo, PMC_logo, our_logo, graph, max_permissible_indents, boq_added, sft, purchase_sft, internal, ongoing, sft_block, feedback, device_id)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)
+               INSERT INTO ks_sites (id, user_id, company_id, customer_id, site_name, address, dlvry_address, client_mail, contact_person1, contact_person1_mobile, contact_person1_mail, contact_person2, contact_person2_mobile, contact_person2_mail, actv, boq_amount, pmc, from_date, end_date, HOD, fl, company_logo, PMC_logo, our_logo, graph, max_permissible_indents, boq_added, sft, purchase_sft, internal, ongoing, sft_block, feedback)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)
                ON CONFLICT (id) DO NOTHING
-             `, [s.id, s.user_id, s.company_id, s.customer_id, s.site_name, s.address, s.dlvry_address, s.client_mail, s.contact_person1, s.contact_person1_mobile, s.contact_person1_mail, s.contact_person2, s.contact_person2_mobile, s.contact_person2_mail, s.actv, s.boq_amount, s.pmc, s.from_date, s.end_date, s.HOD, s.fl, s.company_logo, s.PMC_logo, s.our_logo, s.graph, s.max_permissible_indents, s.boq_added, s.sft, s.purchase_sft, s.internal, s.ongoing, s.sft_block, s.feedback, s.device_id]);
+             `, [s.id, s.user_id, s.company_id, s.customer_id, s.site_name, s.address, s.dlvry_address, s.client_mail, s.contact_person1, s.contact_person1_mobile, s.contact_person1_mail, s.contact_person2, s.contact_person2_mobile, s.contact_person2_mail, s.actv, s.boq_amount, s.pmc, s.from_date, s.end_date, s.HOD, s.fl, s.company_logo, s.PMC_logo, s.our_logo, s.graph, s.max_permissible_indents, s.boq_added, s.sft, s.purchase_sft, s.internal, s.ongoing, s.sft_block, s.feedback]);
              sitesCount++;
           } catch(e: any) {}
         }

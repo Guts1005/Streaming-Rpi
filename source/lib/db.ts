@@ -43,12 +43,28 @@ async function initDb() {
         signature TEXT,
         is_android TEXT DEFAULT 'y',
         boq_rate TEXT DEFAULT 'N',
-        company_id TEXT
+        company_id INTEGER,
+        CONSTRAINT fk_users_company FOREIGN KEY (company_id) REFERENCES ks_companies(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS ks_companies (
         id SERIAL PRIMARY KEY,
         cnm TEXT UNIQUE,
+        company_name_on_bill TEXT,
+        company_address TEXT,
+        csd TEXT,
+        ced TEXT,
+        opening_bal TEXT,
+        phone TEXT,
+        phone2 TEXT,
+        "SMS" TEXT,
+        gst_number TEXT,
+        registration_no TEXT,
+        service_tax_no TEXT,
+        tin_no TEXT,
+        cst_no TEXT,
+        emails TEXT,
+        voucher_adjust_date TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -61,7 +77,8 @@ async function initDb() {
         gst_no TEXT,
         actv TEXT DEFAULT 'Y',
         tdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_customers_company FOREIGN KEY (company_id) REFERENCES ks_companies(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS ks_sites (
@@ -98,9 +115,10 @@ async function initDb() {
         ongoing TEXT DEFAULT 'Y',
         sft_block TEXT,
         feedback TEXT,
-        device_id TEXT,
         tdate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        udate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT fk_sites_company FOREIGN KEY (company_id) REFERENCES ks_companies(id) ON DELETE CASCADE,
+        CONSTRAINT fk_sites_customer FOREIGN KEY (customer_id) REFERENCES ks_customers(id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS ks_devices (
