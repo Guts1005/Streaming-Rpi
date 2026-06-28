@@ -126,8 +126,23 @@ function Dashboard() {
                 document.cookie = `active_device_id=${selectedDeviceId}; path=/; max-age=86400`;
               }
             } else {
-              selectedDeviceId = null;
-              document.cookie = `active_device_id=; path=/; max-age=0`; // clear
+              // Try to find ANY site with devices if the active site has none
+              let foundAnyDevice = false;
+              for (const s of data.user.sites || []) {
+                if (s.devices && s.devices.length > 0) {
+                  selectedSiteId = s.id.toString();
+                  selectedDeviceId = s.devices[0].id.toString();
+                  document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
+                  document.cookie = `active_device_id=${selectedDeviceId}; path=/; max-age=86400`;
+                  setActiveSiteId(selectedSiteId);
+                  foundAnyDevice = true;
+                  break;
+                }
+              }
+              if (!foundAnyDevice) {
+                selectedDeviceId = null;
+                document.cookie = `active_device_id=; path=/; max-age=0`; // clear
+              }
             }
             
             if (selectedDeviceId) {
@@ -709,6 +724,7 @@ function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <select
+                  disabled={!currentUser?.sites?.some((s: any) => s.devices?.length > 0)}
                   value={activeDeviceId || 'default'}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -738,9 +754,11 @@ function Dashboard() {
                     cursor: 'pointer'
                   }}
                 >
-                  {(!activeDeviceId || !currentUser?.sites?.some((s: any) => s.devices?.some((d: any) => d.id.toString() === activeDeviceId))) && (
-                    <option value="default" disabled>Helmet Selection ▼</option>
-                  )}
+                  {!currentUser?.sites?.some((s: any) => s.devices?.length > 0) ? (
+                    <option value="default" disabled>No helmets available</option>
+                  ) : (!activeDeviceId || !currentUser?.sites?.some((s: any) => s.devices?.some((d: any) => d.id.toString() === activeDeviceId))) ? (
+                    <option value="default" disabled>Select Helmet ▼</option>
+                  ) : null}
                   {currentUser?.sites?.flatMap((site: any) => 
                     (site.devices || []).map((device: any) => (
                       <option key={device.id} value={device.id.toString()}>
