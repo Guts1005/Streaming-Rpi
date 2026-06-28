@@ -6,11 +6,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search');
     
-    let sql = `SELECT * FROM ks_companies ORDER BY tdate DESC`;
+    let sql = `SELECT * FROM ks_companies ORDER BY created_at DESC`;
     let params: any[] = [];
     
     if (search) {
-      sql = `SELECT * FROM ks_companies WHERE cnm LIKE ? OR emails LIKE ? ORDER BY tdate DESC`;
+      sql = `SELECT * FROM ks_companies WHERE cnm LIKE ? OR emails LIKE ? ORDER BY created_at DESC`;
       params = [`%${search}%`, `%${search}%`];
     }
     
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       `INSERT INTO ks_companies (
         cnm, company_name_on_bill, company_address, csd, ced,
         opening_bal, phone, phone2, SMS, gst_number, registration_no,
-        service_tax_no, tin_no, cst_no, emails, voucher_adjust_date, tdate
+        service_tax_no, tin_no, cst_no, emails, voucher_adjust_date, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       [
         cnm, company_name_on_bill || null, company_address || null, csd || null, ced || null,
