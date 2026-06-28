@@ -8,14 +8,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
-  // Backwards compatibility for existing legacy sessions
   const u = user as any;
-  if (!u.company_name && u.company_id) {
+  
+  // ALWAYS fetch the latest company name dynamically
+  if (u.company_id) {
     try {
       const compIdInt = parseInt(u.company_id, 10);
-      if (u.username === 'admin' && u.company_id === '8.0') {
-        u.company_name = 'Aspire Smart Vision';
-      } else if (!isNaN(compIdInt)) {
+      if (!isNaN(compIdInt)) {
         const comp = await getQuery('SELECT cnm FROM ks_companies WHERE id = $1', [compIdInt]) as any;
         if (comp && comp.cnm) {
           u.company_name = comp.cnm;

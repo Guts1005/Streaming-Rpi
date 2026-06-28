@@ -19,7 +19,7 @@ export default function SurveyLayout({ children }: { children: React.ReactNode }
       .then(d => {
         if (d.user) {
           setUserName(d.user.username);
-          setCompanyName(d.user.company_name || 'Aspire Survey');
+          setCompanyName(d.user.company_name);
         }
       });
   }, []);
