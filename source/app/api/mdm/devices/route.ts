@@ -1,20 +1,27 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { runQuery, getQuery } from '@/lib/db';
+import { getUserFromRequest } from '@/lib/auth';
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const company_id = searchParams.get('company_id');
-
-    if (!company_id) {
-      return NextResponse.json({ error: 'company_id is required' }, { status: 400 });
+    const user = getUserFromRequest(req);
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    
+    const u = user as any;
+    if (!u.company_id) {
+       return NextResponse.json({ error: 'User does not belong to any company' }, { status: 400 });
     }
 
+    const company_id = u.company_id;
+
     const devices = await runQuery(
-      `SELECT id, device_id, device_name, company_id, site_id, mac_id 
-       FROM ks_devices 
-       WHERE company_id = ? 
-       ORDER BY device_name`,
+      `SELECT d.id, d.device_id, d.device_name, d.company_id, d.site_id, d.mac_id, s.site_name 
+       FROM ks_devices d
+       LEFT JOIN ks_sites s ON d.site_id = s.id
+       WHERE d.company_id = ? 
+       ORDER BY d.device_name`,
       [company_id]
     );
 

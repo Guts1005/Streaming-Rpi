@@ -19,9 +19,10 @@ interface DynamicTableProps {
   title: string;
   alignControlsLeft?: boolean;
   onClose?: () => void;
+  emptyMessage?: string;
 }
 
-export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose }: DynamicTableProps) {
+export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose, emptyMessage }: DynamicTableProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -97,7 +98,7 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
           </thead>
           <tbody>
             {paginatedData.length === 0 ? (
-              <tr><td colSpan={visibleColumns.length + 1} style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>No records found.</td></tr>
+              <tr><td colSpan={visibleColumns.length + 1} style={{ textAlign: 'center', padding: '20px', color: 'var(--text-muted)' }}>{emptyMessage || 'No records found.'}</td></tr>
             ) : paginatedData.map(row => (
               <tr key={row.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
                 {visibleColumns.map(col => (

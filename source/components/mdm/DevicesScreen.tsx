@@ -21,20 +21,13 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
   const [toastMsg, setToastMsg] = useState('');
 
   const fetchData = async () => {
-    if (!currentUser?.company_id) return;
     try {
-      const res = await fetch(`/api/mdm/devices?company_id=${currentUser.company_id}`);
+      const res = await fetch('/api/mdm/devices');
       const json = await res.json();
       if (json.success) {
-        // Map site_id to site_name for display
-        const sitesMap: Record<string, string> = {};
-        (currentUser.sites || []).forEach((s: any) => {
-          sitesMap[s.id.toString()] = s.site_name;
-        });
-
         const formattedData = json.data.map((d: any) => ({
           ...d,
-          site_name: d.site_id ? (sitesMap[d.site_id.toString()] || `Site ${d.site_id}`) : 'Unassigned',
+          site_name: d.site_name ? d.site_name : (d.site_id ? `Site ${d.site_id}` : 'Unassigned'),
           status: 'N/A', // Status placeholder
         }));
         
@@ -107,6 +100,7 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
         onSearch={setSearch}
         alignControlsLeft={true}
         onClose={onClose}
+        emptyMessage="No devices found for your company."
       />
       
       {showAssignModal && editingDevice && (
