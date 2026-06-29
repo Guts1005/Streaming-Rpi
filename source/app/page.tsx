@@ -134,40 +134,11 @@ function Dashboard() {
           let selectedSiteId = matchSite ? matchSite[2] : null;
           let selectedDeviceId = matchDevice ? matchDevice[2] : null;
 
-          if (!selectedSiteId && data.user.sites && data.user.sites.length === 1) {
-            selectedSiteId = data.user.sites[0].id.toString();
-            document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
-          } else if (!selectedSiteId && data.user.all_devices && data.user.all_devices.length > 0) {
-            selectedSiteId = data.user.all_devices[0].site_id?.toString() || '0';
-            document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
+          if (selectedSiteId) {
+            setActiveSiteId(selectedSiteId);
           }
-
-          if (selectedSiteId || (data.user.all_devices && data.user.all_devices.length > 0)) {
-            if (selectedSiteId) setActiveSiteId(selectedSiteId);
-            
-            // Auto-select first device if no device cookie or invalid device
-            if (data.user.all_devices && data.user.all_devices.length > 0) {
-              const deviceExists = data.user.all_devices.some((d: any) => d.id.toString() === selectedDeviceId);
-              if (!selectedDeviceId || !deviceExists) {
-                // Try to find a device for the selected site, or just pick the first one
-                let firstDev = data.user.all_devices.find((d: any) => d.site_id?.toString() === selectedSiteId);
-                if (!firstDev) firstDev = data.user.all_devices[0];
-                
-                selectedDeviceId = firstDev.id.toString();
-                selectedSiteId = firstDev.site_id?.toString() || '0';
-                
-                document.cookie = `active_device_id=${selectedDeviceId}; path=/; max-age=86400`;
-                document.cookie = `active_site_id=${selectedSiteId}; path=/; max-age=86400`;
-                setActiveSiteId(selectedSiteId);
-              }
-            } else {
-              selectedDeviceId = null;
-              document.cookie = `active_device_id=; path=/; max-age=0`; // clear
-            }
-            
-            if (selectedDeviceId) {
-              setActiveDeviceId(selectedDeviceId);
-            }
+          if (selectedDeviceId) {
+            setActiveDeviceId(selectedDeviceId);
           }
         }
       })
@@ -229,16 +200,8 @@ function Dashboard() {
     setActiveSiteId(newSiteId);
     document.cookie = `active_site_id=${newSiteId}; path=/; max-age=86400`;
     
-    // Auto-select first device for the new site
-    const activeSite = currentUser?.sites?.find((s: any) => s.id.toString() === newSiteId);
-    if (activeSite && activeSite.devices && activeSite.devices.length > 0) {
-      const firstDevice = activeSite.devices[0].id.toString();
-      setActiveDeviceId(firstDevice);
-      document.cookie = `active_device_id=${firstDevice}; path=/; max-age=86400`;
-    } else {
-      setActiveDeviceId(null);
-      document.cookie = `active_device_id=; path=/; max-age=0`;
-    }
+    setActiveDeviceId(null);
+    document.cookie = `active_device_id=; path=/; max-age=0`;
     
     // Need to reload stream or UI data if necessary
     window.location.reload();
@@ -737,14 +700,14 @@ function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <select
-                  value={activeDeviceId || 'default'}
+                  value={activeDeviceId || ''}
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === 'pair') {
                       setShowPairModal(true);
                       return;
                     }
-                    if (val === 'default') return;
+                    if (val === '') return;
 
                     const device = currentUser?.all_devices?.find((d: any) => d.id.toString() === val);
                     if (device) {
@@ -767,11 +730,7 @@ function Dashboard() {
                     cursor: 'pointer'
                   }}
                 >
-                  {!currentUser?.all_devices || currentUser.all_devices.length === 0 ? (
-                    <option value="default" disabled>No helmets available</option>
-                  ) : (!activeDeviceId || !currentUser?.all_devices?.some((d: any) => d.id.toString() === activeDeviceId)) ? (
-                    <option value="default" disabled>Select Helmet ▼</option>
-                  ) : null}
+                  <option value="" disabled>Select Device</option>
                   {(currentUser?.all_devices || []).map((device: any) => (
                     <option key={device.id} value={device.id.toString()}>
                       {device.device_name || `Helmet ${device.id}`}
@@ -782,10 +741,10 @@ function Dashboard() {
                 </select>
 
                 <select
-                  value={activeSiteId || 'default'}
+                  value={activeSiteId || ''}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === 'default') return;
+                    if (val === '') return;
                     setActiveSiteId(val);
                     document.cookie = `active_site_id=${val}; path=/; max-age=86400`;
                     window.location.reload();
@@ -801,11 +760,7 @@ function Dashboard() {
                     cursor: 'pointer'
                   }}
                 >
-                  {!currentUser?.sites || currentUser.sites.length === 0 ? (
-                    <option value="default" disabled>No Sites Available</option>
-                  ) : !activeSiteId || !currentUser?.sites?.some((s: any) => s.id.toString() === activeSiteId) ? (
-                    <option value="default" disabled>Select Site ▼</option>
-                  ) : null}
+                  <option value="" disabled>Select Site</option>
                   {(currentUser?.sites || []).map((site: any) => (
                     <option key={site.id} value={site.id.toString()}>
                       {site.site_name}
