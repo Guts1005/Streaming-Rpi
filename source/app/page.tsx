@@ -989,7 +989,7 @@ function Dashboard() {
                       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', color: 'var(--text-primary)' }}>
                         <thead>
                           <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '12px' }}>
-                            <th style={{ padding: '8px 0', fontWeight: '500' }}>Device Name</th>
+                            <th style={{ padding: '8px 0', fontWeight: '500' }}>Location Name</th>
                             <th style={{ padding: '8px 0', fontWeight: '500', textAlign: 'center' }}>Videos</th>
                             <th style={{ padding: '8px 0', fontWeight: '500', textAlign: 'center' }}>Images</th>
                           </tr>
@@ -997,7 +997,7 @@ function Dashboard() {
                         <tbody>
                           {beaconsList.map((beacon, i) => (
                             <tr key={i} style={{ fontSize: '14px' }}>
-                              <td style={{ padding: '12px 0' }}>{beacon.beacon_name || beacon.location_name || 'Unknown Location'}</td>
+                              <td style={{ padding: '12px 0' }}>{beacon.location_name || beacon.beacon_name || 'Unknown Location'}</td>
                               <td style={{ padding: '12px 0', textAlign: 'center' }}>{beacon.video_count || 0}</td>
                               <td style={{ padding: '12px 0', textAlign: 'center' }}>{beacon.image_count || 0}</td>
                             </tr>
