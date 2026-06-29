@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getQuery } from '@/lib/db';
+import { getQuery, allQuery } from '@/lib/db';
 import { signToken, setAuthCookie } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
     let selectedSiteName = null;
 
     try {
-      const { allQuery } = require('@/lib/db'); // ensuring we get allQuery
       const userSites = await allQuery('SELECT id, site_name FROM ks_sites WHERE company_id = ?', [user.company_id]) as any[];
       if (userSites && userSites.length === 1) {
         selectedSiteId = userSites[0].id;
