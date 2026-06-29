@@ -608,7 +608,7 @@ function Dashboard() {
         <nav className="nav-section">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px', padding: '0 8px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Site</span>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Project</span>
               <select
                 value={activeSiteId || ''}
                 onChange={async (e) => {
@@ -644,7 +644,7 @@ function Dashboard() {
                   width: '100%'
                 }}
               >
-                <option value="" disabled>Select Site</option>
+                <option value="" disabled>Select Project</option>
                 {(currentUser?.sites || []).map((site: any) => (
                   <option key={site.id} value={site.id.toString()}>
                     {site.site_name}
@@ -654,7 +654,7 @@ function Dashboard() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Helmet</span>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Device</span>
               <select
                 value={activeDeviceId || ''}
                 onChange={(e) => {
@@ -678,11 +678,11 @@ function Dashboard() {
                 }}
               >
                 <option value="" disabled>
-                  {!activeSiteId ? 'Select Site First' : (((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0) ? 'No helmets assigned' : 'Select Helmet')}
+                  {!activeSiteId ? 'Select Project First' : (((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0) ? 'No devices assigned' : 'Select Device')}
                 </option>
                 {(currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).map((device: any) => (
                   <option key={device.id} value={device.id.toString()}>
-                    {device.device_name || `Helmet ${device.id}`}
+                    {device.device_name || `Device ${device.id}`}
                   </option>
                 ))}
               </select>
