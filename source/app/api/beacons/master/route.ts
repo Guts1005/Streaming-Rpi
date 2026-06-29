@@ -1,48 +1,32 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
+import { allQuery } from '@/lib/db';
+import { getUserFromRequest } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    // Navigate up from source/app/api/beacons/master to the root directory
-    // Assuming the root directory contains beacon_master.csv
-    const filePath = path.join(process.cwd(), '..', 'beacon_master.csv');
-    
-    if (!fs.existsSync(filePath)) {
-       // If running in a different environment, fallback to just process.cwd()
-       const fallbackPath = path.join(process.cwd(), 'beacon_master.csv');
-       if (!fs.existsSync(fallbackPath)) {
-         return NextResponse.json({ error: 'Beacon master file not found', beacons: [] }, { status: 404 });
-       }
-       
-       const content = fs.readFileSync(fallbackPath, 'utf8');
-       return parseCSV(content);
+    const user = getUserFromRequest(req) as any;
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized', beacons: [] }, { status: 401 });
     }
 
-    const content = fs.readFileSync(filePath, 'utf8');
-    return parseCSV(content);
+    const siteId = user.selected_site_id;
+    if (!siteId) {
+      // If no site is selected, return empty instead of querying all
+      return NextResponse.json({ beacons: [] });
+    }
 
+    // Query ks_beacon_master for this specific site
+    const query = `
+      SELECT * 
+      FROM ks_beacon_master 
+      WHERE site_id = $1 
+      ORDER BY beacon_name
+    `;
+    const beacons = await allQuery(query, [siteId]);
+
+    return NextResponse.json({ beacons });
   } catch (error) {
-    console.error('Error reading beacon master file:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error('Error fetching beacons from db:', error);
+    return NextResponse.json({ error: 'Internal Server Error', beacons: [] }, { status: 500 });
   }
-}
-
-function parseCSV(content: string) {
-  const lines = content.split('\n').filter(line => line.trim() !== '');
-  if (lines.length <= 1) {
-    return NextResponse.json({ beacons: [] });
-  }
-
-  const headers = lines[0].split(',');
-  const beacons = lines.slice(1).map(line => {
-    const values = line.split(',');
-    const obj: Record<string, string> = {};
-    headers.forEach((header, index) => {
-      obj[header.trim()] = values[index]?.trim() || '';
-    });
-    return obj;
-  });
-
-  return NextResponse.json({ beacons });
 }
