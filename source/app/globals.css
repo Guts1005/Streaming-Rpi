@@ -152,7 +152,7 @@ body {
 }
 .page-title h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 2px; }
 .page-title p { font-size: 13px; color: var(--text-secondary); }
-.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.topbar-actions { display: flex; align-items: center; gap: 16px; }
 .topbar-icon {
     width: 36px; height: 36px; display: grid; place-items: center;
     border-radius: 50%; color: var(--text-secondary); cursor: pointer;
@@ -678,8 +678,6 @@ body {
     }
     .sidebar-close-btn { display: grid; }
     .hamburger-btn { display: grid; }
-    .mobile-logo { display: block; margin-left: 10px; }
-    .mobile-logo img { height: 32px; border-radius: 4px; }
     .desktop-only { display: none; }
     .topbar { padding: 16px; }
     .dashboard-grid { padding: 0 16px 24px; gap: 16px; }

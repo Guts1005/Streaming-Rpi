@@ -817,9 +817,6 @@ function Dashboard() {
             <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
               <SvgIcon path="M4 6h16M4 12h16M4 18h16" />
             </button>
-            <div className="mobile-logo">
-              <img src="/logo.jpeg" alt="Aspire AI" />
-            </div>
           </div>
 
           <div className="topbar-actions">
