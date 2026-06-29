@@ -97,6 +97,8 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
     } catch (e) {
       showToast('Error assigning device.');
     }
+  };
+
   const handleSaveAdd = async () => {
     if (!addForm.device_name || !addForm.device_id || !addForm.mac_id || !addForm.site_id) {
       showToast('Please fill in all required fields.');
