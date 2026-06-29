@@ -982,14 +982,28 @@ function Dashboard() {
                   <h3 className="section-title" style={{margin: '0 0 16px'}}>Site Location List</h3>
                   <div className="compare-stats" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {beaconsList.length === 0 ? (
-                      <div className="stat-row" style={{justifyContent: 'center'}}><span className="stat-label">No beacon locations found for this site.</span></div>
+                      <div className="stat-row" style={{justifyContent: 'center', padding: '12px 0'}}>
+                        <span className="stat-label">No devices found for this site.</span>
+                      </div>
                     ) : (
-                      beaconsList.map((beacon, i) => (
-                        <div className="stat-row" key={i} style={{ padding: '12px 0', borderBottom: '1px solid var(--border-color)' }}>
-                          <span className="stat-label" style={{ fontSize: '14px', color: 'var(--text-primary)' }}>📍 {beacon.beacon_name || beacon.location_name || 'Unknown Location'}</span>
-                          <span className="stat-val" style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{beacon.beacon_mac}</span>
-                        </div>
-                      ))
+                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', color: 'var(--text-primary)' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '12px' }}>
+                            <th style={{ padding: '8px 0', fontWeight: '500' }}>Device Name</th>
+                            <th style={{ padding: '8px 0', fontWeight: '500', textAlign: 'center' }}>Videos</th>
+                            <th style={{ padding: '8px 0', fontWeight: '500', textAlign: 'center' }}>Images</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {beaconsList.map((beacon, i) => (
+                            <tr key={i} style={{ fontSize: '14px' }}>
+                              <td style={{ padding: '12px 0' }}>{beacon.beacon_name || beacon.location_name || 'Unknown Location'}</td>
+                              <td style={{ padding: '12px 0', textAlign: 'center' }}>{beacon.video_count || 0}</td>
+                              <td style={{ padding: '12px 0', textAlign: 'center' }}>{beacon.image_count || 0}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     )}
                   </div>
                 </div>
