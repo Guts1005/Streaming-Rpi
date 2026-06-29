@@ -10,9 +10,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'device_id and site_id are required' }, { status: 400 });
     }
 
-    // First clear old device assignment if any device was previously assigned to this site
-    await runQuery('UPDATE ks_devices SET site_id = NULL WHERE site_id = ?', [site_id]);
-
     // Now update the selected device with the new site_id
     await runQuery(
       `UPDATE ks_devices SET site_id = ? WHERE id = ?`,
