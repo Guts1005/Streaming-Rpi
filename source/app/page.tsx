@@ -34,7 +34,10 @@ function Dashboard() {
   const [isPlaying, setIsPlaying] = useState(true);
   const [isDesktopRec, setIsDesktopRec] = useState(false);
   const desktopRecRef = useRef<MediaRecorder | null>(null);
-  const webrtcRef = useRef<RTCPeerConnection | null>(null);
+  const playerRef = useRef<any>(null);
+  const webrtcRef = useRef<any>(null); // Kept for backwards compat if needed, but unused
+  const wsRef = useRef<WebSocket | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
   const playerContainerRef = useRef<HTMLDivElement>(null);
 
@@ -268,7 +271,16 @@ function Dashboard() {
     let isMounted = true;
     let reconnectTimeout: any = null;
 
-    const initPlayer = () => {
+    const initPlayer = async () => {
+      let streamUrl = '/api/device/live/livestream.flv';
+      try {
+        const res = await fetch('/api/device/get-stream-url');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.url) streamUrl = data.url;
+        }
+      } catch (e) {}
+
       import("mpegts.js").then((mpegtsModule) => {
         if (!isMounted) return;
         const mpegts = mpegtsModule.default;
@@ -284,7 +296,7 @@ function Dashboard() {
           player = mpegts.createPlayer({
             type: 'flv',
             isLive: true,
-            url: '/api/device/live/livestream.flv'
+            url: streamUrl
           });
           player.attachMediaElement(videoElement);
           player.load();
@@ -387,9 +399,12 @@ function Dashboard() {
 
   async function toggleTalk() { 
     if (talking) {
-      if (webrtcRef.current) {
-        webrtcRef.current.close();
-        webrtcRef.current = null;
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
       }
       if (audioStreamRef.current) {
         audioStreamRef.current.getTracks().forEach((t: any) => t.stop());
@@ -403,46 +418,50 @@ function Dashboard() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         audioStreamRef.current = stream;
 
-        const pc = new RTCPeerConnection();
-        webrtcRef.current = pc;
-
-        pc.onconnectionstatechange = () => {
-          if (pc.connectionState === 'connected') {
-            setTalking(true);
-            toast("Live talk active!");
-          } else if (pc.connectionState === 'failed') {
-            setTalking(false);
-            toast("Talk failed");
-          }
-        };
-
-        stream.getTracks().forEach((track: any) => pc.addTrack(track, stream));
-
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-
-        const rtcUrl = `${window.location.protocol}//${window.location.host}/api/device/api/srs_webrtc_publish`;
-        const payload = {
-          api: rtcUrl,
-          streamurl: "webrtc://localhost/live/talkback",
-          sdp: offer.sdp
-        };
-
-        const res = await fetch(rtcUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+        const base = process.env.NEXT_PUBLIC_DEVICE_API_BASE || (currentUser?.all_devices || []).find((d: any) => d.id?.toString() === activeDeviceId)?.url;
+        if (!base) {
+           toast("Device URL not found!");
+           return;
+        }
         
-        const data = await res.json();
-        if (data.code !== 0) throw new Error(data.server + " error");
+        const wsProtocol = base.startsWith('https') ? 'wss:' : 'ws:';
+        const wsBaseUrl = base.replace(/^https?:/, wsProtocol);
+        const wsUrl = `${wsBaseUrl}/api/audio_talkback`;
         
-        await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+        const ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
+        
+        ws.onopen = () => {
+           setTalking(true);
+           toast("Live talk active!");
+           
+           const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+           mediaRecorderRef.current = mediaRecorder;
+           
+           mediaRecorder.ondataavailable = (e) => {
+              if (e.data.size > 0 && ws.readyState === WebSocket.OPEN) {
+                 ws.send(e.data);
+              }
+           };
+           mediaRecorder.start(250); // Send chunk every 250ms
+        };
+        
+        ws.onerror = (e) => {
+           console.error("WebSocket talkback error:", e);
+           toast("Talk failed");
+        };
+        
+        ws.onclose = () => {
+           setTalking(false);
+           if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') mediaRecorderRef.current.stop();
+           if (audioStreamRef.current) audioStreamRef.current.getTracks().forEach((t: any) => t.stop());
+        };
+        
       } catch (e: any) {
-        console.error("SRS Talk Error:", e);
+        console.error("Talk Error:", e);
         toast("Failed to connect live talk");
         setTalking(false);
-        if (webrtcRef.current) { webrtcRef.current.close(); webrtcRef.current = null; }
+        if (wsRef.current) { wsRef.current.close(); wsRef.current = null; }
         if (audioStreamRef.current) { audioStreamRef.current.getTracks().forEach((t: any) => t.stop()); audioStreamRef.current = null; }
       }
     }
@@ -483,18 +502,29 @@ function Dashboard() {
         return;
       }
 
-      let options = { mimeType: 'video/webm;codecs=vp8,opus' };
-      if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-        options = { mimeType: 'video/webm' };
+      let mimeType = '';
+      const types = [
+        'video/webm;codecs=vp8,opus',
+        'video/webm',
+        'video/mp4;codecs=avc1',
+        'video/mp4'
+      ];
+      for (const t of types) {
+        if (MediaRecorder.isTypeSupported(t)) {
+          mimeType = t;
+          break;
+        }
       }
-
+      
+      const options = mimeType ? { mimeType } : undefined;
       const mediaRecorder = new MediaRecorder(stream, options);
       const chunks: Blob[] = [];
       mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
         const url = URL.createObjectURL(blob);
-        const filename = `stream-capture-${Date.now()}.webm`;
+        const filename = `stream-capture-${Date.now()}.${extension}`;
         
         const a = document.createElement('a');
         a.href = url; a.download = filename; a.click();

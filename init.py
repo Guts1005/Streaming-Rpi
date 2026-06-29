@@ -208,7 +208,16 @@ file_handler.setLevel(logging.INFO)
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 root_logger.addHandler(file_handler)
 
+try:
+    from flask_sock import Sock
+except ImportError:
+    Sock = None
+
 app = Flask(__name__)
+if Sock:
+    sock = Sock(app)
+else:
+    sock = None
 
 frame_lock = threading.Lock()
 frame_condition = threading.Condition(frame_lock)
@@ -792,7 +801,7 @@ def start_record():
             # Use same high quality settings and pipe to ffmpeg to mux with audio!
             cmd = (
                 f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --profile high "
-                f"--bitrate 4000000 --denoise cdn_hq --inline --timeout 0 --nopreview -o - | "
+                f"--bitrate 1500000 --denoise cdn_hq --inline --timeout 0 --nopreview -o - | "
                 f"ffmpeg -y -use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f h264 -i - "
                 f"-use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f alsa -channels 1 -i hw:3,0 "
                 f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 '{path_mp4}' > '{log_path}' 2>&1"
@@ -1602,6 +1611,44 @@ def download_log(filename):
 
 @app.route('/api/srs_webrtc_publish', methods=['POST'])
 def srs_webrtc_publish():
+    # Deprecated: Kept for backwards compatibility but we use WebSocket now
+    return jsonify({"code": 500, "server": "flask", "message": "Deprecated: Use WebSocket talkback instead"}), 500
+
+if Sock:
+    @sock.route('/api/audio_talkback')
+    def audio_talkback(ws):
+        import subprocess
+        process = None
+        try:
+            # -nodisp disables video window
+            # -autoexit exits when stream ends
+            # -f webm implies webm container
+            # -i pipe:0 reads from stdin
+            process = subprocess.Popen(
+                ['ffplay', '-nodisp', '-autoexit', '-probesize', '32', '-sync', 'ext', '-f', 'webm', '-i', 'pipe:0'],
+                stdin=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL
+            )
+            
+            while True:
+                data = ws.receive()
+                if data is None:
+                    break
+                if isinstance(data, bytes) or isinstance(data, bytearray):
+                    process.stdin.write(data)
+                    process.stdin.flush()
+        except Exception as e:
+            print("WebSocket talkback error:", e)
+        finally:
+            if process:
+                try:
+                    process.stdin.close()
+                    process.terminate()
+                except:
+                    pass
+
+def legacy_srs_webrtc_publish():
     try:
         import requests
         

@@ -7,3 +7,4 @@ gpiozero>=2.0
 google-generativeai
 python-dotenv
 bleak
+flask-sock
