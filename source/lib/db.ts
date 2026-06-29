@@ -135,6 +135,8 @@ async function initDb() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT fk_ks_devices_company FOREIGN KEY (company_id) REFERENCES ks_companies(id)
       );
+
+      ALTER TABLE ks_devices ADD COLUMN IF NOT EXISTS active TEXT DEFAULT 'Y';
     `);
 
     // Ensure 'y' status for testing
