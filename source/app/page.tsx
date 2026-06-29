@@ -989,7 +989,11 @@ function Dashboard() {
               <div className="compare-container">
                 {/* Left Half: Site Location List */}
                 <div className="compare-box" style={{ padding: '20px' }}>
-                  <h3 className="section-title" style={{margin: '0 0 16px'}}>Site Location List</h3>
+                  <h3 className="section-title" style={{margin: '0 0 16px'}}>
+                    {activeSiteId 
+                      ? `${(currentUser?.sites || []).find((s: any) => s.id.toString() === activeSiteId)?.site_name || 'Project'} - Location List` 
+                      : 'Select Project - Location List'}
+                  </h3>
                   <div className="compare-stats" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                     {beaconsList.length === 0 ? (
                       <div className="stat-row" style={{justifyContent: 'center', padding: '12px 0'}}>
