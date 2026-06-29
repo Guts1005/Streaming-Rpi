@@ -81,134 +81,12 @@ const formColumns: ColumnDef[] = [
   { key: 'device_id', label: 'Device', type: 'varchar' }
 ];
 
-function DeviceAssignModal({ currentUser, onClose }: { currentUser: any, onClose: () => void }) {
-  const [devices, setDevices] = useState<any[]>([]);
-  const [selectedSites, setSelectedSites] = useState<Record<string, string>>({});
-  const [toastMsg, setToastMsg] = useState('');
-
-  const fetchDevices = async () => {
-    if (!currentUser?.company_id) return;
-    const res = await fetch(`/api/mdm/devices?company_id=${currentUser.company_id}`);
-    const json = await res.json();
-    if (json.success) {
-      setDevices(json.data);
-      const initialSites: Record<string, string> = {};
-      json.data.forEach((d: any) => {
-        initialSites[d.id] = d.site_id ? d.site_id.toString() : '';
-      });
-      setSelectedSites(initialSites);
-    }
-  };
-
-  useEffect(() => {
-    fetchDevices();
-  }, [currentUser]);
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 3000);
-  };
-
-  const handleSave = async (device: any) => {
-    const siteId = selectedSites[device.id];
-    if (!siteId || siteId === '') {
-      showToast('Please select a site.');
-      return;
-    }
-    
-    try {
-      const res = await fetch('/api/mdm/devices/assign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ device_id: device.id, site_id: siteId })
-      });
-      const json = await res.json();
-      if (json.success) {
-        showToast('Device assigned successfully.');
-        fetchDevices();
-      } else {
-        showToast(json.error || 'Failed to assign device.');
-      }
-    } catch (e) {
-      showToast('Error assigning device.');
-    }
-  };
-
-  const sites = currentUser?.sites || [];
-
-  return (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-      <div style={{ background: 'var(--bg-panel)', padding: '24px', borderRadius: '8px', width: '600px', maxWidth: '90%', border: '1px solid var(--border-color)', position: 'relative' }}>
-        <h2 style={{ marginTop: 0, marginBottom: '20px', fontSize: '18px' }}>Assign Device to Site</h2>
-        
-        {toastMsg && (
-          <div style={{ backgroundColor: '#22c55e', color: 'white', padding: '10px', borderRadius: '4px', marginBottom: '16px', textAlign: 'center' }}>
-            {toastMsg}
-          </div>
-        )}
-
-        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '8px' }}>Device</th>
-                <th style={{ padding: '8px' }}>Site</th>
-                <th style={{ padding: '8px' }}>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {devices.map(d => (
-                <tr key={d.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px 8px' }}>{d.device_name || d.device_id}</td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <select 
-                      value={selectedSites[d.id] || ''} 
-                      onChange={(e) => setSelectedSites({...selectedSites, [d.id]: e.target.value})}
-                      style={{ padding: '6px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px', width: '100%' }}
-                    >
-                      <option value="" disabled>Select Site</option>
-                      {sites.map((s: any) => <option key={s.id} value={s.id.toString()}>{s.site_name}</option>)}
-                    </select>
-                  </td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <button 
-                      onClick={() => handleSave(d)}
-                      style={{ background: 'var(--accent-blue)', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer' }}
-                    >
-                      Save
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {devices.length === 0 && (
-                <tr>
-                  <td colSpan={3} style={{ textAlign: 'center', padding: '20px' }}>No devices found.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        
-        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-          <button 
-            onClick={onClose}
-            style={{ background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function SitesScreen({ currentUser, onClose }: { currentUser?: any, onClose?: () => void }) {
   const [data, setData] = useState<any[]>([]);
   const [companies, setCompanies] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   
   const [showForm, setShowForm] = useState(false);
-  const [showDeviceModal, setShowDeviceModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   
   const [search, setSearch] = useState('');
@@ -384,7 +262,6 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
         onSearch={setSearch}
         alignControlsLeft={!isAdmin}
         onClose={onClose}
-        onDeviceClick={() => setShowDeviceModal(true)}
       />
       
       {showForm && (
@@ -398,13 +275,6 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
           onFieldChange={(key, val) => {
             if (key === 'company_id') setModalCompanyId(val ? val.toString() : '');
           }}
-        />
-      )}
-
-      {showDeviceModal && (
-        <DeviceAssignModal 
-          currentUser={currentUser} 
-          onClose={() => setShowDeviceModal(false)} 
         />
       )}
     </div>

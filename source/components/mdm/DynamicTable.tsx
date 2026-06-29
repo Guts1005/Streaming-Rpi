@@ -13,16 +13,15 @@ interface DynamicTableProps {
   columns: ColumnDef[];
   data: any[];
   onEdit: (item: any) => void;
-  onDelete: (item: any) => void;
-  onAdd: () => void;
+  onDelete?: (item: any) => void;
+  onAdd?: () => void;
   onSearch: (query: string) => void;
   title: string;
   alignControlsLeft?: boolean;
   onClose?: () => void;
-  onDeviceClick?: () => void;
 }
 
-export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose, onDeviceClick }: DynamicTableProps) {
+export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose }: DynamicTableProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -72,24 +71,16 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
                 background: 'var(--bg-input)', color: 'var(--text-primary)' 
               }}
             />
-            {onDeviceClick && (
+            {onAdd && (
               <button 
-                onClick={onDeviceClick}
+                onClick={onAdd}
                 style={{ 
-                  background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', 
+                  background: 'var(--accent-blue)', color: '#fff', border: 'none', 
                   padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500
                 }}>
-                Device
+                Add New
               </button>
             )}
-            <button 
-              onClick={onAdd}
-              style={{ 
-                background: 'var(--accent-blue)', color: '#fff', border: 'none', 
-                padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500
-              }}>
-              Add New
-            </button>
           </div>
         </div>
       </div>
@@ -115,8 +106,13 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
                   </td>
                 ))}
                 <td style={{ padding: '12px 16px' }}>
-                  <button onClick={() => onEdit(row)} style={{ background: 'transparent', color: 'var(--status-cyan)', border: 'none', cursor: 'pointer', marginRight: '10px', fontSize: '13px' }}>Edit</button>
-                  <button onClick={() => onDelete(row)} style={{ background: 'transparent', color: 'var(--status-live)', border: 'none', cursor: 'pointer', fontSize: '13px' }}>Delete</button>
+                  <button onClick={() => onEdit(row)} style={{ background: 'transparent', color: 'var(--accent-blue)', border: 'none', cursor: 'pointer', fontSize: '13px' }}>{onDelete ? 'Edit' : 'Assign Site'}</button>
+                  {onDelete && (
+                    <>
+                      <span style={{ color: 'var(--border-color)', margin: '0 8px' }}>|</span>
+                      <button onClick={() => onDelete(row)} style={{ background: 'transparent', color: 'var(--status-live)', border: 'none', cursor: 'pointer', fontSize: '13px' }}>Delete</button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}

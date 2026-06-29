@@ -7,6 +7,7 @@ import DeviceConfigModal from '../components/DeviceConfigModal';
 import CompaniesScreen from '../components/mdm/CompaniesScreen';
 import CustomersScreen from '../components/mdm/CustomersScreen';
 import SitesScreen from '../components/mdm/SitesScreen';
+import DevicesScreen from '../components/mdm/DevicesScreen';
 
 type TokenResponse = { token?: string; error?: string };
 
@@ -644,6 +645,9 @@ function Dashboard() {
           <button className={`nav-item ${activeTab === 'sites' ? 'active' : ''}`} onClick={() => setActiveTab('sites')}>
             <SvgIcon path="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" /> Sites
           </button>
+          <button className={`nav-item ${activeTab === 'devices' ? 'active' : ''}`} onClick={() => setActiveTab('devices')}>
+            <SvgIcon path="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /> Devices
+          </button>
 
           <div className="nav-group-title">AI FEATURES</div>
           <button className="nav-item">
@@ -895,6 +899,12 @@ function Dashboard() {
         {activeTab === 'sites' && (
           <div style={{ padding: '24px' }}>
             <SitesScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
+          </div>
+        )}
+
+        {activeTab === 'devices' && (
+          <div style={{ padding: '24px' }}>
+            <DevicesScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
           </div>
         )}
 
