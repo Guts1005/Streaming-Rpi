@@ -54,6 +54,8 @@ export async function POST(req: NextRequest) {
     let token;
     let selectedSiteId = null;
     let selectedSiteName = null;
+    let selectedDeviceId = null;
+    let selectedDeviceName = null;
 
     try {
       const userSites = await allQuery('SELECT id, site_name FROM ks_sites WHERE company_id = ?', [user.company_id]) as any[];
@@ -69,7 +71,9 @@ export async function POST(req: NextRequest) {
         ac: normalizedRole,
         account_type: user.account_type || normalizedRole,
         selected_site_id: selectedSiteId,
-        selected_site_name: selectedSiteName
+        selected_site_name: selectedSiteName,
+        selected_device_id: selectedDeviceId,
+        selected_device_name: selectedDeviceName
       });
     } catch (e) {
       return NextResponse.json({ error: 'SESSION_CREATION_FAILED' }, { status: 500 });
@@ -86,13 +90,16 @@ export async function POST(req: NextRequest) {
         ac: normalizedRole,
         account_type: user.account_type || normalizedRole,
         selected_site_id: selectedSiteId,
-        selected_site_name: selectedSiteName
+        selected_site_name: selectedSiteName,
+        selected_device_id: selectedDeviceId,
+        selected_device_name: selectedDeviceName
       } 
     });
     response.headers.append('Set-Cookie', setAuthCookie(token));
 
     return response;
   } catch (error: any) {
-    return NextResponse.json({ error: 'UNKNOWN_LOGIN_FAILURE' }, { status: 500 });
+    console.error("UNKNOWN_LOGIN_FAILURE Root Cause:", error);
+    return NextResponse.json({ error: 'UNKNOWN_LOGIN_FAILURE', details: error.message, stack: error.stack }, { status: 500 });
   }
 }
