@@ -19,9 +19,10 @@ interface DynamicTableProps {
   title: string;
   alignControlsLeft?: boolean;
   onClose?: () => void;
+  onDeviceClick?: () => void;
 }
 
-export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose }: DynamicTableProps) {
+export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, onSearch, title, alignControlsLeft, onClose, onDeviceClick }: DynamicTableProps) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
@@ -71,6 +72,16 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
                 background: 'var(--bg-input)', color: 'var(--text-primary)' 
               }}
             />
+            {onDeviceClick && (
+              <button 
+                onClick={onDeviceClick}
+                style={{ 
+                  background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', 
+                  padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500
+                }}>
+                Device
+              </button>
+            )}
             <button 
               onClick={onAdd}
               style={{ 
