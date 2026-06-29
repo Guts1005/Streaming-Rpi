@@ -128,11 +128,15 @@ function Dashboard() {
       .then(data => {
         if (data.authenticated) {
           setCurrentUser(data.user);
-          // Check for existing cookies
-          const matchSite = document.cookie.match(new RegExp('(^| )active_site_id=([^;]+)'));
+          // Check for session selected site first, fallback to cookie
+          let selectedSiteId = data.user.selected_site_id?.toString() || null;
           const matchDevice = document.cookie.match(new RegExp('(^| )active_device_id=([^;]+)'));
           
-          let selectedSiteId = matchSite ? matchSite[2] : null;
+          if (!selectedSiteId) {
+             const matchSite = document.cookie.match(new RegExp('(^| )active_site_id=([^;]+)'));
+             selectedSiteId = matchSite ? matchSite[2] : null;
+          }
+          
           let selectedDeviceId = matchDevice ? matchDevice[2] : null;
 
           if (selectedSiteId) {
@@ -705,9 +709,20 @@ function Dashboard() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <select
                   value={activeSiteId || ''}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const val = e.target.value;
                     if (val === '') return;
+                    
+                    try {
+                      await fetch('/api/auth/set-site', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ site_id: val })
+                      });
+                    } catch (err) {
+                      console.error('Failed to set site', err);
+                    }
+
                     setActiveSiteId(val);
                     document.cookie = `active_site_id=${val}; path=/; max-age=86400`;
                     // Clear active device when site changes

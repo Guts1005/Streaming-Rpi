@@ -52,13 +52,25 @@ export async function POST(req: NextRequest) {
     }
 
     let token;
+    let selectedSiteId = null;
+    let selectedSiteName = null;
+
     try {
+      const { allQuery } = require('@/lib/db'); // ensuring we get allQuery
+      const userSites = await allQuery('SELECT id, site_name FROM ks_sites WHERE company_id = ?', [user.company_id]) as any[];
+      if (userSites && userSites.length === 1) {
+        selectedSiteId = userSites[0].id;
+        selectedSiteName = userSites[0].site_name;
+      }
+
       token = signToken({ 
         id: user.id, 
         username: user.username, 
         company_id: user.company_id, 
         ac: normalizedRole,
-        account_type: user.account_type || normalizedRole 
+        account_type: user.account_type || normalizedRole,
+        selected_site_id: selectedSiteId,
+        selected_site_name: selectedSiteName
       });
     } catch (e) {
       return NextResponse.json({ error: 'SESSION_CREATION_FAILED' }, { status: 500 });
@@ -73,7 +85,9 @@ export async function POST(req: NextRequest) {
         company_id: user.company_id, 
         company_name: companyName,
         ac: normalizedRole,
-        account_type: user.account_type || normalizedRole
+        account_type: user.account_type || normalizedRole,
+        selected_site_id: selectedSiteId,
+        selected_site_name: selectedSiteName
       } 
     });
     response.headers.append('Set-Cookie', setAuthCookie(token));
