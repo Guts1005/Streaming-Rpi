@@ -610,89 +610,6 @@ function Dashboard() {
             <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z M4 6h8a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z" /> Live Stream
           </button>
 
-          <div style={{ padding: '12px 24px 16px 24px', display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid var(--border-color)', marginBottom: '8px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Site</span>
-              <select
-                value={activeSiteId || ''}
-                onChange={async (e) => {
-                  const val = e.target.value;
-                  if (val === '') return;
-                  
-                  try {
-                    await fetch('/api/auth/set-site', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ site_id: val })
-                    });
-                  } catch (err) {
-                    console.error('Failed to set site', err);
-                  }
-
-                  setActiveSiteId(val);
-                  document.cookie = `active_site_id=${val}; path=/; max-age=86400`;
-                  // Clear active device when site changes
-                  setActiveDeviceId('');
-                  document.cookie = `active_device_id=; path=/; max-age=-1`;
-                  window.location.reload();
-                }}
-                style={{
-                  backgroundColor: '#1e293b',
-                  color: '#f8fafc',
-                  border: '1px solid #334155',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  width: '100%'
-                }}
-              >
-                <option value="" disabled>Select Site</option>
-                {(currentUser?.sites || []).map((site: any) => (
-                  <option key={site.id} value={site.id.toString()}>
-                    {site.site_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Helmet</span>
-              <select
-                value={activeDeviceId || ''}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === '') return;
-                  setActiveDeviceId(val);
-                  document.cookie = `active_device_id=${val}; path=/; max-age=86400`;
-                  window.location.reload();
-                }}
-                disabled={!activeSiteId || ((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0)}
-                style={{
-                  backgroundColor: '#1e293b',
-                  color: '#f8fafc',
-                  border: '1px solid #334155',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  outline: 'none',
-                  cursor: 'pointer',
-                  width: '100%'
-                }}
-              >
-                <option value="" disabled>
-                  {!activeSiteId ? 'Select Site First' : (((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0) ? 'No helmets assigned' : 'Select Helmet')}
-                </option>
-                {(currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).map((device: any) => (
-                  <option key={device.id} value={device.id.toString()}>
-                    {device.device_name || `Helmet ${device.id}`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <button className="nav-item" onClick={() => setRecordingsDropdownOpen(!recordingsDropdownOpen)}>
               <SvgIcon path="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14v-4z" /> Recordings
@@ -780,17 +697,96 @@ function Dashboard() {
 
       {/* ===== MAIN CONTENT ===== */}
       <main className="main-area">
-        <header className="topbar">
-          <div style={{display: 'flex', alignItems: 'center'}}>
+        <header className="topbar" style={{ justifyContent: 'flex-start', gap: '12px', padding: '16px 20px', flexWrap: 'nowrap', overflowX: 'auto' }}>
+          <div style={{display: 'flex', alignItems: 'center', flexShrink: 0}}>
             <button className="hamburger-btn" onClick={() => setSidebarOpen(true)}>
               <SvgIcon path="M4 6h16M4 12h16M4 18h16" />
             </button>
             <div className="mobile-logo">
               <img src="/logo.jpeg" alt="Aspire AI" />
             </div>
-
           </div>
-          <div className="topbar-actions">
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <select
+              value={activeSiteId || ''}
+              onChange={async (e) => {
+                const val = e.target.value;
+                if (val === '') return;
+                
+                try {
+                  await fetch('/api/auth/set-site', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ site_id: val })
+                  });
+                } catch (err) {
+                  console.error('Failed to set site', err);
+                }
+
+                setActiveSiteId(val);
+                document.cookie = `active_site_id=${val}; path=/; max-age=86400`;
+                // Clear active device when site changes
+                setActiveDeviceId('');
+                document.cookie = `active_device_id=; path=/; max-age=-1`;
+                window.location.reload();
+              }}
+              style={{
+                backgroundColor: '#1e293b',
+                color: '#f8fafc',
+                border: '1px solid #334155',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer',
+                minWidth: '100px',
+                maxWidth: '160px'
+              }}
+            >
+              <option value="" disabled>Select Site</option>
+              {(currentUser?.sites || []).map((site: any) => (
+                <option key={site.id} value={site.id.toString()}>
+                  {site.site_name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={activeDeviceId || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '') return;
+                setActiveDeviceId(val);
+                document.cookie = `active_device_id=${val}; path=/; max-age=86400`;
+                window.location.reload();
+              }}
+              disabled={!activeSiteId || ((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0)}
+              style={{
+                backgroundColor: '#1e293b',
+                color: '#f8fafc',
+                border: '1px solid #334155',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '14px',
+                outline: 'none',
+                cursor: 'pointer',
+                minWidth: '110px',
+                maxWidth: '180px'
+              }}
+            >
+              <option value="" disabled>
+                {!activeSiteId ? 'Select Site First' : (((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0) ? 'No helmets assigned' : 'Select Helmet')}
+              </option>
+              {(currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).map((device: any) => (
+                <option key={device.id} value={device.id.toString()}>
+                  {device.device_name || `Helmet ${device.id}`}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, flexShrink: 0 }}>
             <div className="topbar-icon">
               <SvgIcon path="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               <div className="notif-dot"></div>
