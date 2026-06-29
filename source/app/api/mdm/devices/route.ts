@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { runQuery, getQuery } from '@/lib/db';
+import { runQuery, getQuery, allQuery } from '@/lib/db';
 import { getUserFromRequest } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const company_id = u.company_id;
 
-    const devices = await runQuery(
+    const devices = await allQuery(
       `SELECT d.id, d.device_id, d.device_name, d.company_id, d.site_id, d.mac_id, s.site_name 
        FROM ks_devices d
        LEFT JOIN ks_sites s ON d.site_id = s.id
