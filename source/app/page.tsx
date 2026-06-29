@@ -704,53 +704,15 @@ function Dashboard() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginLeft: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <select
-                  value={activeDeviceId || ''}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === 'pair') {
-                      setShowPairModal(true);
-                      return;
-                    }
-                    if (val === '') return;
-
-                    const device = currentUser?.all_devices?.find((d: any) => d.id.toString() === val);
-                    if (device) {
-                      const sId = device.site_id || '0';
-                      setActiveSiteId(sId.toString());
-                      setActiveDeviceId(val);
-                      document.cookie = `active_device_id=${val}; path=/; max-age=86400`;
-                      document.cookie = `active_site_id=${sId}; path=/; max-age=86400`;
-                      window.location.reload();
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#1e293b',
-                    color: '#f8fafc',
-                    border: '1px solid #334155',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    outline: 'none',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <option value="" disabled>Select Device</option>
-                  {(currentUser?.all_devices || []).map((device: any) => (
-                    <option key={device.id} value={device.id.toString()}>
-                      {device.device_name || `Helmet ${device.id}`}
-                    </option>
-                  ))}
-                  <option disabled>--------------------</option>
-                  <option value="pair">+ Pair New Helmet</option>
-                </select>
-
-                <select
                   value={activeSiteId || ''}
                   onChange={(e) => {
                     const val = e.target.value;
                     if (val === '') return;
                     setActiveSiteId(val);
                     document.cookie = `active_site_id=${val}; path=/; max-age=86400`;
+                    // Clear active device when site changes
+                    setActiveDeviceId('');
+                    document.cookie = `active_device_id=; path=/; max-age=-1`;
                     window.location.reload();
                   }}
                   style={{
@@ -768,6 +730,37 @@ function Dashboard() {
                   {(currentUser?.sites || []).map((site: any) => (
                     <option key={site.id} value={site.id.toString()}>
                       {site.site_name}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={activeDeviceId || ''}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === '') return;
+                    setActiveDeviceId(val);
+                    document.cookie = `active_device_id=${val}; path=/; max-age=86400`;
+                    window.location.reload();
+                  }}
+                  disabled={!activeSiteId || ((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0)}
+                  style={{
+                    backgroundColor: '#1e293b',
+                    color: '#f8fafc',
+                    border: '1px solid #334155',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="" disabled>
+                    {!activeSiteId ? 'Select Site First' : (((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0) ? 'No helmets assigned' : 'Select Helmet')}
+                  </option>
+                  {(currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).map((device: any) => (
+                    <option key={device.id} value={device.id.toString()}>
+                      {device.device_name || `Helmet ${device.id}`}
                     </option>
                   ))}
                 </select>
