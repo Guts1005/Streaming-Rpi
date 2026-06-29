@@ -83,7 +83,32 @@ function Dashboard() {
   
   const router = useRouter();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const [savedAccounts, setSavedAccounts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setProfileDropdownOpen(false);
+      }
+    };
+
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscKey);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [profileDropdownOpen]);
   
   const [showPairModal, setShowPairModal] = useState(false);
   const [pairSsid, setPairSsid] = useState('');
@@ -798,7 +823,7 @@ function Dashboard() {
             <div className="topbar-icon" onClick={() => setShowDeviceConfigModal(true)} style={{cursor: 'pointer'}}>
               <SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </div>
-            <div className="user-profile" style={{ position: 'relative' }}>
+            <div className="user-profile" style={{ position: 'relative' }} ref={profileDropdownRef}>
               <div 
                 style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} 
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -864,7 +889,10 @@ function Dashboard() {
 
                   <div style={{ padding: '8px 0', borderTop: '1px solid #334155' }}>
                     <button 
-                      onClick={shutdownPi}
+                      onClick={() => {
+                        shutdownPi();
+                        setProfileDropdownOpen(false);
+                      }}
                       style={{
                         width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
                         border: 'none', color: '#cbd5e1', cursor: 'pointer', fontSize: '13px',
@@ -874,10 +902,13 @@ function Dashboard() {
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <SvgIcon path="M18.36 6.64a9 9 0 11-12.73 0M12 2v10" style={{ width: '16px', color: '#ef4444' }} />
-                      Power Off Device
+                      Shut Down Device
                     </button>
                     <button 
-                      onClick={handleLogout}
+                      onClick={() => {
+                        handleLogout();
+                        setProfileDropdownOpen(false);
+                      }}
                       style={{
                         width: '100%', padding: '10px 16px', textAlign: 'left', background: 'none',
                         border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px',
@@ -887,7 +918,7 @@ function Dashboard() {
                       onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <SvgIcon path="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" style={{ width: '16px' }} />
-                      Sign Out
+                      Logout
                     </button>
                   </div>
                 </div>
