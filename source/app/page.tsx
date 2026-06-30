@@ -688,10 +688,13 @@ function Dashboard() {
               <select
                 value={activeDeviceId || ''}
                 onChange={(e) => {
-                  const val = e.target.value;
-                  if (val === '') return;
-                  setActiveDeviceId(val);
-                  document.cookie = `active_device_id=${val}; path=/; max-age=86400`;
+                  const devId = e.target.value;
+                  if (devId === 'pair') {
+                    setShowPairModal(true);
+                    return;
+                  }
+                  setActiveDeviceId(devId);
+                  document.cookie = `active_device_id=${devId}; path=/; max-age=86400`;
                   window.location.reload();
                 }}
                 disabled={!activeSiteId || ((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0)}
@@ -715,33 +718,9 @@ function Dashboard() {
                     {device.device_name || `Device ${device.id}`}
                   </option>
                 ))}
+                <option disabled>--------------------</option>
+                <option value="pair">+ Pair New Helmet</option>
               </select>
-
-              <button
-                onClick={() => setShowPairModal(true)}
-                style={{
-                  backgroundColor: 'transparent',
-                  color: '#3b82f6',
-                  border: '1px dashed #334155',
-                  padding: '8px',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  width: '100%',
-                  marginTop: '12px',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-              >
-                <SvgIcon path="M12 4v16m8-8H4" style={{ width: '14px' }} />
-                Pair New Helmet
-              </button>
             </div>
             
             <div style={{ height: '1px', background: '#334155', marginTop: '16px', marginBottom: '8px' }}></div>
