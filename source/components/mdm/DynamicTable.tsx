@@ -42,26 +42,10 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
   return (
     <div style={{ padding: '20px', background: 'var(--bg-panel)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', color: 'var(--text-primary)' }}>
       <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{title}</h2>
-          {onClose && (
-            <button 
-              onClick={onClose}
-              style={{ 
-                background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', 
-                padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500,
-                display: 'flex', alignItems: 'center', gap: '6px'
-              }}>
-              ✕ Close
-            </button>
-          )}
-        </div>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: alignControlsLeft ? 'flex-start' : 'space-between',
-          gap: '10px'
-        }}>
-          <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
+          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 600, minWidth: '150px' }}>{title}</h2>
+          
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: 1, justifyContent: alignControlsLeft ? 'flex-start' : 'flex-end', marginLeft: alignControlsLeft ? '20px' : '0', flexWrap: 'wrap' }}>
             <input 
               type="text" 
               placeholder="Search..." 
@@ -69,7 +53,7 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
               onChange={handleSearch}
               style={{ 
                 padding: '8px 12px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)', 
-                background: 'var(--bg-input)', color: 'var(--text-primary)' 
+                background: 'var(--bg-input)', color: 'var(--text-primary)', minWidth: '200px'
               }}
             />
             {onAdd && (
@@ -77,9 +61,20 @@ export default function DynamicTable({ columns, data, onEdit, onDelete, onAdd, o
                 onClick={onAdd}
                 style={{ 
                   background: 'var(--accent-blue)', color: '#fff', border: 'none', 
-                  padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500
+                  padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap'
                 }}>
                 Add New
+              </button>
+            )}
+            {onClose && (
+              <button 
+                onClick={onClose}
+                style={{ 
+                  background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', 
+                  padding: '8px 16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 500,
+                  display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap'
+                }}>
+                ✕ Close
               </button>
             )}
           </div>
