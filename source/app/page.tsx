@@ -291,9 +291,13 @@ function Dashboard() {
       } catch (e) {}
 
       import("mpegts.js").then((mpegtsModule) => {
+        if (!isMounted) return;
         const mpegts = mpegtsModule.default;
         if (mpegts.getFeatureList().mseLivePlayback) {
           console.log("MSE supported, using FLV");
+          const videoElement = videoRef.current;
+          if (!videoElement) return;
+          
           let player = mpegtsPlayerRef.current;
           
           if (player) {
@@ -311,7 +315,7 @@ function Dashboard() {
             seekType: 'range',
           });
           
-          player.attachMediaElement(videoRef.current as HTMLMediaElement);
+          player.attachMediaElement(videoElement);
           player.load();
           
           player.on(mpegts.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
