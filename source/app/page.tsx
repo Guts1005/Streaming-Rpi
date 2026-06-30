@@ -311,6 +311,9 @@ function Dashboard() {
             seekType: 'range',
           });
           
+          player.attachMediaElement(videoRef.current as HTMLMediaElement);
+          player.load();
+          
           player.on(mpegts.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
             console.log("Mpegts error:", errorType, errorDetail);
             setConnected(false);
