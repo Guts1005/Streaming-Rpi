@@ -34,6 +34,12 @@ export async function GET(req: NextRequest) {
     // Always fetch sites belonging to the logged-in user's company
     if (u.company_id) {
       u.sites = await allQuery("SELECT id, site_name FROM ks_sites WHERE company_id = $1 AND (actv = 'Y' OR actv = 'y') ORDER BY site_name", [parseInt(u.company_id, 10)]);
+      if (u.sites.length === 0) {
+        const insertRes = await getQuery("INSERT INTO ks_sites (site_name, company_id, actv) VALUES ($1, $2, 'Y') RETURNING id", [`${u.username}'s Project`, parseInt(u.company_id, 10)]);
+        if (insertRes && insertRes.id) {
+          u.sites = [{ id: insertRes.id, site_name: `${u.username}'s Project` }];
+        }
+      }
     } else {
       u.sites = [];
     }
