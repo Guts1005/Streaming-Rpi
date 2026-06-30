@@ -8,8 +8,20 @@ import logging
 import threading
 
 import cv2
-from picamera2 import Picamera2
-from libcamera import Transform
+from dotenv import load_dotenv
+load_dotenv()
+
+# We only import picamera2 if we are using it to avoid crashes on non-Pi setups
+CAMERA_TYPE = os.getenv("CAMERA_TYPE", "picam")
+CAMERA_DEVICE = os.getenv("CAMERA_DEVICE", "/dev/video0")
+
+if CAMERA_TYPE == "picam":
+    try:
+        from picamera2 import Picamera2
+        from libcamera import Transform
+    except ImportError:
+        pass
+
 from pyzbar.pyzbar import decode as zbar_decode
 
 import RPi.GPIO as GPIO
@@ -272,7 +284,20 @@ def main():
 
     led = LedController(LED_PIN)
 
-    picam2 = init_camera_like_main()
+    picam2 = None
+    cap = None
+    if CAMERA_TYPE == "picam":
+        picam2 = init_camera_like_main()
+    else:
+        dev_idx = CAMERA_DEVICE
+        if CAMERA_DEVICE.startswith("/dev/video"):
+            try:
+                dev_idx = int(CAMERA_DEVICE.replace("/dev/video", ""))
+            except:
+                pass
+        cap = cv2.VideoCapture(dev_idx)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(WINDOW_NAME, 900, 650)
@@ -295,12 +320,17 @@ def main():
 
     try:
         while True:
-            raw_yuv = picam2.capture_array("lores")
-            if raw_yuv is None:
-                time.sleep(0.02)
-                continue
-
-            bgr = cv2.cvtColor(raw_yuv, cv2.COLOR_YUV2BGR_I420)
+            if CAMERA_TYPE == "picam":
+                raw_yuv = picam2.capture_array("lores")
+                if raw_yuv is None:
+                    time.sleep(0.02)
+                    continue
+                bgr = cv2.cvtColor(raw_yuv, cv2.COLOR_YUV2BGR_I420)
+            else:
+                ret, bgr = cap.read()
+                if not ret or bgr is None:
+                    time.sleep(0.02)
+                    continue
 
             ssid_now = get_current_ssid()
             draw_overlay(bgr, ssid_now, f"Show Wi-Fi QR. Will switch from {IGNORE_SSID}.")
@@ -360,10 +390,16 @@ def main():
                 break
 
     finally:
-        try:
-            picam2.stop()
-        except Exception:
-            pass
+        if CAMERA_TYPE == "picam":
+            try:
+                picam2.stop()
+            except Exception:
+                pass
+        else:
+            try:
+                if cap: cap.release()
+            except Exception:
+                pass
         try:
             cv2.destroyAllWindows()
         except Exception:
