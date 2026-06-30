@@ -1,32 +1,21 @@
+require('dotenv').config({ path: '.env.production' });
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  connectionString: (process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || '').replace('?sslmode=require', ''),
+  connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING,
   ssl: { rejectUnauthorized: false }
 });
 
 async function main() {
   try {
-    const users = await pool.query('SELECT id, username, ac, company_id FROM users');
-    console.log("USERS:");
-    console.table(users.rows);
-
-    const companies = await pool.query('SELECT id, cnm FROM ks_companies');
-    console.log("COMPANIES:");
-    console.table(companies.rows);
-    
-    const customers = await pool.query('SELECT id, cnm, company_id FROM ks_customers');
-    console.log("CUSTOMERS:");
-    console.table(customers.rows);
-
-    const sites = await pool.query('SELECT id, site_name, company_id, customer_id FROM ks_sites');
-    console.log("SITES:");
-    console.table(sites.rows);
-
-  } catch (error) {
-    console.error(error);
+    let res = await pool.query('SELECT id, user_id, device_name, device_id, api_base_url, status FROM ks_devices');
+    console.log("ks_devices:", res.rows);
+    res = await pool.query('SELECT id, username, ac, company_id FROM users');
+    console.log("users:", res.rows);
+  } catch (err) {
+    console.error(err);
   } finally {
-    await pool.end();
+    pool.end();
   }
 }
 main();

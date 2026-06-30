@@ -31,6 +31,11 @@ async function targetBase(request: NextRequest): Promise<string | null> {
     device = await getQuery('SELECT api_base_url FROM ks_devices WHERE user_id = $1 AND status = $2 LIMIT 1', [(user as any).id, 'active']);
   }
 
+  // Fallback if no device found for user (e.g. admin accounts)
+  if (!device) {
+    device = await getQuery("SELECT api_base_url FROM ks_devices WHERE api_base_url IS NOT NULL AND status = 'active' ORDER BY id ASC LIMIT 1");
+  }
+
   if (device && device.api_base_url) {
     return device.api_base_url.replace(/\/$/, "");
   }
