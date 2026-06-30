@@ -418,7 +418,11 @@ function Dashboard() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
         audioStreamRef.current = stream;
 
-        const base = process.env.NEXT_PUBLIC_DEVICE_API_BASE || (currentUser?.all_devices || []).find((d: any) => d.id?.toString() === activeDeviceId)?.url;
+        // WebSockets cannot be proxied through standard Next.js App Router API routes.
+        // We MUST connect directly to the device's ngrok/tailscale URL if available.
+        const deviceBase = (currentUser?.all_devices || []).find((d: any) => d.id?.toString() === activeDeviceId)?.api_base_url;
+        const base = deviceBase || process.env.NEXT_PUBLIC_DEVICE_API_BASE;
+        
         if (!base) {
            toast("Device URL not found!");
            return;
