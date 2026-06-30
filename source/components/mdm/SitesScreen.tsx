@@ -181,12 +181,19 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   };
 
   const handleSubmit = async (formData: any) => {
-    const method = editingItem ? 'PUT' : 'POST';
-    const url = editingItem ? `/api/mdm/sites/${editingItem.id}` : `/api/mdm/sites`;
+    const isEditing = !!editingItem?.id;
+    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditing ? `/api/mdm/sites/${editingItem.id}` : `/api/mdm/sites`;
+    
+    const payload = { ...formData };
+    if (!isEditing && payload.device_id !== undefined) {
+      delete payload.device_id;
+    }
+
     const res = await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: JSON.stringify(payload)
     });
     
     const json = await res.json();
@@ -220,9 +227,18 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
 
   const dynamicFormColumns = formColumns.map(col => {
     if (col.key === 'company_id') {
-      return { ...col, readonly: !isAdmin };
+      return { ...col, readonly: !editingItem?.id ? true : !isAdmin };
+    }
+    if (col.key === 'customer_id') {
+      return { ...col, required: false };
     }
     return col;
+  }).filter(col => {
+    // Hide device_id for Add Site
+    if (col.key === 'device_id' && !editingItem?.id) {
+      return false;
+    }
+    return true;
   });
 
   return (

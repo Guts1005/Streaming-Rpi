@@ -55,9 +55,12 @@ export async function POST(request: Request) {
       boq_added, sft, purchase_sft, internal, ongoing, sft_block, feedback, device_id
     } = body;
     
-    if (!company_id || !customer_id || !site_name) {
-      return NextResponse.json({ error: 'Company ID, Customer ID, and Site Name are required' }, { status: 400 });
+    if (!company_id || !site_name) {
+      return NextResponse.json({ error: 'Company ID and Site Name are required' }, { status: 400 });
     }
+    
+    // Ensure customer_id is null if not provided
+    const finalCustomerId = customer_id || null;
     
     const result = await getQuery(
       `INSERT INTO ks_sites (
@@ -70,7 +73,7 @@ export async function POST(request: Request) {
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
       ) RETURNING id`,
       [
-        user_id || null, company_id, customer_id, site_name, address || null, dlvry_address || null, client_mail || null,
+        user_id || null, company_id, finalCustomerId, site_name, address || null, dlvry_address || null, client_mail || null,
         contact_person1 || null, contact_person1_mobile || null, contact_person1_mail || null, contact_person2 || null,
         contact_person2_mobile || null, contact_person2_mail || null, actv || null, boq_amount || '0.00', pmc || '0', from_date || null,
         end_date || null, HOD || null, fl || null, company_logo || null, PMC_logo || null, our_logo || null, graph || null, max_permissible_indents || null,
