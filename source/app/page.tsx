@@ -432,8 +432,7 @@ function Dashboard() {
         const wsBaseUrl = base.replace(/\/$/, '').replace(/^https?:/, wsProtocol);
         const wsUrl = `${wsBaseUrl}/api/audio_talkback`;
         
-        // Pass bypass headers as subprotocols to get through ngrok/localtunnel warning screens
-        const ws = new WebSocket(wsUrl, ["ngrok-skip-browser-warning", "bypass-tunnel-reminder"]);
+        const ws = new WebSocket(wsUrl);
         wsRef.current = ws;
         
         ws.onopen = () => {
