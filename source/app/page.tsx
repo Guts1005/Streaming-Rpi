@@ -307,12 +307,7 @@ function Dashboard() {
           player = mpegts.createPlayer({
             type: 'flv',
             isLive: true,
-            url: streamUrl,
-            cors: true,
-          }, {
-            enableWorker: true,
-            lazyLoadMaxDuration: 3 * 60,
-            seekType: 'range',
+            url: streamUrl
           });
           
           player.attachMediaElement(videoElement);
