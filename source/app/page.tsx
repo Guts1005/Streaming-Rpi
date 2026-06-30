@@ -236,9 +236,18 @@ function Dashboard() {
   const fetchMedia = async () => {
     try {
       const res = await device("/api/list_media");
-      if (res.ok) setPiRecordings(await res.json());
-      else toast("Failed to fetch media list");
-    } catch (e) { toast("Could not reach device"); }
+      if (res.ok) {
+          const data = await res.json();
+          setPiRecordings(Array.isArray(data) ? data : []);
+      } else {
+          try {
+              const errData = await res.json();
+              toast(`Failed to fetch media list: ${errData.error || res.status}`);
+          } catch {
+              toast(`Failed to fetch media list: ${res.status}`);
+          }
+      }
+    } catch (e: any) { toast(`Could not reach device: ${e.message}`); }
   };
 
   const shutdownPi = async () => {
@@ -282,25 +291,26 @@ function Dashboard() {
       } catch (e) {}
 
       import("mpegts.js").then((mpegtsModule) => {
-        if (!isMounted) return;
         const mpegts = mpegtsModule.default;
         if (mpegts.getFeatureList().mseLivePlayback) {
-          const videoElement = videoRef.current;
-          if (!videoElement) return;
-
+          console.log("MSE supported, using FLV");
+          let player = mpegtsPlayerRef.current;
+          
           if (player) {
-            try { player.destroy(); } catch(e) {}
-            player = null;
+            player.destroy();
           }
 
           player = mpegts.createPlayer({
             type: 'flv',
             isLive: true,
-            url: streamUrl
+            url: streamUrl,
+            cors: true,
+          }, {
+            enableWorker: true,
+            lazyLoadMaxDuration: 3 * 60,
+            seekType: 'range',
           });
-          player.attachMediaElement(videoElement);
-          player.load();
-
+          
           player.on(mpegts.Events.ERROR, (errorType: any, errorDetail: any, errorInfo: any) => {
             console.log("Mpegts error:", errorType, errorDetail);
             setConnected(false);
@@ -325,8 +335,24 @@ function Dashboard() {
             setConnected(true);
           }
           mpegtsPlayerRef.current = player;
+        } else {
+          console.log("MSE not supported, falling back to HLS");
+          if (videoRef.current) {
+            // Fallback for iOS / macOS Safari which support HLS natively but not MSE
+            videoRef.current.src = '/api/device/live/livestream.m3u8';
+            videoRef.current.load();
+            videoRef.current.play().catch((err: any) => console.log("HLS play error", err));
+            setConnected(true);
+          }
         }
-      }).catch(err => console.log("Failed to load mpegts", err));
+      }).catch(err => {
+        console.log("Failed to load mpegts", err);
+        // Extreme fallback
+        if (videoRef.current) {
+          videoRef.current.src = '/api/device/live/livestream.m3u8';
+          setConnected(true);
+        }
+      });
     };
 
     initPlayer();
@@ -452,7 +478,10 @@ function Dashboard() {
         
         ws.onerror = (e) => {
            console.error("WebSocket talkback error:", e);
-           toast("Talk failed");
+           // Only show error toast if we didn't intentionally close it
+           if (ws.readyState !== 2 && ws.readyState !== 3) {
+               toast("Talk failed");
+           }
         };
         
         ws.onclose = () => {
@@ -471,19 +500,36 @@ function Dashboard() {
     }
   }
 
-  async function startRec() { 
+  const startRec = async () => {
     toast("Live stream paused - recording on device...");
-    await device("/api/start_record"); 
-    fetchStatus(); 
-    setTimeout(() => setPlayerKey(prev => prev + 1), 1000);
-  }
-  async function stopRec() { 
+    try {
+        const res = await device("/api/start_record");
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            toast(`Failed to start recording: ${errData.error || res.status}`);
+        } else {
+            setTimeout(() => setPlayerKey(prev => prev + 1), 1000);
+        }
+    } catch (e: any) {
+        toast(`Could not reach device: ${e.message}`);
+    }
+  };
+
+  const stopRec = async () => {
     toast("Recording saved. Resuming live stream...");
-    await device("/api/stop_record", { method: "POST" }); 
+    try {
+        const res = await device("/api/stop_record", { method: "POST" });
+        if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            toast(`Failed to stop recording: ${errData.error || res.status}`);
+        }
+    } catch (e: any) {
+        toast(`Could not reach device: ${e.message}`);
+    }
     fetchStatus(); 
     setTimeout(fetchMedia, 2500); 
     setTimeout(() => setPlayerKey(prev => prev + 1), 2000);
-  }
+  };
 
   async function snap() { 
     toast("Capturing snapshot..."); 
