@@ -186,8 +186,9 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
     const url = isEditing ? `/api/mdm/sites/${editingItem.id}` : `/api/mdm/sites`;
     
     const payload = { ...formData };
-    if (!isEditing && payload.device_id !== undefined) {
-      delete payload.device_id;
+    if (!isEditing) {
+      if (payload.device_id !== undefined) delete payload.device_id;
+      if (payload.customer_id !== undefined) delete payload.customer_id;
     }
 
     const res = await fetch(url, {
@@ -234,8 +235,8 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
     }
     return col;
   }).filter(col => {
-    // Hide device_id for Add Site
-    if (col.key === 'device_id' && !editingItem?.id) {
+    // Hide device_id and customer_id for Add Site
+    if ((col.key === 'device_id' || col.key === 'customer_id') && !editingItem?.id) {
       return false;
     }
     return true;
