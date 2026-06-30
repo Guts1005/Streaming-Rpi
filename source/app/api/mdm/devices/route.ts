@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const company_id = u.company_id;
 
     const devices = await allQuery(
-      `SELECT d.id, d.device_id, d.device_name, d.company_id, d.site_id, d.mac_id, d.active, s.site_name 
+      `SELECT d.id, d.device_id, d.device_name, d.company_id, d.site_id, d.mac_id, d.active, d.api_base_url, s.site_name 
        FROM ks_devices d
        LEFT JOIN ks_sites s ON d.site_id = s.id
        WHERE d.company_id = $1 
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
     const company_id = u.company_id;
     const body = await req.json();
-    const { device_name, device_id, mac_id, site_id, active } = body;
+    const { device_name, device_id, mac_id, site_id, active, api_base_url } = body;
 
     if (!device_name || !device_id || !mac_id || !site_id) {
       return NextResponse.json({ error: 'Device Name, Device ID, MAC ID, and Site are required.' }, { status: 400 });
@@ -64,9 +64,9 @@ export async function POST(req: NextRequest) {
     }
 
     await runQuery(
-      `INSERT INTO ks_devices (company_id, device_name, device_id, mac_id, site_id, active)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [company_id, device_name, device_id, mac_id, site_id, active || 'Y']
+      `INSERT INTO ks_devices (company_id, device_name, device_id, mac_id, site_id, active, api_base_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [company_id, device_name, device_id, mac_id, site_id, active || 'Y', api_base_url || null]
     );
 
     return NextResponse.json({ success: true, message: 'Device added successfully.' });

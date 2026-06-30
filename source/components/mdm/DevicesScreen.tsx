@@ -27,6 +27,7 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
     device_id: '',
     mac_id: '',
     site_id: '',
+    api_base_url: '',
     active: 'Y'
   });
 
@@ -82,7 +83,7 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
       const res = await fetch('/api/mdm/devices/assign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ device_id: editingDevice.id, site_id: selectedSiteId })
+        body: JSON.stringify({ device_id: editingDevice.id, site_id: selectedSiteId, api_base_url: editingDevice.api_base_url })
       });
       const json = await res.json();
       if (json.success) {
@@ -115,7 +116,7 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
       if (json.success) {
         showToast('Device added successfully.');
         setShowAddModal(false);
-        setAddForm({ device_name: '', device_id: '', mac_id: '', site_id: '', active: 'Y' });
+        setAddForm({ device_name: '', device_id: '', mac_id: '', site_id: '', api_base_url: '', active: 'Y' });
         fetchData();
         // Force refresh state completely if needed
         setTimeout(() => window.location.reload(), 1000);
@@ -173,7 +174,7 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
               />
             </div>
             
-            <div style={{ marginBottom: '24px' }}>
+            <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>Site</label>
               <select 
                 value={selectedSiteId} 
@@ -185,6 +186,17 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
                   <option key={s.id} value={s.id.toString()}>{s.site_name}</option>
                 ))}
               </select>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>API Base URL (Cloudflare Tunnel)</label>
+              <input 
+                type="text" 
+                value={editingDevice.api_base_url || ''} 
+                onChange={(e) => setEditingDevice({...editingDevice, api_base_url: e.target.value})}
+                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                placeholder="https://helmet.aspire-vision.co.in"
+              />
             </div>
             
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
@@ -279,6 +291,17 @@ export default function DevicesScreen({ currentUser, onClose }: { currentUser?: 
                   <option key={s.id} value={s.id.toString()}>{s.site_name}</option>
                 ))}
               </select>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>API Base URL (Cloudflare Tunnel)</label>
+              <input 
+                type="text" 
+                value={addForm.api_base_url} 
+                onChange={(e) => setAddForm({...addForm, api_base_url: e.target.value})}
+                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-input)', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                placeholder="https://helmet.aspire-vision.co.in"
+              />
             </div>
 
             <div style={{ marginBottom: '24px' }}>
