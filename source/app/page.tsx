@@ -550,7 +550,7 @@ function Dashboard() {
       const videoEl = videoRef.current as any;
       const stream = videoEl.captureStream ? videoEl.captureStream() : (videoEl.mozCaptureStream ? videoEl.mozCaptureStream() : null);
       if (!stream) {
-        toast("Stream capture not supported in this browser");
+        toast.error("Desktop Recording is not supported on this browser (e.g. iOS Safari). Please use a PC.");
         return;
       }
 
