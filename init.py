@@ -1618,17 +1618,20 @@ if Sock:
     @sock.route('/api/audio_talkback')
     def audio_talkback(ws):
         import subprocess
-        process = None
+        ffmpeg_process = None
+        aplay_process = None
         try:
-            # -nodisp disables video window
-            # -autoexit exits when stream ends
-            # -f webm implies webm container
-            # -i pipe:0 reads from stdin
-            process = subprocess.Popen(
-                ['ffplay', '-nodisp', '-autoexit', '-probesize', '32', '-sync', 'ext', '-f', 'webm', '-i', 'pipe:0'],
+            ffmpeg_process = subprocess.Popen(
+                ['ffmpeg', '-i', 'pipe:0', '-f', 'wav', 'pipe:1'],
                 stdin=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL
+            )
+            aplay_process = subprocess.Popen(
+                ['aplay', '-D', 'default'],
+                stdin=ffmpeg_process.stdout,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
             
             while True:
@@ -1636,17 +1639,19 @@ if Sock:
                 if data is None:
                     break
                 if isinstance(data, bytes) or isinstance(data, bytearray):
-                    process.stdin.write(data)
-                    process.stdin.flush()
+                    ffmpeg_process.stdin.write(data)
+                    ffmpeg_process.stdin.flush()
         except Exception as e:
             print("WebSocket talkback error:", e)
         finally:
-            if process:
-                try:
-                    process.stdin.close()
-                    process.terminate()
-                except:
-                    pass
+            try:
+                if ffmpeg_process:
+                    ffmpeg_process.stdin.close()
+                    ffmpeg_process.terminate()
+                if aplay_process:
+                    aplay_process.terminate()
+            except:
+                pass
 
 def legacy_srs_webrtc_publish():
     try:
