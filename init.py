@@ -1623,14 +1623,14 @@ if Sock:
         try:
             # Use ffmpeg to decode WebM/Opus and pipe raw audio to aplay for headless compatibility
             process = subprocess.Popen(
-                ['ffmpeg', '-i', 'pipe:0', '-f', 'wav', 'pipe:1'],
+                ['ffmpeg', '-i', 'pipe:0', '-f', 's16le', '-ar', '48000', '-ac', '2', 'pipe:1'],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL
             )
             # Start aplay in a separate process reading from ffmpeg's stdout
             aplay_process = subprocess.Popen(
-                ['aplay', '-D', 'default'],
+                ['aplay', '-D', 'default', '-f', 'S16_LE', '-r', '48000', '-c', '2'],
                 stdin=process.stdout,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
