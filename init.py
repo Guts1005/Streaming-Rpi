@@ -1619,16 +1619,21 @@ if Sock:
     def audio_talkback(ws):
         import subprocess
         process = None
+        aplay_process = None
         try:
-            # -nodisp disables video window
-            # -autoexit exits when stream ends
-            # -f webm implies webm container
-            # -i pipe:0 reads from stdin
+            # Use ffmpeg to decode WebM/Opus and pipe raw audio to aplay for headless compatibility
             process = subprocess.Popen(
-                ['ffplay', '-nodisp', '-autoexit', '-probesize', '32', '-sync', 'ext', '-f', 'webm', '-i', 'pipe:0'],
+                ['ffmpeg', '-i', 'pipe:0', '-f', 'wav', 'pipe:1'],
                 stdin=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                stdout=subprocess.DEVNULL
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL
+            )
+            # Start aplay in a separate process reading from ffmpeg's stdout
+            aplay_process = subprocess.Popen(
+                ['aplay', '-D', 'default'],
+                stdin=process.stdout,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
             
             while True:
@@ -1647,6 +1652,10 @@ if Sock:
                     process.terminate()
                 except:
                     pass
+            try:
+                aplay_process.terminate()
+            except:
+                pass
 
 def legacy_srs_webrtc_publish():
     try:
