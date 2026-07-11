@@ -773,8 +773,19 @@ def health():
         "output_device": "system default"
     })
 
-record_proc = None
+@app.route('/api/stream/pause', methods=['POST'])
+def pause_stream():
+    import subprocess
+    subprocess.run(["sudo", "systemctl", "stop", "srs-publisher.service"], check=False)
+    return jsonify({"success": True})
 
+@app.route('/api/stream/resume', methods=['POST'])
+def resume_stream():
+    import subprocess
+    subprocess.run(["sudo", "systemctl", "start", "srs-publisher.service"], check=False)
+    return jsonify({"success": True})
+
+record_proc = None
 @app.route('/api/start_record', methods=['GET', 'POST'])
 def start_record():
     global record_proc, is_recording_active
