@@ -27,6 +27,7 @@ function Dashboard() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const mpegtsPlayerRef = useRef<any>(null);
   const [connected, setConnected] = useState(false);
+  const [streamPaused, setStreamPaused] = useState(false);
   
   const [audioOn, setAudioOn] = useState(false);
   const [talking, setTalking] = useState(false);
@@ -540,6 +541,31 @@ function Dashboard() {
     fetchMedia(); 
     setTimeout(() => setPlayerKey(prev => prev + 1), 2000);
   }
+
+  const toggleBackendStream = async () => {
+    if (streamPaused) {
+      toast("Resuming stream...");
+      try {
+        const res = await device("/api/stream/resume", { method: "POST" });
+        if (res.ok) {
+          setStreamPaused(false);
+          setTimeout(() => setPlayerKey(prev => prev + 1), 2000);
+        } else {
+          toast(`Failed to resume stream: ${res.status}`);
+        }
+      } catch (e: any) { toast(`Could not reach device: ${e.message}`); }
+    } else {
+      toast("Pausing stream to save bandwidth...");
+      try {
+        const res = await device("/api/stream/pause", { method: "POST" });
+        if (res.ok) {
+          setStreamPaused(true);
+        } else {
+          toast(`Failed to pause stream: ${res.status}`);
+        }
+      } catch (e: any) { toast(`Could not reach device: ${e.message}`); }
+    }
+  };
   
   async function startDesktopRec() {
     try {
@@ -550,7 +576,7 @@ function Dashboard() {
       const videoEl = videoRef.current as any;
       const stream = videoEl.captureStream ? videoEl.captureStream() : (videoEl.mozCaptureStream ? videoEl.mozCaptureStream() : null);
       if (!stream) {
-        toast.error("Desktop Recording is not supported on this browser (e.g. iOS Safari). Please use a PC.");
+        toast("Desktop Recording is not supported on this browser (e.g. iOS Safari). Please use a PC.");
         return;
       }
 
@@ -802,10 +828,10 @@ function Dashboard() {
             )}
           </div>
 
-          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/logs', '_blank')} style={{ display: 'none' }}>
+          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/logs', '_blank')}>
             <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Location Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
-          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/master_logs', '_blank')} style={{ display: 'none' }}>
+          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/master_logs', '_blank')}>
             <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Master Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
 
@@ -826,16 +852,16 @@ function Dashboard() {
           </button>
 
           <div className="nav-group-title">AI FEATURES</div>
-          <button className="nav-item">
+          <button className="nav-item" onClick={() => toast("Feature coming soon")}>
             <SvgIcon path="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /> Video to Text
           </button>
-          <button className="nav-item" style={{ display: 'none' }}>
+          <button className="nav-item" style={{ display: 'none' }} onClick={() => toast("Feature coming soon")}>
             <SvgIcon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /> Object Detection
           </button>
-          <button className="nav-item" style={{ display: 'none' }}>
+          <button className="nav-item" style={{ display: 'none' }} onClick={() => toast("Feature coming soon")}>
             <SvgIcon path="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> Face Detection
           </button>
-          <button className="nav-item">
+          <button className="nav-item" onClick={() => toast("Feature coming soon")}>
             <SvgIcon path="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /> Safety Alerts
           </button>
 
@@ -1016,13 +1042,22 @@ function Dashboard() {
             {/* Video Player */}
             <div className="video-card" ref={playerContainerRef}>
               <div className="video-frame">
-                  <div style={{width: '100%', height: '100%', background: '#000'}}>
-                    <video ref={videoRef} suppressHydrationWarning style={{width: '100%', height: '100%', objectFit: 'contain'}} muted={!audioOn} />
-                  </div>
+                <video ref={videoRef} suppressHydrationWarning style={{width: '100%', height: '100%', objectFit: 'contain'}} muted={!audioOn} />
 
                 {isRecordingLocal && (
                   <div className="video-dim-overlay">
                     <span>🔴 REC {fmtRecTime(recTime)}</span>
+                  </div>
+                )}
+                
+                {streamPaused && (
+                  <div className="video-dim-overlay" style={{background: 'rgba(0,0,0,0.85)', pointerEvents: 'auto'}}>
+                    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px'}}>
+                      <SvgIcon path="M3 3l18 18M18.364 5.636a9 9 0 00-12.728 0M15.536 8.464a5 5 0 00-7.072 0M12 14.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                      <span style={{fontSize: '18px', fontWeight: 600}}>Stream Paused</span>
+                      <span style={{fontSize: '14px', color: '#94a3b8'}}>Bandwidth reserved for uploads</span>
+                      <button onClick={toggleBackendStream} style={{marginTop: '12px', padding: '8px 16px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 500}}>Resume Stream</button>
+                    </div>
                   </div>
                 )}
                 
@@ -1058,6 +1093,12 @@ function Dashboard() {
                 </div>
                 <button className="ctrl-icon" onClick={snap} title="Capture snapshot">
                   <SvgIcon path="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </button>
+                <button className={`ctrl-icon ${streamPaused ? 'active-red' : ''}`} onClick={toggleBackendStream} title={streamPaused ? "Resume Stream" : "Pause Stream (Save Data)"}>
+                  {streamPaused 
+                    ? <SvgIcon path="M3 3l18 18M18.364 5.636a9 9 0 00-12.728 0M15.536 8.464a5 5 0 00-7.072 0M12 14.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+                    : <SvgIcon path="M12 18.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z M8.464 11.464a5 5 0 017.072 0 M5.636 8.636a9 9 0 0112.728 0 M2.808 5.808a13 13 0 0118.384 0" />
+                  }
                 </button>
                 <button className="ctrl-icon" title="Settings">
                   <SvgIcon path="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
