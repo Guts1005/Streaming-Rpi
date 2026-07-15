@@ -804,9 +804,8 @@ def start_record():
             except Exception:
                 pass
                 
-            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             abs_record_folder = os.path.abspath(RECORD_FOLDER)
-            path_mp4 = os.path.join(abs_record_folder, f"video_{ts}_chunk000.mp4")
+            path_mp4_pattern = os.path.join(abs_record_folder, "video_%Y%m%d_%H%M%S.mp4")
             log_path = os.path.join(abs_record_folder, 'camera.log')
             
             # Use same high quality settings and pipe to ffmpeg to mux with audio!
@@ -815,11 +814,11 @@ def start_record():
                 f"--bitrate 1500000 --denoise cdn_hq --inline --timeout 0 --nopreview -o - | "
                 f"ffmpeg -y -use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f h264 -i - "
                 f"-use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f alsa -channels 1 -i hw:3,0 "
-                f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 '{path_mp4}' > '{log_path}' 2>&1"
+                f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 -f segment -segment_time 240 -strftime 1 -reset_timestamps 1 '{path_mp4_pattern}' > '{log_path}' 2>&1"
             )
             record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
             global current_record_mp4
-            current_record_mp4 = path_mp4
+            current_record_mp4 = None
     return "OK"
 
 @app.route('/api/stop_record', methods=['POST'])
