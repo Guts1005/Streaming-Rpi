@@ -632,12 +632,19 @@ def camera_worker():
                             except:
                                 lat, lon, acc, spd = 0.0, 0.0, 0.0, 0.0
 
+                            site_id = current_gps_data.get("site_id", "")
+                            beacon_mac = current_gps_data.get("beacon_mac", "")
+                            location_name = current_gps_data.get("location_name", "Unknown")
+
                             gps_points.append({
                                 "timestamp": ts_str,
                                 "lat": lat,
                                 "lon": lon,
                                 "accuracy": acc,
-                                "speed": spd
+                                "speed": spd,
+                                "site_id": site_id,
+                                "beacon_mac": beacon_mac,
+                                "location_name": location_name
                             })
                             if gps_json_path:
                                 _write_gps_json_file(gps_json_path, gps_points)
@@ -1243,20 +1250,28 @@ def _gps_payload_from_video(filename):
                 lon = float(p.get("lon", 0.0))
                 ts = p.get("timestamp", "")
                 if (lat != 0.0 or lon != 0.0) and ts:
-                    valid_pts.append({"lat": lat, "lon": lon, "timestamp": ts})
+                    valid_pts.append(p)
             except:
                 continue
 
         if not valid_pts:
-            return raw, None, None
+            return raw, None, None, None
 
         start = valid_pts[0]
         end = valid_pts[-1]
-        start_location = f"{start['lat']},{start['lon']}"
-        stop_location = f"{end['lat']},{end['lon']}"
-        return raw, start_location, stop_location
+        start_location = f"{start.get('lat', 0)},{start.get('lon', 0)}"
+        stop_location = f"{end.get('lat', 0)},{end.get('lon', 0)}"
+        
+        # Try to find a site_id in any of the points
+        site_id = None
+        for p in valid_pts:
+            if p.get("site_id"):
+                site_id = p.get("site_id")
+                break
+                
+        return raw, start_location, stop_location, site_id
     except:
-        return None, None, None
+        return None, None, None, None
 
 @app.route('/api/upload_cloud', methods=['POST'])
 def api_upload_cloud():
@@ -1271,7 +1286,7 @@ def api_upload_cloud():
 
         video_path = os.path.join(RECORD_FOLDER, filename)
 
-        gps_json_string, start_location, stop_location = _gps_payload_from_video(filename)
+        gps_json_string, start_location, stop_location, site_id = _gps_payload_from_video(filename)
         if gps_json_string is None:
             gps_json_string = ""
 
@@ -1281,7 +1296,8 @@ def api_upload_cloud():
                 device_id=DEVICE_ID,
                 start_location=start_location,
                 stop_location=stop_location,
-                location_json_string=gps_json_string
+                location_json_string=gps_json_string,
+                site_id=site_id
             )
 
             with upload_status_lock:
@@ -1343,13 +1359,21 @@ def api_upload_image():
                 lon = float(current_gps_data.get("lon", 0.0))
             except Exception:
                 lat, lon = 0.0, 0.0
+            
+            site_id = current_gps_data.get("site_id", "")
+            beacon_mac = current_gps_data.get("beacon_mac", "")
+            location_name = current_gps_data.get("location_name", "Unknown")
+
             loc_str = f"{lat},{lon}"
             location_json_string = json.dumps({
                 "points": [
                     {
                         "lat": lat,
                         "lon": lon,
-                        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "site_id": site_id,
+                        "beacon_mac": beacon_mac,
+                        "location_name": location_name
                     }
                 ]
             })
@@ -1358,7 +1382,8 @@ def api_upload_image():
                 device_id=DEVICE_ID,
                 start_location=loc_str,
                 stop_location=loc_str,
-                location_json_string=location_json_string
+                location_json_string=location_json_string,
+                site_id=site_id
             )
             with upload_status_lock:
                 if success:
@@ -1408,7 +1433,7 @@ def batch_upload():
                 with upload_status_lock:
                     upload_status[chunk_name] = {"status": "uploading", "message": "Uploading..."}
 
-                gps_json_string, start_location, stop_location = _gps_payload_from_video(chunk_name)
+                gps_json_string, start_location, stop_location, site_id = _gps_payload_from_video(chunk_name)
                 if gps_json_string is None:
                     gps_json_string = ""
 
@@ -1417,7 +1442,8 @@ def batch_upload():
                     device_id=DEVICE_ID,
                     start_location=start_location,
                     stop_location=stop_location,
-                    location_json_string=gps_json_string
+                    location_json_string=gps_json_string,
+                    site_id=site_id
                 )
 
                 with upload_status_lock:

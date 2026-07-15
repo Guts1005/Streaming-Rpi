@@ -110,12 +110,15 @@ def log_master(beacon_mac, location_info):
     except Exception as e:
         logging.error(f"Failed to rewrite {MASTER_FILE}: {e}")
 
-def update_backend(location_info):
+def update_backend(location_info, beacon_mac=None):
     payload = {
         "lat": location_info.get("lat", 0.0),
         "lon": location_info.get("lon", 0.0),
         "accuracy": 10.0,
-        "speed": 0.0
+        "speed": 0.0,
+        "site_id": location_info.get("site_id", ""),
+        "beacon_mac": beacon_mac or "",
+        "location_name": location_info.get("name", "Unknown")
     }
     try:
         requests.post(BACKEND_URL, json=payload, timeout=2)
@@ -200,7 +203,7 @@ async def main():
         if current_beacon and current_beacon in known_beacons:
             log_master(current_beacon, known_beacons[current_beacon])
             log_detection(current_beacon, known_beacons[current_beacon], best_rssi)
-            update_backend(known_beacons[current_beacon])
+            update_backend(known_beacons[current_beacon], current_beacon)
 
         # Sleep to yield radio to Wi-Fi stack
         await asyncio.sleep(SCAN_SLEEP_SEC)

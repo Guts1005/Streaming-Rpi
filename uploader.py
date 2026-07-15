@@ -43,7 +43,8 @@ def upload_to_cloud(
     device_id: str,
     start_location: str = None,
     stop_location: str = None,
-    location_json_string: str = ""
+    location_json_string: str = "",
+    site_id: str = None
 ):
     """
     Upload video and location payload to cloud.
@@ -54,6 +55,7 @@ def upload_to_cloud(
       start_location: "lat,lon" or None
       stop_location: "lat,lon" or None
       location_json_string: JSON string (entire file content) or ""
+      site_id: the site_id extracted from beacons
 
     Returns:
       (success: bool, message: str)
@@ -82,6 +84,8 @@ def upload_to_cloud(
             data["start_location"] = str(start_location)
         if stop_location:
             data["stop_location"] = str(stop_location)
+        if site_id:
+            data["site_id"] = str(site_id)
 
         # Store entire JSON as a string under "location"
         if location_json_string is None:
@@ -108,25 +112,16 @@ def upload_to_cloud(
         except Exception:
             # Non-JSON response
             if resp.status_code == 200:
-                return True, "Upload successful"
-            return False, f"HTTP {resp.status_code}: {resp.text[:200]}"
+                return True, f"Success HTTP 200: {resp.text}"
+            return False, f"Failed HTTP {resp.status_code}: {resp.text}"
 
-        if resp.status_code != 200:
-            msg = result.get("message") or f"HTTP {resp.status_code}"
-            return False, msg
+        if result.get("status") == "success" or resp.status_code == 200:
+            return True, "Success"
+        else:
+            return False, str(result.get("message", "Upload failed"))
 
-        # Expect server to return {"success": true/false, ...}
-        if bool(result.get("success")):
-            return True, result.get("message") or "Upload successful"
-
-        return False, result.get("message") or "Upload failed"
-
-    except requests.exceptions.Timeout:
-        return False, "Timeout"
-    except requests.exceptions.ConnectionError:
-        return False, "Connection error"
     except Exception as e:
-        logging.exception("[UPLOAD] Unexpected error")
+        logging.error(f"Upload error {filename}: {e}")
         return False, str(e)
 
 def upload_image_to_cloud(
@@ -135,7 +130,8 @@ def upload_image_to_cloud(
     device_id: str,
     start_location: str = None,
     stop_location: str = None,
-    location_json_string: str = ""
+    location_json_string: str = "",
+    site_id: str = None
 ):
     try:
         if not os.path.exists(image_path):
@@ -157,6 +153,8 @@ def upload_image_to_cloud(
             data["start_location"] = str(start_location)
         if stop_location:
             data["stop_location"] = str(stop_location)
+        if site_id:
+            data["site_id"] = str(site_id)
         if location_json_string is None:
             location_json_string = ""
         data["location"] = str(location_json_string)
