@@ -207,7 +207,7 @@ async function initDb() {
       if (res.rows.length === 0) {
         await pool.query('INSERT INTO ks_beacons_master (beacon_mac, location_name, site_id, lat, lon) VALUES ($1, $2, $3, $4, $5)', [mac, name, siteId, lat, lon]);
       } else {
-        await pool.query('UPDATE ks_beacons_master SET location_name = $2, site_id = $3, lat = $4, lon = $5 WHERE beacon_mac = $1', [name, siteId, lat, lon]);
+        await pool.query('UPDATE ks_beacons_master SET location_name = $2, site_id = $3, lat = $4, lon = $5 WHERE beacon_mac = $1', [mac, name, siteId, lat, lon]);
       }
     };
 
