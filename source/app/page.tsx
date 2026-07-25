@@ -1132,11 +1132,11 @@ function Dashboard() {
             <div className="progress-card">
               <div className="compare-container">
                 {/* Left Half: Dynamic Live Location */}
-                <div className="compare-box" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <div className="compare-box" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start' }}>
                   <h3 className="section-title" style={{margin: '0 0 16px', alignSelf: 'flex-start'}}>
                     Current Location
                   </h3>
-                  <div className="compare-stats" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100%', minHeight: '200px', width: '100%', overflowY: 'auto' }}>
+                  <div className="compare-stats beacons-scroll-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', height: '100%', maxHeight: '320px', minHeight: '200px', width: '100%', overflowY: 'auto', paddingRight: '8px' }}>
                     {beaconsList.length > 0 ? (
                       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {beaconsList.map((b: any, idx: number) => {
