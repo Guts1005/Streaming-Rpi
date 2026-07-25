@@ -1840,57 +1840,6 @@ def beacon_scan():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
 
-@app.route('/api/beacons/logs', methods=['GET'])
-def beacon_logs():
-    site_id = request.args.get('site_id')
-    if os.path.exists('beacon_logs.csv'):
-        if not site_id:
-            return send_file('beacon_logs.csv', as_attachment=True, download_name='beacon_logs.csv', mimetype='text/csv')
-        
-        # Filter by site_id
-        import csv
-        filtered_file = 'beacon_logs_filtered.csv'
-        try:
-            with open('beacon_logs.csv', 'r') as infile, open(filtered_file, 'w', newline='') as outfile:
-                reader = csv.reader(infile)
-                writer = csv.writer(outfile)
-                headers = next(reader, None)
-                if headers:
-                    writer.writerow(headers)
-                    # site_id is at index 4 based on ble_locator.py
-                    for row in reader:
-                        if len(row) > 4 and row[4] == site_id:
-                            writer.writerow(row)
-            return send_file(filtered_file, as_attachment=True, download_name=f'beacon_logs_{site_id}.csv', mimetype='text/csv')
-        except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
-            
-    return jsonify({"success": False, "error": "No logs found"}), 404
-
-@app.route('/api/beacons/master_logs', methods=['GET'])
-def beacon_master_logs():
-    site_id = request.args.get('site_id')
-    if os.path.exists('beacon_master.csv'):
-        if not site_id:
-            return send_file('beacon_master.csv', as_attachment=True, download_name='beacon_master.csv', mimetype='text/csv')
-            
-        import csv
-        filtered_file = 'beacon_master_filtered.csv'
-        try:
-            with open('beacon_master.csv', 'r') as infile, open(filtered_file, 'w', newline='') as outfile:
-                reader = csv.DictReader(infile)
-                if reader.fieldnames:
-                    writer = csv.DictWriter(outfile, fieldnames=reader.fieldnames)
-                    writer.writeheader()
-                    for row in reader:
-                        if row.get('site_id') == site_id:
-                            writer.writerow(row)
-            return send_file(filtered_file, as_attachment=True, download_name=f'beacon_master_{site_id}.csv', mimetype='text/csv')
-        except Exception as e:
-            return jsonify({"success": False, "error": str(e)}), 500
-            
-    return jsonify({"success": False, "error": "No master logs found"}), 404
-
 # --------------------------------------
 
 if __name__ == '__main__':

@@ -1,33 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { allQuery } from '@/lib/db';
-import { getUserFromRequest } from '@/lib/auth';
+import { allQuery, runQuery } from '@/lib/db';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = getUserFromRequest(req) as any;
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized', beacons: [] }, { status: 401 });
+    const { searchParams } = new URL(req.url);
+    const site_id = searchParams.get('site_id');
+
+    let query = 'SELECT * FROM ks_beacons_master';
+    let params: any[] = [];
+    
+    if (site_id) {
+      query += ' WHERE site_id = ?';
+      params.push(parseInt(site_id, 10));
     }
 
-    const siteId = req.cookies.get('active_site_id')?.value || user.selected_site_id;
-    if (!siteId) {
-      // If no site is selected, return empty instead of querying all
-      return NextResponse.json({ beacons: [] });
-    }
-
-    // Query ks_beacon_master for this specific site
-    const query = `
-      SELECT * 
-      FROM ks_beacon_master 
-      WHERE site_id = $1 
-      ORDER BY beacon_name
-    `;
-    const beacons = await allQuery(query, [siteId]);
-    const cols = await allQuery("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'ks_beacon_master'");
-
-    return NextResponse.json({ beacons, cols });
-  } catch (error) {
-    console.error('Error fetching beacons from db:', error);
-    return NextResponse.json({ error: 'Internal Server Error', beacons: [] }, { status: 500 });
+    const beacons = await allQuery(query, params);
+    return NextResponse.json({ success: true, data: beacons });
+  } catch (error: any) {
+    console.error('Error fetching beacon master data:', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

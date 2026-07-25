@@ -2,16 +2,15 @@ import asyncio
 import json
 import time
 import os
-import csv
 import logging
 import requests
 from datetime import datetime
 from bleak import BleakScanner
 
 # --- Configuration ---
-LOG_FILE = os.path.join(os.path.dirname(__file__), "beacon_logs.csv")
-MASTER_FILE = os.path.join(os.path.dirname(__file__), "beacon_master.csv")
 BEACONS_FILE = os.path.join(os.path.dirname(__file__), "beacons.json")
+BACKEND_URL = "http://localhost:5000/api/update_gps"
+CLOUD_LOGS_URL = "https://helmet-live-viewer.vercel.app/api/beacons/logs"
 BACKEND_URL = "http://localhost:5000/api/update_gps"
 SCAN_ACTIVE_SEC = 2.5
 SCAN_SLEEP_SEC = 2.5
@@ -44,71 +43,26 @@ def load_beacons():
         return {}
 
 def log_detection(beacon_mac, location_info, rssi):
-    file_exists = os.path.isfile(LOG_FILE)
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    lat = location_info.get("lat", 0.0)
-    lon = location_info.get("lon", 0.0)
-    name = location_info.get("name", "Unknown")
-    site_id = location_info.get("site_id", "")
-    
-    try:
-        with open(LOG_FILE, mode='a', newline='') as f:
-            writer = csv.writer(f)
-            if not file_exists:
-                writer.writerow(["timestamp", "r_pi_id", "beacon_mac", "location_name", "site_id", "signal_strength", "lat", "lon"])
-            writer.writerow([timestamp, DEVICE_ID, beacon_mac, name, site_id, f"{rssi:.1f}", lat, lon])
-        logging.info(f"Logged detection: {name} ({beacon_mac}) at {rssi:.1f} dBm")
-    except Exception as e:
-        logging.error(f"Failed to write to {LOG_FILE}: {e}")
-
-master_entries = {}
-
-def load_master_entries():
-    if os.path.isfile(MASTER_FILE):
-        try:
-            with open(MASTER_FILE, "r") as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    master_entries[row["beacon_mac"]] = row
-        except Exception as e:
-            logging.error(f"Failed to read {MASTER_FILE}: {e}")
-
-# Load them immediately
-load_master_entries()
+    # This function is kept for structural compatibility if needed elsewhere,
+    # but we no longer write to local CSV.
+    pass
 
 def log_master(beacon_mac, location_info):
-    lat = str(location_info.get("lat", 0.0))
-    lon = str(location_info.get("lon", 0.0))
-    name = location_info.get("name", "Unknown")
-    site_id = location_info.get("site_id", "")
-    
-    existing = master_entries.get(beacon_mac)
-    if existing:
-        if existing["location_name"] == name and str(existing["lat"]) == lat and str(existing["lon"]) == lon and existing.get("site_id", "") == site_id:
-            return # No change needed
-        timestamp = existing["timestamp"]
-    else:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # Master is now managed in the cloud database.
+    pass
 
-    master_entries[beacon_mac] = {
-        "timestamp": timestamp,
+def log_to_cloud(beacon_mac, location_info):
+    payload = {
         "r_pi_id": DEVICE_ID,
         "beacon_mac": beacon_mac,
-        "location_name": name,
-        "site_id": site_id,
-        "lat": lat,
-        "lon": lon
+        "site_id": location_info.get("site_id", "")
     }
-    
     try:
-        with open(MASTER_FILE, mode='w', newline='') as f:
-            writer = csv.DictWriter(f, fieldnames=["timestamp", "r_pi_id", "beacon_mac", "location_name", "site_id", "lat", "lon"])
-            writer.writeheader()
-            for row in master_entries.values():
-                writer.writerow(row)
-        logging.info(f"Updated master entry: {name} ({beacon_mac})")
+        # Fire and forget request to log the scan to the cloud database
+        requests.post(CLOUD_LOGS_URL, json=payload, timeout=2)
+        logging.info(f"Logged to cloud: {location_info.get('name', 'Unknown')} ({beacon_mac})")
     except Exception as e:
-        logging.error(f"Failed to rewrite {MASTER_FILE}: {e}")
+        logging.warning(f"Failed to post log to cloud: {e}")
 
 def update_backend(location_info, beacon_mac=None):
     payload = {
@@ -201,8 +155,7 @@ async def main():
 
         # Log the current beacon continuously (every scan window)
         if current_beacon and current_beacon in known_beacons:
-            log_master(current_beacon, known_beacons[current_beacon])
-            log_detection(current_beacon, known_beacons[current_beacon], best_rssi)
+            log_to_cloud(current_beacon, known_beacons[current_beacon])
             update_backend(known_beacons[current_beacon], current_beacon)
 
         # Sleep to yield radio to Wi-Fi stack

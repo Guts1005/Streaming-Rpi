@@ -145,6 +145,24 @@ async function initDb() {
       );
 
       ALTER TABLE ks_devices ADD COLUMN IF NOT EXISTS active TEXT DEFAULT 'Y';
+
+      CREATE TABLE IF NOT EXISTS ks_beacons_master (
+        id SERIAL PRIMARY KEY,
+        beacon_mac TEXT UNIQUE,
+        location_name TEXT,
+        site_id INTEGER,
+        lat REAL,
+        lon REAL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS ks_beacons_logs (
+        id SERIAL PRIMARY KEY,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        r_pi_id TEXT,
+        beacon_mac TEXT,
+        site_id INTEGER
+      );
     `);
 
     // Ensure 'y' status for testing
@@ -183,6 +201,26 @@ async function initDb() {
     await seedUser('site', 'Site', '8');
     await seedUser('sports', 'Sports', '6');
     await seedUser('surveyor', 'Surveyor', '7');
+
+    const seedBeacon = async (mac: string, name: string, siteId: number | null, lat: number | null, lon: number | null) => {
+      const res = await pool.query('SELECT * FROM ks_beacons_master WHERE beacon_mac = $1', [mac]);
+      if (res.rows.length === 0) {
+        await pool.query('INSERT INTO ks_beacons_master (beacon_mac, location_name, site_id, lat, lon) VALUES ($1, $2, $3, $4, $5)', [mac, name, siteId, lat, lon]);
+      } else {
+        await pool.query('UPDATE ks_beacons_master SET location_name = $2, site_id = $3, lat = $4, lon = $5 WHERE beacon_mac = $1', [name, siteId, lat, lon]);
+      }
+    };
+
+    await seedBeacon('23:60:79:98:9C:15', 'Test Zone Alpha', null, 18.9234, 73.5678);
+    await seedBeacon('04:49:A7:44:EF:A0', 'Edge Beading', 1, 60, 70);
+    await seedBeacon('55:7B:4A:9F:DF:2E', 'WorkStation area', 1, 30, 40);
+    await seedBeacon('58:4B:B7:7C:1B:0E', 'laminate pressing WT', 1, 50, 60);
+    await seedBeacon('E1:5A:A1:D3:CD:7B', 'CNS Router', 1, 100, 200);
+    await seedBeacon('5F:45:1C:7A:F8:5A', 'Pannel Saw Machine', 1, 200, 300);
+    await seedBeacon('45:55:7A:1D:D7:58', 'Edge beading 45 degree', 1, 300, 400);
+    await seedBeacon('4F:03:88:1E:32:84', 'Laminate Pressing BIESS', 1, 60, 70);
+    await seedBeacon('6D:6C:BA:04:80:E8', 'CNC Acoustic', 1, 80, 90);
+
   } catch (error) {
     console.error('Database initialization error:', error);
   }
