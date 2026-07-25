@@ -224,3 +224,10 @@ If the user asks for `/graphify` or architecture understanding, use the Graphify
 - Keep status updates short.
 - Give exact commands when the user needs to run something.
 - If something cannot be verified, say so directly and state the next concrete check.
+
+## Memory Context & State Tracking
+
+- **CRITICAL NEW RULE**: There is a `PROJECT_MEMORY.md` file in the root directory. You MUST ALWAYS rely on it to understand the current state and architecture of the project.
+- With every change you make (be it small or big), you MUST update `PROJECT_MEMORY.md` to reflect the new state.
+- If you make a change and then remove/revert it later, you MUST update the "Removed or Reverted Features" section in the memory file so that future agents do not attempt to rebuild a flawed or removed feature.
+- Always keep this memory file perfectly synced with the latest codebase changes pushed to GitHub.
