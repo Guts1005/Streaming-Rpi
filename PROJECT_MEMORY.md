@@ -6,7 +6,7 @@ This document serves as a permanent, locally stored memory bank for the AI assis
 ## 1. The "Compression Plan" (Auto-Chunking)
 - **The Problem:** The Centrix cloud API (`https://centrix.co.in/v_api/upload`) has a strict **50MB upload limit**.
 - **The Solution (Implemented):** Implemented **Real-Time Auto-Chunking** using `ffmpeg`.
-- **How it works:** The raw hardware H.264 stream from `rpicam-vid` (720p, 24fps, 1.5Mbps) is piped directly into `ffmpeg`. `ffmpeg` copies the video stream (`-c:v copy`) and segments it into exactly **4-minute chunks** (`-f segment -segment_time 240`). This guarantees no chunk ever exceeds the 50MB limit. 
+- **How it works:** The raw hardware H.264 stream from `rpicam-vid` (720p, 24fps, 1.1Mbps) is piped directly into `ffmpeg`. `ffmpeg` copies the video stream (`-c:v copy`) and segments it into exactly **5-minute chunks** (`-f segment -segment_time 300`). This guarantees no chunk ever exceeds the 50MB limit, creating ~46MB files. 
 - **Timestamps:** The chunks are dynamically named with exactly perfectly formatted timestamps (`video_YYYYMMDD_HHMMSS.mp4`) using `strftime`, which natively aligns with the beacon timestamps.
 
 ## 2. Beacon Data Pipeline & Site IDs

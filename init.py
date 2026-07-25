@@ -818,10 +818,10 @@ def start_record():
             # Use same high quality settings and pipe to ffmpeg to mux with audio!
             cmd = (
                 f"rpicam-vid --width 1280 --height 720 --framerate 24 --codec h264 --profile high "
-                f"--bitrate 1500000 --denoise cdn_hq --inline --timeout 0 --nopreview -o - | "
+                f"--bitrate 1100000 --denoise cdn_hq --inline --timeout 0 --nopreview -o - | "
                 f"ffmpeg -y -use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f h264 -i - "
                 f"-use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f alsa -channels 1 -i hw:3,0 "
-                f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 -f segment -segment_time 240 -strftime 1 -reset_timestamps 1 '{path_mp4_pattern}' > '{log_path}' 2>&1"
+                f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 -f segment -segment_time 300 -strftime 1 -reset_timestamps 1 '{path_mp4_pattern}' > '{log_path}' 2>&1"
             )
             record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
             global current_record_mp4
