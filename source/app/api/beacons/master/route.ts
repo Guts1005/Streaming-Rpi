@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized', beacons: [] }, { status: 401 });
     }
 
-    const siteId = user.selected_site_id;
+    const siteId = req.cookies.get('active_site_id')?.value || user.selected_site_id;
     if (!siteId) {
       // If no site is selected, return empty instead of querying all
       return NextResponse.json({ beacons: [] });
@@ -23,8 +23,9 @@ export async function GET(req: NextRequest) {
       ORDER BY beacon_name
     `;
     const beacons = await allQuery(query, [siteId]);
+    const cols = await allQuery("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'ks_beacon_master'");
 
-    return NextResponse.json({ beacons });
+    return NextResponse.json({ beacons, cols });
   } catch (error) {
     console.error('Error fetching beacons from db:', error);
     return NextResponse.json({ error: 'Internal Server Error', beacons: [] }, { status: 500 });

@@ -1,8 +1,13 @@
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 
+let connString = process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING || "";
+if (connString.includes('?')) {
+  connString = connString.split('?')[0];
+}
+
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING,
+  connectionString: connString,
   ssl: { rejectUnauthorized: false },
   max: 2, // Limit connections per serverless instance to prevent exceeding Supabase 15-client limit
   idleTimeoutMillis: 30000,

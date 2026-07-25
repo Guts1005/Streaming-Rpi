@@ -137,11 +137,11 @@ export default function SitesScreen({ currentUser, onClose }: { currentUser?: an
   useEffect(() => {
     fetchCustomersForFilter();
     setSelectedCustomer('');
-  }, [selectedCompany]);
+  }, [selectedCompany, currentUser?.company_id]);
 
   useEffect(() => {
     fetchData();
-  }, [search, selectedCompany, selectedCustomer]);
+  }, [search, selectedCompany, selectedCustomer, currentUser?.company_id]);
 
   const handleAdd = () => {
     let initialCompany = '';

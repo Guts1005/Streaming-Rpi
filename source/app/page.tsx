@@ -828,10 +828,10 @@ function Dashboard() {
             )}
           </div>
 
-          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/logs', '_blank')}>
+          <button className="nav-item" onClick={() => window.open(activeSiteId ? `/api/device/api/beacons/logs?site_id=${activeSiteId}` : '/api/device/api/beacons/logs', '_blank')}>
             <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Location Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
-          <button className="nav-item" onClick={() => window.open('/api/device/api/beacons/master_logs', '_blank')}>
+          <button className="nav-item" onClick={() => window.open(activeSiteId ? `/api/device/api/beacons/master_logs?site_id=${activeSiteId}` : '/api/device/api/beacons/master_logs', '_blank')}>
             <SvgIcon path="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> Master Report <span className="nav-badge" style={{background: '#3b82f6', color: '#fff'}}>CSV</span>
           </button>
 
@@ -1112,37 +1112,41 @@ function Dashboard() {
             {/* Site Location and Progress */}
             <div className="progress-card">
               <div className="compare-container">
-                {/* Left Half: Site Location List */}
-                <div className="compare-box" style={{ padding: '20px' }}>
-                  <h3 className="section-title" style={{margin: '0 0 16px'}}>
-                    {activeSiteId 
-                      ? `${(currentUser?.sites || []).find((s: any) => s.id.toString() === activeSiteId)?.site_name || 'Project'} - Location List` 
-                      : 'Select Project - Location List'}
+                {/* Left Half: Dynamic Live Location */}
+                <div className="compare-box" style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <h3 className="section-title" style={{margin: '0 0 16px', alignSelf: 'flex-start'}}>
+                    Current Location
                   </h3>
-                  <div className="compare-stats" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                    {beaconsList.length === 0 ? (
-                      <div className="stat-row" style={{justifyContent: 'center', padding: '12px 0'}}>
-                        <span className="stat-label">No devices found for this site.</span>
-                      </div>
+                  <div className="compare-stats" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '200px', width: '100%' }}>
+                    {deviceStatus?.gps?.location_name && deviceStatus.gps.location_name !== "Unknown" ? (
+                      <>
+                        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                          <SvgIcon path="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z" style={{ width: '32px', height: '32px', color: '#3b82f6' }} />
+                        </div>
+                        <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f8fafc', margin: '0 0 8px 0', textAlign: 'center' }}>
+                          {deviceStatus.gps.location_name}
+                        </h2>
+                        <span style={{ color: '#10b981', fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <span className="dot green" style={{ width: '8px', height: '8px' }}></span> Beacon Detected
+                        </span>
+                        {deviceStatus.gps.beacon_mac && (
+                          <span style={{ color: '#64748b', fontSize: '12px', marginTop: '8px' }}>
+                            MAC: {deviceStatus.gps.beacon_mac}
+                          </span>
+                        )}
+                      </>
                     ) : (
-                      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', color: 'var(--text-primary)' }}>
-                        <thead>
-                          <tr style={{ borderBottom: '1px solid #334155', color: '#94a3b8', fontSize: '12px' }}>
-                            <th style={{ padding: '8px 0', fontWeight: '500' }}>Location Name</th>
-                            <th style={{ padding: '8px 0', fontWeight: '500', textAlign: 'center' }}>Videos</th>
-                            <th style={{ padding: '8px 0', fontWeight: '500', textAlign: 'center' }}>Images</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {beaconsList.map((beacon, i) => (
-                            <tr key={i} style={{ fontSize: '14px' }}>
-                              <td style={{ padding: '12px 0' }}>{beacon.location_name || beacon.beacon_name || 'Unknown Location'}</td>
-                              <td style={{ padding: '12px 0', textAlign: 'center' }}>{beacon.video_count || 0}</td>
-                              <td style={{ padding: '12px 0', textAlign: 'center' }}>{beacon.image_count || 0}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                      <>
+                        <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: 'rgba(148, 163, 184, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                          <SvgIcon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" style={{ width: '32px', height: '32px', color: '#94a3b8' }} />
+                        </div>
+                        <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#94a3b8', margin: '0 0 8px 0', textAlign: 'center' }}>
+                          Scanning for Beacons...
+                        </h2>
+                        <span style={{ color: '#64748b', fontSize: '14px', textAlign: 'center' }}>
+                          Move closer to a mapped beacon to identify location.
+                        </span>
+                      </>
                     )}
                   </div>
                 </div>

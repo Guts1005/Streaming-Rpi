@@ -98,8 +98,15 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   } catch (err: any) {
     console.error(`[Proxy] Fetch failed for ${targetUrl}:`, err);
     return Response.json(
-      { error: `Could not reach device at ${base}: ${err.message}` },
+      { error: "Helmet is offline. Please turn it on and check its Wi-Fi connection." },
       { status: 502 },
+    );
+  }
+
+  if (upstream.status === 530 || upstream.status === 522 || upstream.status === 502) {
+    return Response.json(
+      { error: "Helmet is offline. Please turn it on and check its Wi-Fi connection." },
+      { status: 502 }
     );
   }
 
