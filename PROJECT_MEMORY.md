@@ -21,6 +21,7 @@ This document serves as a permanent, locally stored memory bank for the AI assis
 - **Dynamic Live Beacons UI:** Replaced the static "Location List" on the Live Stream dashboard with a dynamic "Current Location" widget. It pulls `deviceStatus.gps.location_name` from the Pi (`/api/status`) and updates the UI instantly when the worker walks near a new beacon.
 - **Site-Wise CSV Downloads:** The "Location Report" and "Master Report" buttons on the Next.js dashboard now automatically attach the `?site_id=` parameter. The Pi's `init.py` backend (`/api/beacons/logs` and `/api/beacons/master_logs`) intercepts this, uses Python's `csv` module to filter the file in-memory, and returns only the rows for that specific site.
 - **Filename Start & Stop Time:** `uploader.py` now parses the exact chunk start time from the `ffmpeg`-generated filename, captures the chunk end time from the file's modification time, and physically renames the file to `video_START_to_STOP.mp4` on the Pi's filesystem just before uploading it to Centrix.
+- **UI Tweaks:** Fixed the dashboard logo text being cut off by changing `.brand-image` from `object-fit: cover` to `object-fit: contain` in `globals.css`.
 
 ## 4. Core Technical Architecture
 - **Hardware:** Raspberry Pi 
