@@ -146,6 +146,15 @@ async function initDb() {
 
       ALTER TABLE ks_devices ADD COLUMN IF NOT EXISTS active TEXT DEFAULT 'Y';
 
+      CREATE TABLE IF NOT EXISTS ks_transcripts (
+        id SERIAL PRIMARY KEY,
+        video_name VARCHAR(255) NOT NULL UNIQUE,
+        site_id INT NOT NULL,
+        transcript TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS ks_beacons_master (
         id SERIAL PRIMARY KEY,
         beacon_mac TEXT UNIQUE,

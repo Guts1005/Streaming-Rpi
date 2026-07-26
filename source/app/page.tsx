@@ -8,6 +8,7 @@ import CompaniesScreen from '../components/mdm/CompaniesScreen';
 import CustomersScreen from '../components/mdm/CustomersScreen';
 import SitesScreen from '../components/mdm/SitesScreen';
 import DevicesScreen from '../components/mdm/DevicesScreen';
+import TranscriptsScreen from '../components/TranscriptsScreen';
 
 type TokenResponse = { token?: string; error?: string };
 
@@ -871,7 +872,7 @@ function Dashboard() {
           </button>
 
           <div className="nav-group-title">AI FEATURES</div>
-          <button className="nav-item" onClick={() => toast("Feature coming soon")}>
+          <button className={`nav-item ${activeTab === 'video-text' ? 'active' : ''}`} onClick={() => setActiveTab('video-text')}>
             <SvgIcon path="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /> Video to Text
           </button>
           <button className="nav-item" style={{ display: 'none' }} onClick={() => toast("Feature coming soon")}>
@@ -1052,6 +1053,12 @@ function Dashboard() {
         {activeTab === 'devices' && (
           <div style={{ padding: '24px' }}>
             <DevicesScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
+          </div>
+        )}
+
+        {activeTab === 'video-text' && (
+          <div style={{ padding: '24px' }}>
+            <TranscriptsScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
           </div>
         )}
 

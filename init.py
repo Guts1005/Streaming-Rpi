@@ -1493,6 +1493,30 @@ def batch_upload():
 def download(filename):
     return send_from_directory(RECORD_FOLDER, filename, as_attachment=True)
 
+@app.route('/api/extract_audio/<filename>')
+def extract_audio(filename):
+    p = os.path.join(RECORD_FOLDER, filename)
+    if not os.path.exists(p) or not filename.endswith('.mp4'):
+        return jsonify({"success": False, "error": "Invalid or missing video file"}), 404
+    
+    out_filename = filename.replace('.mp4', '.mp3')
+    out_path = os.path.join(RECORD_FOLDER, out_filename)
+    
+    # If already extracted, return it immediately
+    if not os.path.exists(out_path):
+        try:
+            # Extract audio quickly using ffmpeg (approx 1-2 seconds)
+            import subprocess
+            subprocess.run([
+                'ffmpeg', '-y', '-i', p,
+                '-vn', '-c:a', 'libmp3lame', '-q:a', '4',
+                out_path
+            ], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            return jsonify({"success": False, "error": f"Extraction failed: {str(e)}"}), 500
+
+    return send_from_directory(RECORD_FOLDER, out_filename, as_attachment=True)
+
 @app.route('/api/delete_file', methods=['POST'])
 def delete_file():
     n = (request.json or {}).get('filename', '')
