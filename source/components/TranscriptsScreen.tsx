@@ -391,6 +391,18 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
         });
         const uploadData = await uploadRes.json();
         if (uploadData.error) throw new Error(uploadData.error.message);
+        
+        // Wait for file processing to complete
+        let fileState = uploadData.file.state;
+        while (fileState === 'PROCESSING') {
+          setStatus(`Processing video on Gemini (this may take a minute)...`);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          const checkRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${uploadData.file.name}?key=${apiKey}`);
+          const checkData = await checkRes.json();
+          fileState = checkData.state;
+          if (fileState === 'FAILED') throw new Error('Gemini failed to process the video file.');
+        }
+
         fileDataPayload = { mimeType: 'video/mp4', fileUri: uploadData.file.uri };
       } else {
         setStatus(`Extracting audio for ${videoName} (this takes ~1-2s)...`);
