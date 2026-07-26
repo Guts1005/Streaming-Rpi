@@ -26,9 +26,20 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
       // Fetch videos from Pi proxy
       const res = await fetch('/api/device/proxy?endpoint=/api/list_media');
       const data = await res.json();
-      if (data.success) {
-        setVideos(data.files || []);
+      
+      let videoNames: string[] = [];
+      if (Array.isArray(data)) {
+        data.forEach(item => {
+          if (item.type === 'batch') {
+            item.chunks?.forEach((c: any) => {
+              if (c.name?.endsWith('.mp4')) videoNames.push(c.name);
+            });
+          } else if (item.name?.endsWith('.mp4')) {
+            videoNames.push(item.name);
+          }
+        });
       }
+      setVideos(videoNames);
     } catch (e) {
       console.error(e);
     }
