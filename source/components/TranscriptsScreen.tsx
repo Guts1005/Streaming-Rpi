@@ -164,56 +164,174 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   };
 
   return (
-    <div className="card full-width">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2>Video Transcripts</h2>
-        <button className="btn-secondary" onClick={onClose}>Close</button>
+    <div className="card full-width" style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
+          <span style={{ fontSize: '1.5rem' }}>🎙️</span> Video Transcripts
+        </h2>
+        <button 
+          onClick={onClose}
+          style={{
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#e2e8f0',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
+          onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
+        >
+          ✕ Close
+        </button>
       </div>
 
       {status && (
-        <div style={{ padding: '15px', background: '#e0f7fa', color: '#006064', borderRadius: '8px', marginBottom: '20px', fontWeight: 'bold' }}>
-          ⏳ {status}
+        <div style={{ 
+          padding: '16px 20px', 
+          background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)', 
+          borderLeft: '4px solid #8b5cf6',
+          color: '#e2e8f0', 
+          borderRadius: '8px', 
+          marginBottom: '25px', 
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+        }}>
+          <span className="spinner" style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin 1s linear infinite' }}></span>
+          {status}
         </div>
       )}
 
       {loading ? (
-        <p>Loading videos...</p>
+        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
+          <div className="spinner" style={{ margin: '0 auto 15px auto', width: '30px', height: '30px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+          Loading your recordings...
+        </div>
+      ) : videos.filter(v => v.endsWith('.mp4')).length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+          <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>📁</span>
+          No video files found on the device.
+        </div>
       ) : (
-        <div style={{ display: 'grid', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {videos.filter(v => v.endsWith('.mp4')).map(video => {
             const transcriptData = transcripts[video];
             return (
-              <div key={video} style={{ border: '1px solid #eee', padding: '20px', borderRadius: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3 style={{ margin: 0 }}>{video}</h3>
+              <div key={video} style={{ 
+                background: 'rgba(255, 255, 255, 0.02)',
+                border: '1px solid rgba(255, 255, 255, 0.08)', 
+                padding: '24px', 
+                borderRadius: '12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                transition: 'transform 0.2s ease',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', padding: '8px', borderRadius: '8px' }}>🎥</span>
+                    <h3 style={{ margin: 0, color: '#f8fafc', fontSize: '1.1rem', wordBreak: 'break-all' }}>{video}</h3>
+                  </div>
+                  
                   {!transcriptData && !status && (
-                    <button className="btn-primary" onClick={() => generateTranscript(video)}>
-                      Generate Transcript
+                    <button 
+                      onClick={() => generateTranscript(video)}
+                      style={{
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                        transition: 'transform 0.1s'
+                      }}
+                      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
+                      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                    >
+                      ✨ Generate AI Transcript
                     </button>
                   )}
                 </div>
 
                 {transcriptData && (
-                  <div style={{ marginTop: '15px' }}>
-                    <div style={{ background: '#f5f5f5', padding: '15px', borderRadius: '6px', marginBottom: '10px' }}>
-                      <strong>Summary:</strong>
-                      <p style={{ margin: '10px 0 0 0' }}>{transcriptData.summary}</p>
+                  <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    {/* Summary Block */}
+                    <div style={{ 
+                      background: 'rgba(59, 130, 246, 0.05)', 
+                      padding: '20px', 
+                      borderRadius: '10px', 
+                      borderLeft: '4px solid #3b82f6',
+                      borderRight: '1px solid rgba(255,255,255,0.03)',
+                      borderTop: '1px solid rgba(255,255,255,0.03)',
+                      borderBottom: '1px solid rgba(255,255,255,0.03)'
+                    }}>
+                      <h4 style={{ margin: '0 0 12px 0', color: '#60a5fa', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        📋 Executive Summary
+                      </h4>
+                      <p style={{ margin: 0, color: '#e2e8f0', lineHeight: '1.6', fontSize: '0.95rem' }}>{transcriptData.summary}</p>
                     </div>
+
+                    {/* Full Transcript Block */}
                     <div>
-                      <strong>Full Transcript:</strong>
-                      <p style={{ whiteSpace: 'pre-wrap', color: '#555' }}>{transcriptData.transcript}</p>
+                      <h4 style={{ margin: '0 0 12px 0', color: '#94a3b8', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        📝 Full Transcript
+                      </h4>
+                      <div style={{ 
+                        background: 'rgba(0, 0, 0, 0.3)', 
+                        padding: '20px', 
+                        borderRadius: '10px',
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        maxHeight: '350px',
+                        overflowY: 'auto'
+                      }}>
+                        <p style={{ 
+                          margin: 0, 
+                          whiteSpace: 'pre-wrap', 
+                          color: '#cbd5e1', 
+                          lineHeight: '1.7', 
+                          fontSize: '0.9rem',
+                          fontFamily: 'system-ui, -apple-system, sans-serif'
+                        }}>
+                          {transcriptData.transcript}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
             );
           })}
-          
-          {videos.filter(v => v.endsWith('.mp4')).length === 0 && (
-            <p>No video files found on the device.</p>
-          )}
         </div>
       )}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+        /* Custom scrollbar for dark mode transcript box */
+        div::-webkit-scrollbar {
+          width: 8px;
+        }
+        div::-webkit-scrollbar-track {
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: 4px;
+        }
+        div::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.15);
+          border-radius: 4px;
+        }
+        div::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.25);
+        }
+      `}} />
     </div>
   );
 }
