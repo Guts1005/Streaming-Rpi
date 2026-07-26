@@ -58,7 +58,7 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`Summary:\n${displayData.summary}\n\nTranscript:\n${displayData.transcript}`);
+    navigator.clipboard.writeText(`Summary:\n${currentData.summary}\n\nTranscript:\n${currentData.transcript}`);
     alert('Copied to clipboard!');
   };
 
@@ -69,9 +69,9 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
       <body>
         <h1>Transcript for ${video}</h1>
         <h2>Executive Summary</h2>
-        <p>${displayData.summary.replace(/\n/g, '<br/>')}</p>
+        <p>${currentData.summary.replace(/\n/g, '<br/>')}</p>
         <h2>Full Transcript</h2>
-        <p>${displayData.transcript.replace(/\n/g, '<br/>')}</p>
+        <p>${currentData.transcript.replace(/\n/g, '<br/>')}</p>
       </body>
       </html>
     `;
@@ -104,13 +104,13 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
         <body>
           <h1>Video Transcript: ${video}</h1>
           <h2>Executive Summary</h2>
-          <p>${displayData.summary.replace(/\[SAFETY ALERTS\]:[\s\S]*/, '')}</p>
-          ${displayData.summary.includes('[SAFETY ALERTS]:') ? `
+          <p>${currentData.summary.replace(/\[SAFETY ALERTS\]:[\s\S]*/, '')}</p>
+          ${currentData.summary.includes('[SAFETY ALERTS]:') ? `
             <h2>Safety Alerts</h2>
-            <div class="alert"><p>${displayData.summary.split('[SAFETY ALERTS]:')[1]}</p></div>
+            <div class="alert"><p>${currentData.summary.split('[SAFETY ALERTS]:')[1]}</p></div>
           ` : ''}
           <h2>Full Transcript</h2>
-          <p>${displayData.transcript}</p>
+          <p>${currentData.transcript}</p>
         </body>
       </html>
     `);
@@ -130,7 +130,10 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
     );
   };
 
-  let normalSummary = displayData?.summary || '';
+  // Use derived data to prevent render crashes when initialData updates before useEffect runs
+  const currentData = displayData || initialData;
+
+  let normalSummary = currentData?.summary || '';
   let safetyAlerts = '';
   if (normalSummary.includes('[SAFETY ALERTS]:')) {
     const parts = normalSummary.split('[SAFETY ALERTS]:');
@@ -170,7 +173,7 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
         )}
       </div>
 
-      {initialData && (
+      {initialData && currentData && (
         <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
           {/* Action Bar (Export, Translate, Search) */}
@@ -232,7 +235,7 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
             </h4>
             <div style={{ background: 'rgba(0, 0, 0, 0.3)', padding: '20px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.05)', maxHeight: '350px', overflowY: 'auto' }}>
               <p style={{ margin: 0, whiteSpace: 'pre-wrap', color: '#cbd5e1', lineHeight: '1.7', fontSize: '0.9rem', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-                {highlightText(displayData.transcript)}
+                {highlightText(currentData.transcript)}
               </p>
             </div>
           </div>
