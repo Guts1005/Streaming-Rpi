@@ -188,6 +188,12 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
                 <option value="English" style={{color: '#000'}}>🇺🇸 English</option>
                 <option value="Hindi" style={{color: '#000'}}>🇮🇳 Hindi</option>
                 <option value="Marathi" style={{color: '#000'}}>🚩 Marathi</option>
+                <option value="Bengali" style={{color: '#000'}}>🐅 Bengali</option>
+                <option value="Telugu" style={{color: '#000'}}>🌅 Telugu</option>
+                <option value="Tamil" style={{color: '#000'}}>🛕 Tamil</option>
+                <option value="Gujarati" style={{color: '#000'}}>🦁 Gujarati</option>
+                <option value="Kannada" style={{color: '#000'}}>🐘 Kannada</option>
+                <option value="Malayalam" style={{color: '#000'}}>🌴 Malayalam</option>
               </select>
               {isTranslating && <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Translating...</span>}
             </div>
@@ -341,7 +347,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
         body: JSON.stringify({
           contents: [{
             parts: [
-              { text: "Listen to this audio. Provide a full word-for-word transcript. Then provide a short executive summary. Also, identify any safety hazards or crucial action items mentioned and put them in a list. Return it as a JSON object with three keys: 'transcript', 'summary', and 'safety_alerts' (an array of strings). If there are no safety alerts, return an empty array for that key." },
+              { text: "Listen to this audio. Provide a full word-for-word transcript. Format the transcript like a script with speakers (e.g., 'Speaker 1: Hello.', 'Speaker 2: Hi.'). If you can figure out their names, titles, or roles from the context of the audio, use those instead of 'Speaker 1'. Break it into readable paragraphs when speakers change. Then provide a short executive summary. Also, identify any safety hazards or crucial action items mentioned and put them in a list. Return it as a JSON object with three keys: 'transcript', 'summary', and 'safety_alerts' (an array of strings). If there are no safety alerts, return an empty array for that key." },
               { inlineData: { mimeType: "audio/mp3", data: base64Audio } }
             ]
           }],
