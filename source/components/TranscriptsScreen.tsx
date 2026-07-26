@@ -192,17 +192,17 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
               {isTranslating && <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Translating...</span>}
             </div>
 
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
               <input 
                 type="text" 
                 placeholder="🔍 Search transcript..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '6px', outline: 'none', width: '180px' }}
+                style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '6px', outline: 'none', width: '180px', flexGrow: 1 }}
               />
-              <button onClick={handleCopy} title="Copy to Clipboard" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>📋 Copy</button>
-              <button onClick={handleDownloadWord} title="Download Word Doc" style={{ background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.5)', color: '#60a5fa', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>📝 Word</button>
-              <button onClick={handleDownloadPDF} title="Download PDF" style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.5)', color: '#f87171', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer' }}>📄 PDF</button>
+              <button onClick={handleCopy} title="Copy to Clipboard" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>📋 Copy</button>
+              <button onClick={handleDownloadWord} title="Download Word Doc" style={{ background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.5)', color: '#60a5fa', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>📝 Word</button>
+              <button onClick={handleDownloadPDF} title="Download PDF" style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.5)', color: '#f87171', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>📄 PDF</button>
             </div>
           </div>
 
