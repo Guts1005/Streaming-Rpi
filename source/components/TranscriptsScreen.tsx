@@ -119,7 +119,20 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
       if (aiData.error) throw new Error(aiData.error.message);
 
       const aiText = aiData.candidates[0].content.parts[0].text;
-      const parsed = JSON.parse(aiText);
+      
+      let parsed;
+      try {
+        let cleanText = aiText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        // Extract just the first complete JSON object to ignore any trailing conversational text
+        const match = cleanText.match(/\{[\s\S]*\}/);
+        if (match) {
+          cleanText = match[0];
+        }
+        parsed = JSON.parse(cleanText);
+      } catch (err) {
+        console.error("AI Output:", aiText);
+        throw new Error("AI returned malformed JSON structure.");
+      }
 
       setStatus(`Saving transcript...`);
 
