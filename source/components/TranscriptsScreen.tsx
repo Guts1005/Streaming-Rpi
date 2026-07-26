@@ -136,7 +136,11 @@ function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscr
 
   let normalSummary = currentData?.summary || '';
   let safetyAlerts = '';
-  if (normalSummary.includes('[SAFETY ALERTS]:')) {
+  
+  if (currentData?.safety_alerts && Array.isArray(currentData.safety_alerts) && currentData.safety_alerts.length > 0) {
+    safetyAlerts = currentData.safety_alerts.map((alert: string) => `• ${alert}`).join('\n');
+  } else if (normalSummary.includes('[SAFETY ALERTS]:')) {
+    // Fallback for older transcripts that used the string format
     const parts = normalSummary.split('[SAFETY ALERTS]:');
     normalSummary = parts[0];
     safetyAlerts = parts[1];
