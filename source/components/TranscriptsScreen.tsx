@@ -24,7 +24,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
     setLoading(true);
     try {
       // Fetch videos from Pi proxy
-      const res = await fetch('/api/device/proxy?endpoint=/api/list_media');
+      const res = await fetch('/api/device/api/list_media');
       const data = await res.json();
       
       let videoNames: string[] = [];
@@ -83,7 +83,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
       
       // 1. Fetch Audio from Pi
       // /api/extract_audio/<filename> on the Pi
-      const proxyUrl = `/api/device/proxy?endpoint=/api/extract_audio/${encodeURIComponent(videoName)}`;
+      const proxyUrl = `/api/device/api/extract_audio/${encodeURIComponent(videoName)}`;
       const audioRes = await fetch(proxyUrl);
       if (!audioRes.ok) throw new Error("Failed to extract audio from helmet.");
       
