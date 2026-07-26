@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { get, set } from 'idb-keyval';
 
 // NOTE: This relies on the Google Generative AI REST API to avoid requiring the SDK in the browser bundle
 // which could cause webpack issues or expose too much. 
@@ -9,7 +10,7 @@ type TranscriptsScreenProps = {
 };
 
 // --- Child Component for Individual Transcripts ---
-function TranscriptItem({ video, initialData, apiKey, generateTranscript, globalStatus }: { video: string, initialData: any, apiKey: string, generateTranscript: (v: string) => void, globalStatus: string }) {
+function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscript, globalStatus }: { video: string, localFile?: File, initialData: any, apiKey: string, generateTranscript: (v: string, f?: File) => void, globalStatus: string }) {
   const [displayData, setDisplayData] = useState(initialData);
   const [targetLang, setTargetLang] = useState('English');
   const [isTranslating, setIsTranslating] = useState(false);
@@ -158,7 +159,7 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
         
         {!initialData && !globalStatus && (
           <button 
-            onClick={() => generateTranscript(video)}
+            onClick={() => generateTranscript(video, localFile)}
             style={{
               background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
               color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px',
@@ -206,7 +207,7 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '6px', outline: 'none', width: '180px', flexGrow: 1 }}
               />
-              <button onClick={() => { if(window.confirm('Are you sure you want to regenerate? This will overwrite the current transcript.')) generateTranscript(video); }} title="Regenerate Transcript" style={{ background: 'rgba(139, 92, 246, 0.2)', border: '1px solid rgba(139, 92, 246, 0.5)', color: '#a78bfa', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>🔄 Regenerate</button>
+              <button onClick={() => { if(window.confirm('Are you sure you want to regenerate? This will overwrite the current transcript.')) generateTranscript(video, localFile); }} title="Regenerate Transcript" style={{ background: 'rgba(139, 92, 246, 0.2)', border: '1px solid rgba(139, 92, 246, 0.5)', color: '#a78bfa', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>🔄 Regenerate</button>
               <button onClick={handleCopy} title="Copy to Clipboard" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>📋 Copy</button>
               <button onClick={handleDownloadWord} title="Download Word Doc" style={{ background: 'rgba(59, 130, 246, 0.2)', border: '1px solid rgba(59, 130, 246, 0.5)', color: '#60a5fa', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>📝 Word</button>
               <button onClick={handleDownloadPDF} title="Download PDF" style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.5)', color: '#f87171', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', flexGrow: 1 }}>📄 PDF</button>
@@ -257,6 +258,7 @@ function TranscriptItem({ video, initialData, apiKey, generateTranscript, global
 // --- Main Screen ---
 export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsScreenProps) {
   const [videos, setVideos] = useState<string[]>([]);
+  const [localVideos, setLocalVideos] = useState<{name: string, file: File}[]>([]);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
   const [apiKey, setApiKey] = useState('');
@@ -265,6 +267,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   useEffect(() => {
     fetchVideos();
     fetchApiKey();
+    loadLocalDirectory(true); // Attempt silent restore from IndexedDB
   }, []);
 
   const fetchVideos = async () => {
@@ -315,29 +318,95 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   };
 
   useEffect(() => {
-    videos.forEach(v => loadExistingTranscript(v));
-  }, [videos]);
+    const allVideos = [...videos, ...localVideos.map(v => v.name)];
+    // deduplicate slightly by passing a Set
+    Array.from(new Set(allVideos)).forEach(v => loadExistingTranscript(v));
+  }, [videos, localVideos]);
 
-  const generateTranscript = async (videoName: string) => {
+  const loadLocalDirectory = async (silent = false) => {
+    try {
+      let handle: FileSystemDirectoryHandle | undefined;
+      if (silent) {
+        handle = await get('downloads_dir_handle');
+        if (handle) {
+          // verify permission without triggering prompt
+          const perm = await (handle as any).queryPermission({ mode: 'read' });
+          if (perm !== 'granted') return; // wait for explicit action
+        } else {
+          return;
+        }
+      } else {
+        if (!('showDirectoryPicker' in window)) {
+          // Fallback handled by the input type="file" button logic in render
+          return;
+        }
+        handle = await (window as any).showDirectoryPicker({ mode: 'read' });
+        await set('downloads_dir_handle', handle);
+      }
+
+      if (!handle) return;
+      const foundFiles: {name: string, file: File}[] = [];
+      const regex = /^(video|uploaded|failed_upload)_.*\.mp4$/i;
+      
+      for await (const entry of (handle as any).values()) {
+        if (entry.kind === 'file' && regex.test(entry.name)) {
+          const file = await entry.getFile();
+          foundFiles.push({ name: entry.name, file });
+        }
+      }
+      setLocalVideos(foundFiles.sort((a,b) => b.name.localeCompare(a.name)));
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error("Failed to load directory", err);
+    }
+  };
+
+  const handleManualFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const valid = files.filter(f => /^(video|uploaded|failed_upload)_.*\.mp4$/i.test(f.name));
+    setLocalVideos(prev => {
+      const combined = [...prev, ...valid.map(f => ({name: f.name, file: f}))];
+      // deduplicate
+      const unique = combined.filter((v, i, a) => a.findIndex(t => t.name === v.name) === i);
+      return unique;
+    });
+  };
+
+  const generateTranscript = async (videoName: string, localFile?: File) => {
     if (!apiKey) {
       alert("API Key not configured");
       return;
     }
     
     try {
-      setStatus(`Extracting audio for ${videoName} (this takes ~1-2s)...`);
-      const proxyUrl = `/api/device/api/extract_audio/${encodeURIComponent(videoName)}`;
-      const audioRes = await fetch(proxyUrl);
-      if (!audioRes.ok) throw new Error("Failed to extract audio from helmet.");
-      
-      const audioBlob = await audioRes.blob();
-      
-      setStatus(`Uploading to Gemini (this takes ~2s)...`);
-      const base64Audio = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-        reader.readAsDataURL(audioBlob);
-      });
+      let fileDataPayload: any = null;
+      let inlineDataPayload: any = null;
+
+      if (localFile) {
+        setStatus(`Uploading ${videoName} directly to Gemini (Local Sync)...`);
+        const uploadUrl = `https://generativelanguage.googleapis.com/upload/v1beta/files?uploadType=media&key=${apiKey}`;
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'video/mp4' },
+          body: localFile
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.error) throw new Error(uploadData.error.message);
+        fileDataPayload = { mimeType: 'video/mp4', fileUri: uploadData.file.uri };
+      } else {
+        setStatus(`Extracting audio for ${videoName} (this takes ~1-2s)...`);
+        const proxyUrl = `/api/device/api/extract_audio/${encodeURIComponent(videoName)}`;
+        const audioRes = await fetch(proxyUrl);
+        if (!audioRes.ok) throw new Error("Failed to extract audio from helmet.");
+        
+        const audioBlob = await audioRes.blob();
+        setStatus(`Preparing audio data (this takes ~2s)...`);
+        const base64Audio = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+          reader.readAsDataURL(audioBlob);
+        });
+        inlineDataPayload = { mimeType: "audio/mp3", data: base64Audio };
+      }
 
       setStatus(`Generating transcript...`);
 
@@ -349,7 +418,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
           contents: [{
             parts: [
               { text: "Listen to this audio. Provide a full word-for-word transcript. Format the transcript like a script with speakers (e.g., 'Speaker 1: Hello.', 'Speaker 2: Hi.'). If you can figure out their names, titles, or roles from the context of the audio, use those instead of 'Speaker 1'. Break it into readable paragraphs when speakers change. Then provide a short executive summary. Also, identify any safety hazards or crucial action items mentioned and put them in a list. Return it as a JSON object with three keys: 'transcript', 'summary', and 'safety_alerts' (an array of strings). If there are no safety alerts, return an empty array for that key." },
-              { inlineData: { mimeType: "audio/mp3", data: base64Audio } }
+              fileDataPayload ? { fileData: fileDataPayload } : { inlineData: inlineDataPayload }
             ]
           }],
           generationConfig: { responseMimeType: "application/json" }
@@ -408,18 +477,44 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
 
   return (
     <div className="card full-width" style={{ position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0 }}>
-          <span style={{ fontSize: '1.5rem' }}>🎙️</span> Video Transcripts
+      {/* Top Header Section */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', flexWrap: 'wrap', gap: '15px' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: 0, fontSize: '1.6rem' }}>
+          <span style={{ fontSize: '1.8rem' }}>🎙️</span> Video Transcripts
         </h2>
-        <button 
-          onClick={onClose}
-          style={{ background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)', color: '#e2e8f0', padding: '8px 16px', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', transition: 'all 0.2s ease' }}
-          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}
-          onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}
-        >
-          ✕ Close
-        </button>
+        
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          {/* File System Access Sync Button */}
+          <button 
+            onClick={() => loadLocalDirectory(false)}
+            style={{ 
+              background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', border: '1px solid rgba(34, 197, 94, 0.4)', 
+              padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+            }}
+          >
+            🔗 Sync Local Folder
+          </button>
+          
+          {/* Fallback File Input for unsupported browsers */}
+          <label style={{ 
+              background: 'rgba(255, 255, 255, 0.1)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.2)', 
+              padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'
+          }}>
+            📁 Select Files
+            <input type="file" multiple accept="video/mp4" onChange={handleManualFiles} style={{ display: 'none' }} />
+          </label>
+
+          <button 
+            className="btn-secondary" 
+            onClick={onClose}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.05)', color: '#cbd5e1', border: '1px solid rgba(255, 255, 255, 0.1)', 
+              padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s ease'
+            }}
+          >
+            ✕ Close
+          </button>
+        </div>
       </div>
 
       {status && (
@@ -434,23 +529,48 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
           <div className="spinner" style={{ margin: '0 auto 15px auto', width: '30px', height: '30px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#3b82f6', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
           Loading your recordings...
         </div>
-      ) : videos.filter(v => v.endsWith('.mp4')).length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.1)' }}>
-          <span style={{ fontSize: '2rem', display: 'block', marginBottom: '10px' }}>📁</span>
-          No video files found on the device.
-        </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {videos.filter(v => v.endsWith('.mp4')).map(video => (
-            <TranscriptItem 
-              key={video}
-              video={video}
-              initialData={transcripts[video]}
-              apiKey={apiKey}
-              generateTranscript={generateTranscript}
-              globalStatus={status}
-            />
-          ))}
+        {!loading && videos.length === 0 && localVideos.length === 0 && (
+          <div style={{ textAlign: 'center', color: '#94a3b8', padding: '40px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+            No recorded videos found on the helmet. Sync a local folder to upload downloaded videos.
+          </div>
+        )}
+        
+        {/* Local Sync Videos */}
+        {localVideos.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+            <h3 style={{ color: '#4ade80', margin: '0 0 10px 0', fontSize: '1.1rem' }}>💻 Locally Synced Videos</h3>
+            {localVideos.map((lv) => (
+              <TranscriptItem 
+                key={`local-${lv.name}`} 
+                video={lv.name}
+                localFile={lv.file}
+                initialData={transcripts[lv.name]}
+                apiKey={apiKey}
+                generateTranscript={generateTranscript}
+                globalStatus={status}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Helmet Videos */}
+        {videos.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h3 style={{ color: '#60a5fa', margin: '0 0 10px 0', fontSize: '1.1rem' }}>🎥 Helmet Videos</h3>
+            {videos.map((v) => (
+              <TranscriptItem 
+                key={v} 
+                video={v}
+                initialData={transcripts[v]}
+                apiKey={apiKey}
+                generateTranscript={generateTranscript}
+                globalStatus={status}
+              />
+            ))}
+          </div>
+        )}
         </div>
       )}
       <style dangerouslySetInnerHTML={{__html: `
