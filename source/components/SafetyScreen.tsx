@@ -38,8 +38,8 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    fetch('/api/transcripts/config').then(r => r.json()).then(d => {
-      if (d.apiKey) setApiKey(d.apiKey);
+    fetch('/api/device/api/get_gemini_key').then(r => r.json()).then(d => {
+      if (d.key) setApiKey(d.key);
     }).catch(e => console.error("Error fetching Gemini key:", e));
 
     fetch('/api/device/api/list_media')
