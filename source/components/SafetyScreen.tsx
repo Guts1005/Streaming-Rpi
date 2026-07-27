@@ -56,6 +56,9 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
     get('safety_reports').then(data => {
       if (data) setReports(data);
     });
+
+    // Auto-load previously synced local directory
+    loadLocalDirectory(true);
   }, []);
 
   const saveReport = async (videoName: string, report: AIReport) => {
