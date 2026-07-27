@@ -76,11 +76,8 @@ def upload_to_cloud(
             if m and "_to_" not in filename:
                 start_str = m.group(1)
                 end_str = datetime.datetime.fromtimestamp(mtime).strftime("%H%M%S")
-                new_filename = filename.replace(start_str, f"{start_str}_to_{end_str}")
-                new_video_path = os.path.join(os.path.dirname(video_path), new_filename)
-                os.rename(video_path, new_video_path)
-                video_path = new_video_path
-                filename = new_filename
+                # Just update the filename variable to send to the server, do NOT rename on disk
+                filename = filename.replace(start_str, f"{start_str}_to_{end_str}")
 
         except Exception as e:
             logging.warning(f"Error renaming video file to include end time: {e}")
