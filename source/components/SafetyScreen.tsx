@@ -29,6 +29,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
   // State for the currently processing video
   const [processingVideo, setProcessingVideo] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState("");
+  const [playingHazard, setPlayingHazard] = useState<string | null>(null);
   
   // Stored reports
   const [reports, setReports] = useState<Record<string, AIReport>>({});
@@ -386,7 +387,8 @@ Output STRICTLY in this JSON format:
                       <svg style={{ width: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                       Download PPT
                     </button>
-                    <button className="btn-secondary" onClick={() => processVideo(video, isLocal?.file)}>
+                    <button className="btn-outline" onClick={() => processVideo(video, isLocal?.file)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <svg style={{ width: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                       Re-Analyze
                     </button>
                   </div>
@@ -407,8 +409,30 @@ Output STRICTLY in this JSON format:
               )}
 
               {report && (
-                <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <h4 style={{ margin: 0, fontSize: '16px', color: '#cbd5e1' }}>Detected Violations ({report.hazards.length})</h4>
+                <>
+                  <div style={{ marginTop: '24px', display: 'flex', gap: '16px' }}>
+                    <div style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ef4444' }}>
+                        {report.hazards.filter(h => h.severity === 'Critical').length}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#fca5a5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Critical</div>
+                    </div>
+                    <div style={{ flex: 1, background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>
+                        {report.hazards.filter(h => h.severity === 'Warning').length}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Warning</div>
+                    </div>
+                    <div style={{ flex: 1, background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                      <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0d9488' }}>
+                        {report.hazards.filter(h => h.severity === 'Low').length}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#5eead4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Low</div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <h4 style={{ margin: 0, fontSize: '16px', color: '#cbd5e1' }}>Detected Violations ({report.hazards.length})</h4>
                   
                   {report.hazards.length === 0 ? (
                     <div style={{ padding: '24px', background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', borderRadius: '8px', textAlign: 'center', border: '1px dashed #4ade80' }}>
@@ -418,11 +442,34 @@ Output STRICTLY in this JSON format:
                     report.hazards.map((h, idx) => (
                       <div key={idx} style={{ display: 'flex', gap: '20px', background: '#0f172a', padding: '16px', borderRadius: '12px', border: '1px solid #1e293b' }}>
                         
-                        <div style={{ width: '240px', height: '135px', background: '#000', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
-                          {h.imageBase64 ? (
-                            <img src={h.imageBase64} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ width: '240px', height: '135px', background: '#000', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                          {playingHazard === `${video}_${h.timestamp}` ? (
+                            <video 
+                              src={isLocal?.file ? URL.createObjectURL(isLocal.file) : `/api/device/data/${encodeURIComponent(video)}`} 
+                              controls autoPlay 
+                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                              onLoadedMetadata={(e) => {
+                                const v = e.target as HTMLVideoElement;
+                                const parts = h.timestamp.split(':');
+                                if (parts.length === 3) {
+                                  v.currentTime = parseInt(parts[0])*3600 + parseInt(parts[1])*60 + parseInt(parts[2]);
+                                }
+                              }}
+                            />
                           ) : (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '12px' }}>No Image</div>
+                            <>
+                              {h.imageBase64 ? (
+                                <img src={h.imageBase64} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ) : (
+                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '12px' }}>No Image</div>
+                              )}
+                              <button 
+                                onClick={() => setPlayingHazard(`${video}_${h.timestamp}`)}
+                                style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', color: '#fff' }}
+                              >
+                                <svg style={{ width: '48px', height: '48px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                              </button>
+                            </>
                           )}
                         </div>
 
@@ -446,7 +493,8 @@ Output STRICTLY in this JSON format:
                       </div>
                     ))
                   )}
-                </div>
+                  </div>
+                </>
               )}
 
             </div>
