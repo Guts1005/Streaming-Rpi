@@ -28,7 +28,16 @@ This document serves as a permanent, locally stored memory bank for the AI assis
 - **Video Capture:** `rpicam-vid` (hardware H.264, 720p 24fps) piped to `ffmpeg` for ALSA audio mixing.
 - **Cloud Backend:** Centrix (`centrix.co.in`) handles media storage. Vercel PostgreSQL handles device/beacon configuration.
 - **Single Source of Truth:** We rely on the Centrix API as the single source of truth for media counts to prevent database split-brain.
+- **Offline Resiliency**: 
+  - If the Pi is offline, the dashboard provides a "🔗 Sync Local Folder" button using the **File System Access API**.
+  - This allows users to link their PC's Downloads folder directly to the dashboard to process downloaded `.mp4` helmet videos entirely via the browser using the **Gemini File Upload API**.
 - **Updates:** `updater.sh` handles auto-pulling the latest GitHub commits on reboot if internet is available.
 
 ## 5. Removed or Reverted Features
 *(None currently - record any reverted architecture here to avoid repeating mistakes)*
+
+## 6. AI Safety Command Center
+- **Gemini Flash 1.5 Integration:** A new dashboard page (`SafetyScreen.tsx`) has been built that allows users to select a video and run it through the Gemini Flash API to detect safety violations (missing helmets, vests, lanyards, etc.).
+- **UI Architecture:** Videos are split into **Locally Synced Videos** (selected via the File System Access API or manual file picker) and **Helmet Videos** (fetched from the Pi via Cloudflare proxy).
+- **Hazard Video Player:** The player dynamically extracts timestamps from the AI report and jumps to the exact second a violation occurred.
+- **Bug Fix (Auto-Resume Loop):** To prevent local videos from auto-resuming every time the dashboard polled for a status update, the `URL.createObjectURL` generation was extracted out of the render loop and wrapped in a `useRef` cache map. This prevents React from recreating the `src` string, which stops the player's `useEffect` from resetting the timeline and triggering `.play()` unexpectedly.
