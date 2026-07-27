@@ -9,6 +9,7 @@ import CustomersScreen from '../components/mdm/CustomersScreen';
 import SitesScreen from '../components/mdm/SitesScreen';
 import DevicesScreen from '../components/mdm/DevicesScreen';
 import TranscriptsScreen from '../components/TranscriptsScreen';
+import SafetyScreen from '../components/SafetyScreen';
 
 type TokenResponse = { token?: string; error?: string };
 
@@ -881,7 +882,7 @@ function Dashboard() {
           <button className="nav-item" style={{ display: 'none' }} onClick={() => toast("Feature coming soon")}>
             <SvgIcon path="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> Face Detection
           </button>
-          <button className="nav-item" onClick={() => toast("Feature coming soon")}>
+          <button className={`nav-item ${activeTab === 'safety-alerts' ? 'active' : ''}`} onClick={() => setActiveTab('safety-alerts')}>
             <SvgIcon path="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /> Safety Alerts
           </button>
 
@@ -1059,6 +1060,12 @@ function Dashboard() {
         {activeTab === 'video-text' && (
           <div style={{ padding: '24px' }}>
             <TranscriptsScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
+          </div>
+        )}
+
+        {activeTab === 'safety-alerts' && (
+          <div style={{ padding: '24px' }}>
+            <SafetyScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
           </div>
         )}
 
