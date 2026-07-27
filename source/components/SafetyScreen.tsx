@@ -233,7 +233,7 @@ Output STRICTLY in this JSON format:
   ]
 }`;
 
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`;
       const aiRes = await fetch(geminiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -244,7 +244,15 @@ Output STRICTLY in this JSON format:
       });
       
       const aiData = await aiRes.json();
-      if (!aiData.candidates || aiData.candidates.length === 0) throw new Error("No response from AI");
+      if (aiData.error) {
+        throw new Error(`Gemini API Error: ${aiData.error.message || JSON.stringify(aiData.error)}`);
+      }
+      if (aiData.promptFeedback && aiData.promptFeedback.blockReason) {
+        throw new Error(`Safety block by Gemini: ${aiData.promptFeedback.blockReason}`);
+      }
+      if (!aiData.candidates || aiData.candidates.length === 0) {
+        throw new Error(`No response from AI: ${JSON.stringify(aiData)}`);
+      }
       const aiText = aiData.candidates[0].content.parts[0].text;
       
       let parsed: AIReport;
