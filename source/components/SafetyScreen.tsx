@@ -73,8 +73,16 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
       if (silent) {
         handle = await get('downloads_dir_handle');
         if (handle) {
-          const perm = await (handle as any).queryPermission({ mode: 'read' });
-          if (perm !== 'granted') return;
+          let perm = await (handle as any).queryPermission({ mode: 'read' });
+          if (perm === 'prompt') {
+            // Only prompt if they try to click a video or we explicitly need it. 
+            // Wait, since this runs on mount, we shouldn't spam the user with a prompt.
+            // But if it's silently returning, the videos disappear!
+            // Let's just return if it's not granted. They must click the Sync button again.
+            if (perm !== 'granted') return;
+          } else if (perm !== 'granted') {
+            return;
+          }
         } else {
           return;
         }
