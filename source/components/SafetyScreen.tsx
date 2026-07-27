@@ -57,6 +57,9 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
   // Stored reports
   const [reports, setReports] = useState<Record<string, AIReport>>({});
 
+  // Cache for local video Object URLs to prevent re-renders from recreating them
+  const localUrlsRef = useRef<Record<string, string>>({});
+
   // Hidden video ref for frame extraction
   const hiddenVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -373,6 +376,17 @@ Output STRICTLY in this JSON format:
     const isProcessing = processingVideo === video;
     const report = reports[video];
 
+    // Memoize the URL creation so React re-renders don't generate new strings and trigger video auto-play resets
+    const getVideoSrc = () => {
+      if (isLocal?.file) {
+        if (!localUrlsRef.current[isLocal.name]) {
+          localUrlsRef.current[isLocal.name] = URL.createObjectURL(isLocal.file);
+        }
+        return localUrlsRef.current[isLocal.name];
+      }
+      return `/api/device/data/${encodeURIComponent(video)}`;
+    };
+
     return (
       <div key={video} className="card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -464,7 +478,7 @@ Output STRICTLY in this JSON format:
                     <div style={{ width: '240px', height: '135px', background: '#000', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
                       {playingHazard === `${video}_${h.timestamp}` ? (
                         <HazardVideoPlayer 
-                          src={isLocal?.file ? URL.createObjectURL(isLocal.file) : `/api/device/data/${encodeURIComponent(video)}`} 
+                          src={getVideoSrc()} 
                           timestamp={h.timestamp}
                         />
                       ) : (
