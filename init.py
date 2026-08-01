@@ -1203,8 +1203,11 @@ def rename_batch():
 @app.route('/api/list_media')
 def list_media():
     v = glob.glob(os.path.join(RECORD_FOLDER, "video_*.mp4"))
+    v += glob.glob(os.path.join(RECORD_FOLDER, "site_*_video_*.mp4"))
     v += glob.glob(os.path.join(RECORD_FOLDER, "failed_upload_*.mp4"))
+    v += glob.glob(os.path.join(RECORD_FOLDER, "site_*_failed_upload_*.mp4"))
     v += glob.glob(os.path.join(RECORD_FOLDER, "uploaded_*.mp4"))
+    v += glob.glob(os.path.join(RECORD_FOLDER, "site_*_uploaded_*.mp4"))
     temp = glob.glob(os.path.join(RECORD_FOLDER, "temp_*.h264"))
     incomplete = glob.glob(os.path.join(RECORD_FOLDER, "incomplete_*.h264"))
     i = glob.glob(os.path.join(RECORD_FOLDER, "img_*.jpg"))
@@ -1652,7 +1655,9 @@ def sync_offline():
         try:
             # Find all offline video files
             v = glob.glob(os.path.join(RECORD_FOLDER, "video_*.mp4"))
+            v += glob.glob(os.path.join(RECORD_FOLDER, "site_*_video_*.mp4"))
             v += glob.glob(os.path.join(RECORD_FOLDER, "failed_upload_*.mp4"))
+            v += glob.glob(os.path.join(RECORD_FOLDER, "site_*_failed_upload_*.mp4"))
             # We don't want chunks
             v = [f for f in v if "_chunk" not in os.path.basename(f)]
             
