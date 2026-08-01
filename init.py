@@ -1383,21 +1383,21 @@ def _gps_payload_from_video(filename):
             except:
                 continue
 
+        # Try to find a site_id in any of the RAW points (since lat/lon might be 0.0 for indoor beacons)
+        site_id = None
+        for p in pts:
+            if p.get("site_id"):
+                site_id = str(p.get("site_id"))
+                break
+
         if not valid_pts:
-            return raw, None, None, None
+            return raw, None, None, site_id
 
         start = valid_pts[0]
         end = valid_pts[-1]
         start_location = f"{start.get('lat', 0)},{start.get('lon', 0)}"
         stop_location = f"{end.get('lat', 0)},{end.get('lon', 0)}"
         
-        # Try to find a site_id in any of the points
-        site_id = None
-        for p in valid_pts:
-            if p.get("site_id"):
-                site_id = p.get("site_id")
-                break
-                
         return raw, start_location, stop_location, site_id
     except:
         return None, None, None, None
