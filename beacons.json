@@ -4,5 +4,11 @@
     "lon": 73.5678,
     "name": "Test Zone Alpha",
     "site_id": "1"
+  },
+  "E1:5A:A1:D3:CD:7B": {
+    "lat": 0.0,
+    "lon": 0.0,
+    "name": "CNS Router",
+    "site_id": "1"
   }
 }
