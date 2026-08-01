@@ -11,7 +11,7 @@ function SvgIcon({ path, className, style }: { path: string, className?: string,
   );
 }
 
-export default function DeviceConfigModal({ onClose, sites = [] }: { onClose: () => void, sites?: any[] }) {
+export default function DeviceConfigModal({ onClose, sites = [], masterBeacons = [] }: { onClose: () => void, sites?: any[], masterBeacons?: any[] }) {
   const [activeTab, setActiveTab] = useState<'wifi' | 'bluetooth' | 'hotspot' | 'beacons'>('wifi');
   const [msg, setMsg] = useState("");
 
@@ -69,7 +69,7 @@ export default function DeviceConfigModal({ onClose, sites = [] }: { onClose: ()
           {activeTab === 'wifi' && <WifiSetup toast={toast} />}
           {activeTab === 'bluetooth' && <BluetoothSetup toast={toast} />}
           {activeTab === 'hotspot' && <HotspotSetup toast={toast} />}
-          {activeTab === 'beacons' && <BeaconSetup toast={toast} sites={sites} />}
+          {activeTab === 'beacons' && <BeaconSetup toast={toast} sites={sites} masterBeacons={masterBeacons} />}
         </div>
 
         {msg && <div style={{
@@ -320,12 +320,15 @@ function HotspotSetup({ toast }: { toast: (msg: string) => void }) {
   );
 }
 
-function BeaconRow({ dev, config, updateLocation, sites }: { dev: any, config: any, updateLocation: (mac: string, name: string, siteId: string, lat: string, lon: string) => void, sites: any[] }) {
-  const isConfigured = config[dev.mac];
-  const [roomName, setRoomName] = useState(isConfigured ? isConfigured.name : "");
-  const [siteId, setSiteId] = useState(isConfigured && isConfigured.site_id ? isConfigured.site_id : "");
-  const [lat, setLat] = useState(isConfigured ? isConfigured.lat : "");
-  const [lon, setLon] = useState(isConfigured ? isConfigured.lon : "");
+function BeaconRow({ dev, config, updateLocation, sites, masterBeacons }: { dev: any, config: any, updateLocation: (mac: string, name: string, siteId: string, lat: string, lon: string) => void, sites: any[], masterBeacons: any[] }) {
+  const cloudData = masterBeacons.find((b: any) => b.beacon_mac === dev.mac);
+  const localConfig = config[dev.mac];
+  const isConfigured = !!cloudData || !!localConfig;
+
+  const [roomName, setRoomName] = useState(cloudData ? cloudData.location_name : (localConfig ? localConfig.name : ""));
+  const [siteId, setSiteId] = useState(cloudData && cloudData.site_id ? cloudData.site_id.toString() : (localConfig && localConfig.site_id ? localConfig.site_id : ""));
+  const [lat, setLat] = useState(cloudData ? cloudData.lat : (localConfig ? localConfig.lat : ""));
+  const [lon, setLon] = useState(cloudData ? cloudData.lon : (localConfig ? localConfig.lon : ""));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#0f172a', padding: '12px', borderRadius: '8px', border: '1px solid #334155' }}>
@@ -351,7 +354,7 @@ function BeaconRow({ dev, config, updateLocation, sites }: { dev: any, config: a
   );
 }
 
-function BeaconSetup({ toast, sites }: { toast: (msg: string) => void, sites: any[] }) {
+function BeaconSetup({ toast, sites, masterBeacons = [] }: { toast: (msg: string) => void, sites: any[], masterBeacons?: any[] }) {
   const [devices, setDevices] = useState<{name: string, mac: string, rssi: number}[]>([]);
   const [scanning, setScanning] = useState(false);
   const [config, setConfig] = useState<Record<string, any>>({});
@@ -419,7 +422,7 @@ function BeaconSetup({ toast, sites }: { toast: (msg: string) => void, sites: an
         {devices.length === 0 && !scanning && (
           <div style={{ textAlign: 'center', color: '#64748b', padding: '20px' }}>No beacons found nearby.</div>
         )}
-        {devices.map(d => <BeaconRow key={d.mac} dev={d} config={config} updateLocation={updateLocation} sites={sites} />)}
+        {devices.map(d => <BeaconRow key={d.mac} dev={d} config={config} updateLocation={updateLocation} sites={sites} masterBeacons={masterBeacons} />)}
       </div>
     </div>
   );

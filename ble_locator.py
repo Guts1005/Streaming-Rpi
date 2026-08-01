@@ -10,7 +10,7 @@ from bleak import BleakScanner
 # --- Configuration ---
 BEACONS_FILE = os.path.join(os.path.dirname(__file__), "beacons.json")
 BACKEND_URL = "http://localhost:5000/api/update_gps"
-CLOUD_LOGS_URL = "https://helmet-live-viewer.vercel.app/api/beacons/logs"
+CLOUD_LOGS_URL = "https://aspire-vision.co.in/api/beacons/logs"
 BACKEND_URL = "http://localhost:5000/api/update_gps"
 SCAN_ACTIVE_SEC = 2.5
 SCAN_SLEEP_SEC = 2.5

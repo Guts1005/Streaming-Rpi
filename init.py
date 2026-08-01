@@ -301,6 +301,68 @@ def _find_existing_gps_json_for_video(filename):
             return p
     return None
 
+def finalize_local_media_name(filename, site_id):
+    import re
+    # If already finalized, skip
+    if filename.startswith("site_") or "_to_" in filename:
+        return filename
+
+    # Calculate end time from file modification
+    video_path = os.path.join(RECORD_FOLDER, filename)
+    if not os.path.exists(video_path):
+        return filename
+
+    try:
+        mtime = os.path.getmtime(video_path)
+        end_str = datetime.datetime.fromtimestamp(mtime).strftime("%H%M%S")
+    except Exception:
+        end_str = "000000"
+
+    # Extract start time
+    m = re.search(r"(\d{8}_\d{6})", filename)
+    if not m:
+        return filename
+    start_str = m.group(1)
+    
+    new_filename = filename.replace(start_str, f"{start_str}_to_{end_str}")
+    if site_id:
+        new_filename = f"site_{site_id}_{new_filename}"
+        
+    new_video_path = os.path.join(RECORD_FOLDER, new_filename)
+    
+    # Rename the video
+    try:
+        os.rename(video_path, new_video_path)
+    except Exception as e:
+        logging.error(f"Error renaming video: {e}")
+        return filename
+
+    # Find and rename the matching json
+    json_path = _find_existing_gps_json_for_video(filename)
+    if json_path and os.path.exists(json_path):
+        base_json = os.path.basename(json_path)
+        new_json_name = base_json.replace(start_str, f"{start_str}_to_{end_str}")
+        if site_id:
+            new_json_name = f"site_{site_id}_{new_json_name}"
+        try:
+            os.rename(json_path, os.path.join(RECORD_FOLDER, new_json_name))
+        except Exception as e:
+            logging.error(f"Error renaming json: {e}")
+
+    # Same for CSV
+    csv_path = _find_existing_gps_json_for_video(filename).replace('.json', '.csv') if _find_existing_gps_json_for_video(filename) else None
+    if csv_path and os.path.exists(csv_path):
+        base_csv = os.path.basename(csv_path)
+        new_csv_name = base_csv.replace(start_str, f"{start_str}_to_{end_str}")
+        if site_id:
+            new_csv_name = f"site_{site_id}_{new_csv_name}"
+        try:
+            os.rename(csv_path, os.path.join(RECORD_FOLDER, new_csv_name))
+        except Exception:
+            pass
+
+    return new_filename
+
 def recover_orphaned_files():
     orphaned = glob.glob(os.path.join(RECORD_FOLDER, "temp_*.h264"))
     if not orphaned:
@@ -1290,9 +1352,17 @@ def api_upload_cloud():
         if gps_json_string is None:
             gps_json_string = ""
 
+        final_filename = finalize_local_media_name(filename, site_id)
+        final_video_path = os.path.join(RECORD_FOLDER, final_filename)
+
+        with upload_status_lock:
+            # Update the status key if the name changed
+            if final_filename != filename:
+                upload_status[final_filename] = upload_status.pop(filename, {"status": "uploading", "message": "Uploading..."})
+
         def upload_thread():
             success, message = upload_to_cloud(
-                video_path=video_path,
+                video_path=final_video_path,
                 device_id=DEVICE_ID,
                 start_location=start_location,
                 stop_location=stop_location,
@@ -1302,14 +1372,14 @@ def api_upload_cloud():
 
             with upload_status_lock:
                 if success:
-                    upload_status[filename] = {"status": "success", "message": message}
+                    upload_status[final_filename] = {"status": "success", "message": message}
                     try:
-                        uploaded_name = filename.replace('video_', 'uploaded_')
+                        uploaded_name = final_filename.replace('video_', 'uploaded_')
                         new_path = os.path.join(RECORD_FOLDER, uploaded_name)
-                        if os.path.exists(video_path):
-                            os.rename(video_path, new_path)
+                        if os.path.exists(final_video_path):
+                            os.rename(final_video_path, new_path)
 
-                        json_path = _find_existing_gps_json_for_video(filename)
+                        json_path = _find_existing_gps_json_for_video(final_filename)
                         if json_path and os.path.exists(json_path):
                             base = os.path.basename(json_path)
                             uploaded_json = base.replace('gps_', 'uploaded_gps_')
@@ -1317,16 +1387,16 @@ def api_upload_cloud():
                     except Exception as e:
                         logging.error(f"[UPLOAD] Rename failed: {e}")
 
-                    threading.Timer(3.0, lambda: upload_status.pop(filename, None)).start()
+                    threading.Timer(3.0, lambda: upload_status.pop(final_filename, None)).start()
                 else:
-                    upload_status[filename] = {"status": "failed", "message": message}
+                    upload_status[final_filename] = {"status": "failed", "message": message}
                     try:
-                        failed_name = filename.replace('video_', 'failed_upload_')
+                        failed_name = final_filename.replace('video_', 'failed_upload_')
                         new_path = os.path.join(RECORD_FOLDER, failed_name)
-                        if os.path.exists(video_path):
-                            os.rename(video_path, new_path)
+                        if os.path.exists(final_video_path):
+                            os.rename(final_video_path, new_path)
 
-                        json_path = _find_existing_gps_json_for_video(filename)
+                        json_path = _find_existing_gps_json_for_video(final_filename)
                         if json_path and os.path.exists(json_path):
                             base = os.path.basename(json_path)
                             failed_json = base.replace('gps_', 'failed_upload_gps_')
@@ -1437,8 +1507,15 @@ def batch_upload():
                 if gps_json_string is None:
                     gps_json_string = ""
 
+                final_chunk_name = finalize_local_media_name(chunk_name, site_id)
+                final_chunk_path = os.path.join(RECORD_FOLDER, final_chunk_name)
+
+                with upload_status_lock:
+                    if final_chunk_name != chunk_name:
+                        upload_status[final_chunk_name] = upload_status.pop(chunk_name, {"status": "uploading", "message": "Uploading..."})
+
                 success, message = upload_to_cloud(
-                    video_path=chunk_path,
+                    video_path=final_chunk_path,
                     device_id=DEVICE_ID,
                     start_location=start_location,
                     stop_location=stop_location,
@@ -1448,35 +1525,35 @@ def batch_upload():
 
                 with upload_status_lock:
                     if success:
-                        upload_status[chunk_name] = {"status": "success", "message": message}
+                        upload_status[final_chunk_name] = {"status": "success", "message": message}
                         try:
-                            uploaded_name = chunk_name.replace('video_', 'uploaded_')
+                            uploaded_name = final_chunk_name.replace('video_', 'uploaded_')
                             new_path = os.path.join(RECORD_FOLDER, uploaded_name)
-                            if os.path.exists(chunk_path):
-                                os.rename(chunk_path, new_path)
+                            if os.path.exists(final_chunk_path):
+                                os.rename(final_chunk_path, new_path)
 
-                            json_path = _find_existing_gps_json_for_video(chunk_name)
+                            json_path = _find_existing_gps_json_for_video(final_chunk_name)
                             if json_path and os.path.exists(json_path):
                                 basej = os.path.basename(json_path)
                                 uploaded_json = basej.replace('gps_', 'uploaded_gps_')
                                 os.rename(json_path, os.path.join(RECORD_FOLDER, uploaded_json))
                         except Exception as e:
-                            logging.error(f"[BATCH] Rename failed: {e}")
+                            logging.error(f"[BATCH UPLOAD] Rename failed: {e}")
                     else:
-                        upload_status[chunk_name] = {"status": "failed", "message": message}
+                        upload_status[final_chunk_name] = {"status": "failed", "message": message}
                         try:
-                            failed_name = chunk_name.replace('video_', 'failed_upload_')
+                            failed_name = final_chunk_name.replace('video_', 'failed_upload_')
                             new_path = os.path.join(RECORD_FOLDER, failed_name)
-                            if os.path.exists(chunk_path):
-                                os.rename(chunk_path, new_path)
+                            if os.path.exists(final_chunk_path):
+                                os.rename(final_chunk_path, new_path)
 
-                            json_path = _find_existing_gps_json_for_video(chunk_name)
+                            json_path = _find_existing_gps_json_for_video(final_chunk_name)
                             if json_path and os.path.exists(json_path):
                                 basej = os.path.basename(json_path)
                                 failed_json = basej.replace('gps_', 'failed_upload_gps_')
                                 os.rename(json_path, os.path.join(RECORD_FOLDER, failed_json))
                         except Exception as e:
-                            logging.error(f"[BATCH] Rename failed: {e}")
+                            logging.error(f"[BATCH UPLOAD] Rename failed: {e}")
 
                 time.sleep(1)
 
@@ -1488,6 +1565,95 @@ def batch_upload():
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+sync_offline_lock = threading.Lock()
+is_syncing_offline = False
+
+@app.route('/api/sync_offline', methods=['POST'])
+def sync_offline():
+    global is_syncing_offline
+    with sync_offline_lock:
+        if is_syncing_offline:
+            return jsonify({"success": True, "message": "Already syncing"})
+        is_syncing_offline = True
+
+    def sync_thread():
+        global is_syncing_offline
+        try:
+            # Find all offline video files
+            v = glob.glob(os.path.join(RECORD_FOLDER, "video_*.mp4"))
+            v += glob.glob(os.path.join(RECORD_FOLDER, "failed_upload_*.mp4"))
+            # We don't want chunks
+            v = [f for f in v if "_chunk" not in os.path.basename(f)]
+            
+            for video_path in sorted(v):
+                filename = os.path.basename(video_path)
+                gps_json_string, start_location, stop_location, site_id = _gps_payload_from_video(filename)
+                if gps_json_string is None:
+                    gps_json_string = ""
+
+                final_filename = finalize_local_media_name(filename, site_id)
+                final_video_path = os.path.join(RECORD_FOLDER, final_filename)
+
+                with upload_status_lock:
+                    upload_status[final_filename] = {"status": "uploading", "message": "Uploading..."}
+
+                success, message = upload_to_cloud(
+                    video_path=final_video_path,
+                    device_id=DEVICE_ID,
+                    start_location=start_location,
+                    stop_location=stop_location,
+                    location_json_string=gps_json_string,
+                    site_id=site_id
+                )
+
+                with upload_status_lock:
+                    if success:
+                        upload_status[final_filename] = {"status": "success", "message": message}
+                        try:
+                            uploaded_name = final_filename.replace('video_', 'uploaded_').replace('failed_upload_', 'uploaded_')
+                            new_path = os.path.join(RECORD_FOLDER, uploaded_name)
+                            if os.path.exists(final_video_path):
+                                os.rename(final_video_path, new_path)
+
+                            json_path = _find_existing_gps_json_for_video(final_filename)
+                            if json_path and os.path.exists(json_path):
+                                basej = os.path.basename(json_path)
+                                uploaded_json = basej.replace('gps_', 'uploaded_gps_').replace('failed_upload_gps_', 'uploaded_gps_')
+                                os.rename(json_path, os.path.join(RECORD_FOLDER, uploaded_json))
+                        except Exception as e:
+                            logging.error(f"[SYNC] Rename failed: {e}")
+                        threading.Timer(3.0, lambda: upload_status.pop(final_filename, None)).start()
+                    else:
+                        upload_status[final_filename] = {"status": "failed", "message": message}
+                        try:
+                            if 'failed_upload_' not in final_filename:
+                                failed_name = final_filename.replace('video_', 'failed_upload_')
+                                new_path = os.path.join(RECORD_FOLDER, failed_name)
+                                if os.path.exists(final_video_path):
+                                    os.rename(final_video_path, new_path)
+
+                                json_path = _find_existing_gps_json_for_video(final_filename)
+                                if json_path and os.path.exists(json_path):
+                                    basej = os.path.basename(json_path)
+                                    failed_json = basej.replace('gps_', 'failed_upload_gps_')
+                                    os.rename(json_path, os.path.join(RECORD_FOLDER, failed_json))
+                        except Exception as e:
+                            logging.error(f"[SYNC] Rename failed: {e}")
+
+                time.sleep(2) # Breathe between uploads
+
+        except Exception as e:
+            logging.error(f"Sync thread error: {e}")
+        finally:
+            with sync_offline_lock:
+                is_syncing_offline = False
+
+    t = threading.Thread(target=sync_thread)
+    t.daemon = True
+    t.start()
+    return jsonify({"success": True, "message": "Sync started"})
+
 
 @app.route('/api/download/<filename>')
 def download(filename):

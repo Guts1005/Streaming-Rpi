@@ -78,16 +78,10 @@ def capture_photo_api():
 def sync_pending():
     if not internet_available() or get_is_recording():
         return
-    for path in sorted(glob.glob(os.path.join(RECORD_DIR, "video_*.mp4")) + glob.glob(os.path.join(RECORD_DIR, "img_*.jpg"))):
-        name = os.path.basename(path)
-        if name.startswith("img_"):
-            ok, msg = upload_image_to_cloud(image_path=path, device_id=DEVICE_ID)
-            prefix = "uploaded_img_" if ok else "failed_upload_img_"
-        else:
-            ok, msg = upload_to_cloud(video_path=path, device_id=DEVICE_ID)
-            prefix = "uploaded_" if ok else "failed_upload_"
-        logging.info("[SYNC] %s: %s", name, msg)
-        os.rename(path, os.path.join(RECORD_DIR, prefix + name.split("_", 1)[1]))
+    try:
+        requests.post("http://127.0.0.1:5001/api/sync_offline", timeout=10)
+    except Exception as e:
+        logging.error(f"[SYNC] Failed to trigger sync_offline API: {e}")
 
 
 def main():

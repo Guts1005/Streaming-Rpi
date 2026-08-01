@@ -10,6 +10,9 @@ import SitesScreen from '../components/mdm/SitesScreen';
 import DevicesScreen from '../components/mdm/DevicesScreen';
 import TranscriptsScreen from '../components/TranscriptsScreen';
 import SafetyScreen from '../components/SafetyScreen';
+import BeaconLocationsScreen from '../components/BeaconLocationsScreen';
+import BeaconTimeline from '../components/BeaconTimeline';
+import { parseVideoStartTime } from '../lib/beaconUtils';
 
 type TokenResponse = { token?: string; error?: string };
 
@@ -87,6 +90,7 @@ function Dashboard() {
   const [activeSiteId, setActiveSiteId] = useState<string | null>(null);
   const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null);
   const [beaconsList, setBeaconsList] = useState<any[]>([]);
+  const [beaconLogs, setBeaconLogs] = useState<any[]>([]);
   
   const router = useRouter();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
@@ -298,6 +302,25 @@ function Dashboard() {
   }, [activeSiteId]);
 
   useEffect(() => {
+    if (!activeDeviceId || !activeSiteId) {
+      setBeaconLogs([]);
+      return;
+    }
+    const fetchBeaconLogs = async () => {
+      try {
+        const res = await fetch(`/api/beacons/logs?r_pi_id=${activeDeviceId}&site_id=${activeSiteId}`);
+        const data = await res.json();
+        if (data.success) {
+          setBeaconLogs(data.data);
+        }
+      } catch (e) {
+        console.error('Failed to fetch beacon logs:', e);
+      }
+    };
+    fetchBeaconLogs();
+  }, [activeDeviceId, activeSiteId]);
+
+  useEffect(() => {
     let player: any = null;
     let isMounted = true;
     let reconnectTimeout: any = null;
@@ -470,7 +493,9 @@ function Dashboard() {
 
         // WebSockets cannot be proxied through standard Next.js App Router API routes.
         // We MUST connect directly to the device's ngrok/tailscale URL if available.
-        const deviceBase = (currentUser?.all_devices || []).find((d: any) => d.id?.toString() === activeDeviceId)?.api_base_url;
+        const deviceBase = (currentUser?.all_devices || []).find((d: any) => 
+          d.id?.toString() === activeDeviceId || d.device_id === activeDeviceId
+        )?.api_base_url;
         const base = deviceBase || process.env.NEXT_PUBLIC_DEVICE_API_BASE;
         
         if (!base) {
@@ -812,11 +837,13 @@ function Dashboard() {
                 <option value="" disabled>
                   {!activeSiteId ? 'Select Project First' : (((currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).length === 0) ? 'No devices assigned' : 'Select Device')}
                 </option>
-                {(currentUser?.all_devices || []).filter((d: any) => d.site_id?.toString() === activeSiteId).map((device: any) => (
-                  <option key={device.id} value={device.id.toString()}>
-                    {device.device_name || `Device ${device.id}`}
-                  </option>
-                ))}
+                {(currentUser?.all_devices || [])
+                  .filter((d: any) => d.site_id?.toString() === activeSiteId)
+                  .map((device: any) => (
+                    <option key={device.id} value={device.id.toString()}>
+                      {device.device_name}
+                    </option>
+                  ))}
                 <option disabled>--------------------</option>
                 <option value="pair">+ Pair New Helmet</option>
               </select>
@@ -877,13 +904,13 @@ function Dashboard() {
             <SvgIcon path="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" /> Video to Text
           </button>
           <button className="nav-item" style={{ display: 'none' }} onClick={() => toast("Feature coming soon")}>
-            <SvgIcon path="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /> Object Detection
-          </button>
-          <button className="nav-item" style={{ display: 'none' }} onClick={() => toast("Feature coming soon")}>
             <SvgIcon path="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /> Face Detection
           </button>
           <button className={`nav-item ${activeTab === 'safety-alerts' ? 'active' : ''}`} onClick={() => setActiveTab('safety-alerts')}>
             <SvgIcon path="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /> Safety Alerts
+          </button>
+          <button className={`nav-item ${activeTab === 'beacon-locations' ? 'active' : ''}`} onClick={() => setActiveTab('beacon-locations')}>
+            <SvgIcon path="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /> Beacon Locations
           </button>
 
           <div className="nav-group-title">PROGRESS ANALYSIS</div>
@@ -1066,6 +1093,22 @@ function Dashboard() {
         {activeTab === 'safety-alerts' && (
           <div style={{ padding: '24px' }}>
             <SafetyScreen currentUser={currentUser} onClose={() => setActiveTab('live')} />
+          </div>
+        )}
+
+        {activeTab === 'beacon-locations' && (
+          <div style={{ padding: '24px' }}>
+            <BeaconLocationsScreen 
+              masterBeacons={beaconsList} 
+              beaconLogs={beaconLogs} 
+              mediaFiles={desktopRecordings} 
+              onPlayVideo={(media) => {
+                setSelectedMedia(media);
+                setVideoError(false);
+                setGalleryMode('desktop');
+                setShowGallery(true);
+              }}
+            />
           </div>
         )}
 
@@ -1382,6 +1425,22 @@ function Dashboard() {
                 <img src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name}`} style={{maxWidth: '100%', maxHeight: '65vh', borderRadius: 'var(--radius-sm)'}} alt="Captured" />
               </div>
             )}
+            
+            {selectedMedia?.name?.endsWith('.mp4') && (
+              <BeaconTimeline 
+                videoName={selectedMedia.name || ''}
+                videoStartMs={parseVideoStartTime(selectedMedia.name) || null}
+                videoDurationMs={120000} // Fallback to 2 minutes
+                logs={beaconLogs}
+                masterBeacons={beaconsList}
+                onSeek={(sec: number) => {
+                  const vid = document.querySelector('.modal-content video') as HTMLVideoElement;
+                  if (vid) vid.currentTime = sec;
+                }}
+                isLive={false}
+              />
+            )}
+
             <div style={{marginTop: '14px', display: 'flex', justifyContent: 'flex-end'}}>
               <a href={selectedMedia.isLocal ? selectedMedia.url : `/api/device/download/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}`} target="_blank" rel="noopener noreferrer" className="download-link" download={selectedMedia.isLocal ? selectedMedia.name : undefined}>
                 <SvgIcon path="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1432,7 +1491,7 @@ function Dashboard() {
         </div>
       )}
 
-      {showDeviceConfigModal && <DeviceConfigModal onClose={() => setShowDeviceConfigModal(false)} sites={currentUser?.sites || []} />}
+      {showDeviceConfigModal && <DeviceConfigModal onClose={() => setShowDeviceConfigModal(false)} sites={currentUser?.sites || []} masterBeacons={beaconsList} />}
       
       {showPairModal && (
         <div className="modal-backdrop" onClick={() => setShowPairModal(false)}>

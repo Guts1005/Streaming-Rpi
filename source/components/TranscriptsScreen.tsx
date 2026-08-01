@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { get, set } from 'idb-keyval';
+import BeaconTimeline from './BeaconTimeline';
+import { BeaconLog, BeaconMaster, parseVideoStartTime } from '../lib/beaconUtils';
 
 // NOTE: This relies on the Google Generative AI REST API to avoid requiring the SDK in the browser bundle
 // which could cause webpack issues or expose too much. 
+// Added persistent video player for beacon timeline interactivity.
 
 type TranscriptsScreenProps = {
   currentUser: any;
@@ -10,11 +13,23 @@ type TranscriptsScreenProps = {
 };
 
 // --- Child Component for Individual Transcripts ---
-function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscript, globalStatus }: { video: string, localFile?: File, initialData: any, apiKey: string, generateTranscript: (v: string, f?: File) => void, globalStatus: string }) {
+function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscript, globalStatus, logs, masterBeacons }: { video: string, localFile?: File, initialData: any, apiKey: string, generateTranscript: (v: string, f?: File) => void, globalStatus: string, logs: BeaconLog[], masterBeacons: BeaconMaster[] }) {
   const [displayData, setDisplayData] = useState(initialData);
   const [targetLang, setTargetLang] = useState('English');
   const [isTranslating, setIsTranslating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+
+  const videoStartTime = parseVideoStartTime(video);
+
+  const handleSeek = (seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = seconds;
+      videoRef.current.play().catch(e => console.log('Autoplay prevented', e));
+    }
+  };
 
   // Update display data if initialData changes (e.g. freshly generated)
   useEffect(() => {
@@ -177,6 +192,28 @@ function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscr
           </button>
         )}
       </div>
+      
+      {/* Persistent Video Player with Beacon Timeline */}
+      <div style={{ marginTop: '16px', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
+        <video 
+          ref={videoRef}
+          src={localFile ? URL.createObjectURL(localFile) : `/api/device/data/${encodeURIComponent(video)}`} 
+          controls 
+          style={{ width: '100%', maxHeight: '400px', display: 'block' }} 
+          onLoadedMetadata={() => {
+            if (videoRef.current) setVideoDuration(videoRef.current.duration * 1000);
+          }}
+        />
+      </div>
+
+      <BeaconTimeline 
+        videoName={video}
+        videoStartMs={videoStartTime}
+        videoDurationMs={videoDuration}
+        logs={logs}
+        masterBeacons={masterBeacons}
+        onSeek={handleSeek}
+      />
 
       {initialData && currentData && (
         <div style={{ marginTop: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -267,12 +304,34 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   const [status, setStatus] = useState('');
   const [apiKey, setApiKey] = useState('');
   const [transcripts, setTranscripts] = useState<Record<string, any>>({});
+  
+  const [beaconLogs, setBeaconLogs] = useState<BeaconLog[]>([]);
+  const [masterBeacons, setMasterBeacons] = useState<BeaconMaster[]>([]);
 
   useEffect(() => {
     fetchVideos();
     fetchApiKey();
     loadLocalDirectory(true); // Attempt silent restore from IndexedDB
+    fetchBeaconData();
   }, []);
+
+  const fetchBeaconData = async () => {
+    try {
+      // 1. Fetch master beacons for site
+      const mRes = await fetch(`/api/beacons/master?site_id=${currentUser.site_id || 1}`);
+      const mData = await mRes.json();
+      if (mData.success) setMasterBeacons(mData.data);
+
+      // 2. Fetch logs for device (batch fetch everything for now, can be optimized later with start/end if needed)
+      // activeDeviceId is needed here, assuming currentUser.r_pi_id or from localStorage
+      const activeDeviceId = localStorage.getItem('activeDeviceId') || currentUser.device_id || currentUser.site_id || '1';
+      const lRes = await fetch(`/api/beacons/logs?r_pi_id=${activeDeviceId}&site_id=${currentUser.site_id || 1}`);
+      const lData = await lRes.json();
+      if (lData.success) setBeaconLogs(lData.data);
+    } catch (e) {
+      console.error("Failed to load beacon data:", e);
+    }
+  };
 
   const fetchVideos = async () => {
     setLoading(true);
@@ -350,7 +409,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
 
       if (!handle) return;
       const foundFiles: {name: string, file: File}[] = [];
-      const regex = /^(video|uploaded|failed_upload)_.*\.mp4$/i;
+      const regex = /\.mp4$/i;
       
       for await (const entry of (handle as any).values()) {
         if (entry.kind === 'file' && regex.test(entry.name)) {
@@ -366,7 +425,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
 
   const handleManualFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const valid = files.filter(f => /^(video|uploaded|failed_upload)_.*\.mp4$/i.test(f.name));
+    const valid = files.filter(f => /\.mp4$/i.test(f.name));
     setLocalVideos(prev => {
       const combined = [...prev, ...valid.map(f => ({name: f.name, file: f}))];
       // deduplicate
@@ -553,36 +612,38 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
           </div>
         )}
         
-        {/* Local Sync Videos */}
         {localVideos.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-            <h3 style={{ color: '#4ade80', margin: '0 0 10px 0', fontSize: '1.1rem' }}>💻 Locally Synced Videos</h3>
-            {localVideos.map((lv) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ color: '#4ade80', margin: '0 0 -10px 0', fontSize: '1.1rem' }}>💻 Locally Synced Videos</h3>
+            {localVideos.map(lv => (
               <TranscriptItem 
-                key={`local-${lv.name}`} 
-                video={lv.name}
+                key={lv.name} 
+                video={lv.name} 
                 localFile={lv.file}
-                initialData={transcripts[lv.name]}
+                initialData={transcripts[lv.name]} 
                 apiKey={apiKey}
                 generateTranscript={generateTranscript}
                 globalStatus={status}
+                logs={beaconLogs}
+                masterBeacons={masterBeacons}
               />
             ))}
           </div>
         )}
 
-        {/* Helmet Videos */}
         {videos.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            <h3 style={{ color: '#60a5fa', margin: '0 0 10px 0', fontSize: '1.1rem' }}>🎥 Helmet Videos</h3>
-            {videos.map((v) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ color: '#60a5fa', margin: '0 0 -10px 0', fontSize: '1.1rem' }}>🎥 Helmet Videos</h3>
+            {videos.map(v => (
               <TranscriptItem 
                 key={v} 
-                video={v}
-                initialData={transcripts[v]}
+                video={v} 
+                initialData={transcripts[v]} 
                 apiKey={apiKey}
                 generateTranscript={generateTranscript}
                 globalStatus={status}
+                logs={beaconLogs}
+                masterBeacons={masterBeacons}
               />
             ))}
           </div>

@@ -24,9 +24,14 @@ async function targetBase(request: NextRequest): Promise<string | null> {
 
   if (activeDeviceId && !isNaN(parseInt(activeDeviceId, 10))) {
     device = await getQuery('SELECT api_base_url FROM ks_devices WHERE id = $1 AND status = $2 LIMIT 1', [parseInt(activeDeviceId, 10), 'active']);
-  } else if (activeSiteId && !isNaN(parseInt(activeSiteId, 10))) {
+  } else if (activeDeviceId) {
+    // Fallback for when activeDeviceId is a string (like 'smart_hm_02')
+    device = await getQuery('SELECT api_base_url FROM ks_devices WHERE device_id = $1 AND status = $2 LIMIT 1', [activeDeviceId, 'active']);
+  }
+  
+  if (!device && activeSiteId && !isNaN(parseInt(activeSiteId, 10))) {
     device = await getQuery('SELECT api_base_url FROM ks_devices WHERE site_id = $1 AND status = $2 LIMIT 1', [parseInt(activeSiteId, 10), 'active']);
-  } else {
+  } else if (!device) {
     // Just grab the user's first active device
     device = await getQuery('SELECT api_base_url FROM ks_devices WHERE user_id = $1 AND status = $2 LIMIT 1', [(user as any).id, 'active']);
   }

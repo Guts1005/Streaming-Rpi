@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { get, set } from 'idb-keyval';
 import pptxgen from 'pptxgenjs';
+import BeaconTimeline from './BeaconTimeline';
+import { BeaconLog, BeaconMaster, parseVideoStartTime } from '../lib/beaconUtils';
 
 const HazardVideoPlayer = ({ src, timestamp }: { src: string, timestamp: string }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -25,6 +27,8 @@ const HazardVideoPlayer = ({ src, timestamp }: { src: string, timestamp: string 
   );
 };
 
+
+
 type SafetyScreenProps = {
   currentUser: any;
   onClose: () => void;
@@ -48,6 +52,8 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
   const [apiKey, setApiKey] = useState('');
   const [videos, setVideos] = useState<string[]>([]);
   const [localVideos, setLocalVideos] = useState<{name: string, file: File}[]>([]);
+  const [beaconLogs, setBeaconLogs] = useState<BeaconLog[]>([]);
+  const [masterBeacons, setMasterBeacons] = useState<BeaconMaster[]>([]);
   
   const [processingVideo, setProcessingVideo] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState("");
@@ -72,10 +78,19 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
     fetch('/api/device/api/list_media')
       .then(res => res.json())
       .then(data => {
-        if (data.media) {
-          const vids = data.media.filter((m: any) => /^(video|uploaded|failed_upload)_.*\.mp4$/i.test(m.name)).map((m: any) => m.name);
-          setVideos(vids.sort((a:string,b:string) => b.localeCompare(a)));
+        let videoNames: string[] = [];
+        if (Array.isArray(data)) {
+          data.forEach(item => {
+            if (item.type === 'batch') {
+              item.chunks?.forEach((c: any) => {
+                if (/\.mp4$/i.test(c.name || '')) videoNames.push(c.name);
+              });
+            } else if (/\.mp4$/i.test(item.name || '')) {
+              videoNames.push(item.name);
+            }
+          });
         }
+        setVideos(videoNames.sort((a, b) => b.localeCompare(a)));
       })
       .catch(err => console.error("Failed to load device media", err));
       
@@ -86,6 +101,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
 
     // Auto-load previously synced local directory
     loadLocalDirectory(true);
+    fetchBeaconData();
   }, []);
 
   const saveReport = async (videoName: string, report: AIReport) => {
@@ -121,7 +137,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
 
       if (!handle) return;
       const foundFiles: {name: string, file: File}[] = [];
-      const regex = /^(video|uploaded|failed_upload)_.*\.mp4$/i;
+      const regex = /\.mp4$/i;
       
       for await (const entry of (handle as any).values()) {
         if (entry.kind === 'file' && regex.test(entry.name)) {
@@ -137,7 +153,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
 
   const handleManualFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const valid = files.filter(f => /^(video|uploaded|failed_upload)_.*\.mp4$/i.test(f.name));
+    const valid = files.filter(f => /\.mp4$/i.test(f.name));
     setLocalVideos(prev => {
       const combined = [...prev, ...valid.map(f => ({name: f.name, file: f}))];
       // deduplicate
@@ -372,56 +388,100 @@ Output STRICTLY in this JSON format:
     return <span style={{ background: '#f0fdfa', color: '#0d9488', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold', border: '1px solid #ccfbf1' }}>LOW</span>;
   };
 
-  const renderVideoCard = (video: string, isLocal?: {name: string, file: File}) => {
-    const isProcessing = processingVideo === video;
-    const report = reports[video];
+  const fetchBeaconData = async () => {
+    try {
+      const mRes = await fetch(`/api/beacons/master?site_id=${currentUser.site_id || 1}`);
+      const mData = await mRes.json();
+      if (mData.success) setMasterBeacons(mData.data);
 
-    // Memoize the URL creation so React re-renders don't generate new strings and trigger video auto-play resets
-    const getVideoSrc = () => {
-      if (isLocal?.file) {
-        if (!localUrlsRef.current[isLocal.name]) {
-          localUrlsRef.current[isLocal.name] = URL.createObjectURL(isLocal.file);
-        }
-        return localUrlsRef.current[isLocal.name];
+      const activeDeviceId = localStorage.getItem('activeDeviceId') || currentUser.device_id || currentUser.site_id || '1';
+      const lRes = await fetch(`/api/beacons/logs?r_pi_id=${activeDeviceId}&site_id=${currentUser.site_id || 1}`);
+      const lData = await lRes.json();
+      if (lData.success) setBeaconLogs(lData.data);
+    } catch (e) {
+      console.error("Failed to load beacon data:", e);
+    }
+  };
+
+// Refactored SafetyVideoCard to hold its own videoRef for timeline seeking
+function SafetyVideoCard({ video, isLocal, isProcessing, report, progressMsg, collapsedReports, setCollapsedReports, playingHazard, setPlayingHazard, handleExportPPT, processVideo, getSeverityBadge, beaconLogs, masterBeacons }: any) {
+  const localUrlRef = useRef<string | null>(null);
+  const mainVideoRef = useRef<HTMLVideoElement>(null);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+
+  const videoStartTime = parseVideoStartTime(video);
+
+  const handleSeek = (seconds: number) => {
+    if (mainVideoRef.current) {
+      mainVideoRef.current.currentTime = seconds;
+      mainVideoRef.current.play().catch(e => console.log('Autoplay prevented', e));
+    }
+  };
+
+  const getVideoSrc = () => {
+    if (isLocal?.file) {
+      if (!localUrlRef.current) {
+        localUrlRef.current = URL.createObjectURL(isLocal.file);
       }
-      return `/api/device/data/${encodeURIComponent(video)}`;
-    };
+      return localUrlRef.current;
+    }
+    return `/api/device/data/${encodeURIComponent(video)}`;
+  };
 
-    return (
-      <div key={video} className="card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-          <div>
-            <h3 style={{ margin: '0 0 4px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              {video} {isLocal && <span style={{ fontSize: '12px', background: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>Local Sync</span>}
-            </h3>
-            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>
-              {report ? `Analyzed on ${new Date().toLocaleDateString()}` : 'No safety analysis run yet.'}
-            </p>
-          </div>
-          
-          {report ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Safety Score</div>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: report.overall_score > 80 ? '#4ade80' : report.overall_score > 60 ? '#facc15' : '#ef4444' }}>
-                  {report.overall_score}/100
-                </div>
-              </div>
-              <button className="btn-primary" onClick={() => handleExportPPT(video, report)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e11d48', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
-                <svg style={{ width: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Download PPT
-              </button>
-              <button className="btn-outline" onClick={() => processVideo(video, isLocal?.file)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
-                <svg style={{ width: '16px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                Re-Analyze
-              </button>
-            </div>
-          ) : (
-            <button className="btn-primary" onClick={() => processVideo(video, isLocal?.file)} disabled={isProcessing} style={{ background: '#3b82f6', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
-              {isProcessing ? "Processing..." : "Generate AI Safety Report"}
-            </button>
-          )}
+  return (
+    <div className="card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div>
+          <h3 style={{ margin: '0 0 4px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {video} {isLocal && <span style={{ fontSize: '12px', background: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>Local Sync</span>}
+          </h3>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>
+            {report ? `Analyzed on ${new Date().toLocaleDateString()}` : 'No safety analysis run yet.'}
+          </p>
         </div>
+        
+        {report ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Safety Score</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: report.overall_score > 80 ? '#4ade80' : report.overall_score > 60 ? '#facc15' : '#ef4444' }}>
+                {report.overall_score}/100
+              </div>
+            </div>
+            <button className="btn-primary" onClick={() => handleExportPPT(video, report)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e11d48', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
+              Download PPT
+            </button>
+            <button className="btn-outline" onClick={() => processVideo(video, isLocal?.file)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
+              Re-Analyze
+            </button>
+          </div>
+        ) : (
+          <button className="btn-primary" onClick={() => processVideo(video, isLocal?.file)} disabled={isProcessing} style={{ background: '#3b82f6', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
+            {isProcessing ? "Processing..." : "Generate AI Safety Report"}
+          </button>
+        )}
+      </div>
+
+      <div style={{ marginTop: '16px', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
+        <video 
+          ref={mainVideoRef}
+          src={getVideoSrc()} 
+          controls 
+          style={{ width: '100%', maxHeight: '400px', display: 'block' }} 
+          onLoadedMetadata={() => {
+            if (mainVideoRef.current) setVideoDuration(mainVideoRef.current.duration * 1000);
+          }}
+        />
+      </div>
+
+      <BeaconTimeline 
+        videoName={video}
+        videoStartMs={videoStartTime}
+        videoDurationMs={videoDuration}
+        logs={beaconLogs}
+        masterBeacons={masterBeacons}
+        onSeek={handleSeek}
+      />
 
         {isProcessing && (
           <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59,130,246,0.3)', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
@@ -437,19 +497,19 @@ Output STRICTLY in this JSON format:
             <div style={{ marginTop: '24px', display: 'flex', gap: '16px' }}>
               <div style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
                 <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ef4444' }}>
-                  {report.hazards.filter(h => h.severity === 'Critical').length}
+                  {report.hazards.filter((h: any) => h.severity === 'Critical').length}
                 </div>
                 <div style={{ fontSize: '12px', color: '#fca5a5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Critical</div>
               </div>
               <div style={{ flex: 1, background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
                 <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>
-                  {report.hazards.filter(h => h.severity === 'Warning').length}
+                  {report.hazards.filter((h: any) => h.severity === 'Warning').length}
                 </div>
                 <div style={{ fontSize: '12px', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Warning</div>
               </div>
               <div style={{ flex: 1, background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
                 <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0d9488' }}>
-                  {report.hazards.filter(h => h.severity === 'Low').length}
+                  {report.hazards.filter((h: any) => h.severity === 'Low').length}
                 </div>
                 <div style={{ fontSize: '12px', color: '#5eead4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Low</div>
               </div>
@@ -459,7 +519,7 @@ Output STRICTLY in this JSON format:
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h4 style={{ margin: 0, fontSize: '16px', color: '#cbd5e1' }}>Detected Violations ({report.hazards.length})</h4>
                 <button 
-                  onClick={() => setCollapsedReports(prev => ({ ...prev, [video]: !prev[video] }))} 
+                  onClick={() => setCollapsedReports((prev: any) => ({ ...prev, [video]: !prev[video] }))} 
                   style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 'bold' }}
                 >
                   {collapsedReports[video] ? '▼ Show' : '▲ Hide'}
@@ -472,7 +532,7 @@ Output STRICTLY in this JSON format:
                   ✅ Perfect! No safety violations detected in this video.
                 </div>
               ) : (
-                report.hazards.map((h, idx) => (
+                report.hazards.map((h: any, idx: number) => (
                   <div key={idx} style={{ display: 'flex', gap: '20px', background: '#0f172a', padding: '16px', borderRadius: '12px', border: '1px solid #1e293b' }}>
                     
                     <div style={{ width: '240px', height: '135px', background: '#000', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
@@ -523,8 +583,8 @@ Output STRICTLY in this JSON format:
           </>
         )}
       </div>
-    );
-  };
+  );
+}
 
   return (
     <div className="animate-fade-in" style={{ padding: '0 12px' }}>
@@ -561,14 +621,49 @@ Output STRICTLY in this JSON format:
         {localVideos.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <h3 style={{ color: '#4ade80', margin: '0 0 10px 0', fontSize: '1.1rem' }}>💻 Locally Synced Videos</h3>
-            {localVideos.map(lv => renderVideoCard(lv.name, lv))}
+            {localVideos.map(lv => (
+              <SafetyVideoCard 
+                key={lv.name}
+                video={lv.name}
+                isLocal={lv}
+                isProcessing={processingVideo === lv.name}
+                report={reports[lv.name]}
+                progressMsg={progressMsg}
+                collapsedReports={collapsedReports}
+                setCollapsedReports={setCollapsedReports}
+                playingHazard={playingHazard}
+                setPlayingHazard={setPlayingHazard}
+                handleExportPPT={handleExportPPT}
+                processVideo={processVideo}
+                getSeverityBadge={getSeverityBadge}
+                beaconLogs={beaconLogs}
+                masterBeacons={masterBeacons}
+              />
+            ))}
           </div>
         )}
 
         {videos.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <h3 style={{ color: '#60a5fa', margin: '0 0 10px 0', fontSize: '1.1rem' }}>🎥 Helmet Videos</h3>
-            {videos.map(v => renderVideoCard(v))}
+            {videos.map(v => (
+              <SafetyVideoCard 
+                key={v}
+                video={v}
+                isProcessing={processingVideo === v}
+                report={reports[v]}
+                progressMsg={progressMsg}
+                collapsedReports={collapsedReports}
+                setCollapsedReports={setCollapsedReports}
+                playingHazard={playingHazard}
+                setPlayingHazard={setPlayingHazard}
+                handleExportPPT={handleExportPPT}
+                processVideo={processVideo}
+                getSeverityBadge={getSeverityBadge}
+                beaconLogs={beaconLogs}
+                masterBeacons={masterBeacons}
+              />
+            ))}
           </div>
         )}
       </div>

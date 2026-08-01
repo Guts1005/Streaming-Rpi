@@ -16,8 +16,9 @@ export function middleware(request: NextRequest) {
 
   const isDeviceRoute = request.nextUrl.pathname.startsWith('/api/device');
   const isTokenRoute = request.nextUrl.pathname.startsWith('/api/token');
+  const isBeaconRoute = request.nextUrl.pathname.startsWith('/api/beacons');
 
-  if (!token && !isAuthRoute && !isDeviceRoute && !isTokenRoute) {
+  if (!token && !isAuthRoute && !isDeviceRoute && !isTokenRoute && !isBeaconRoute) {
     if (request.nextUrl.pathname.startsWith('/api/')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
