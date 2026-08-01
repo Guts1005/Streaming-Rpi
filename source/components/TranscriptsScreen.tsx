@@ -307,6 +307,49 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   
   const [beaconLogs, setBeaconLogs] = useState<BeaconLog[]>([]);
   const [masterBeacons, setMasterBeacons] = useState<BeaconMaster[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
+
+  const locations = useMemo(() => {
+    const locs = new Set<string>();
+    masterBeacons.forEach(mb => {
+      if (mb.location_name) locs.add(mb.location_name);
+    });
+    return Array.from(locs);
+  }, [masterBeacons]);
+
+  useEffect(() => {
+    if (locations.length > 0 && !selectedLocation) {
+      setSelectedLocation(locations[0]);
+    }
+  }, [locations, selectedLocation]);
+
+  const filterVideoByLocation = (v: string) => {
+    if (!selectedLocation) return true;
+    if (v.includes("site_1_")) return true; // BYPASS RULE
+    const macs = masterBeacons.filter(mb => mb.location_name === selectedLocation).map(mb => mb.beacon_mac);
+    const relevantLogs = beaconLogs.filter(log => macs.includes(log.beacon_mac));
+    if (relevantLogs.length === 0) return false;
+
+    const startMs = parseVideoStartTime(v);
+    if (!startMs) return false;
+    let endMs = startMs + 120000;
+    const match = v.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_\d{8}_\d{6}_to_(\d{6})/);
+    if (match) {
+      const timeStr = match[1];
+      const dateStr = v.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_(\d{8})/)?.[1] || "";
+      if (dateStr) {
+         const isoStr = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}T${timeStr.substring(0,2)}:${timeStr.substring(2,4)}:${timeStr.substring(4,6)}+05:30`;
+         endMs = new Date(isoStr).getTime();
+      }
+    }
+    return relevantLogs.some(l => {
+      const t = new Date(l.timestamp).getTime();
+      return t >= startMs && t <= endMs;
+    });
+  };
+
+  const filteredVideos = useMemo(() => videos.filter(filterVideoByLocation), [videos, selectedLocation, masterBeacons, beaconLogs]);
+  const filteredLocalVideos = useMemo(() => localVideos.filter(lv => filterVideoByLocation(lv.name)), [localVideos, selectedLocation, masterBeacons, beaconLogs]);
 
   useEffect(() => {
     fetchVideos();
@@ -559,6 +602,20 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
         </h2>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <select 
+            value={selectedLocation} 
+            onChange={e => setSelectedLocation(e.target.value)}
+            style={{
+              padding: '8px 16px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(255, 255, 255, 0.1)', color: '#fff', outline: 'none'
+            }}
+          >
+            {locations.length === 0 && <option value="">No Beacons Found</option>}
+            {locations.map(loc => (
+              <option key={loc} value={loc} style={{color: '#000'}}>{loc}</option>
+            ))}
+          </select>
+
           {/* File System Access Sync Button */}
           <button 
             onClick={() => loadLocalDirectory(false)}
@@ -606,16 +663,16 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {!loading && videos.length === 0 && localVideos.length === 0 && (
+        {!loading && filteredVideos.length === 0 && filteredLocalVideos.length === 0 && (
           <div style={{ textAlign: 'center', color: '#94a3b8', padding: '40px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
-            No recorded videos found on the helmet. Sync a local folder to upload downloaded videos.
+            No videos found for this location. Sync a local folder to upload downloaded videos.
           </div>
         )}
         
-        {localVideos.length > 0 && (
+        {filteredLocalVideos.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <h3 style={{ color: '#4ade80', margin: '0 0 -10px 0', fontSize: '1.1rem' }}>💻 Locally Synced Videos</h3>
-            {localVideos.map(lv => (
+            {filteredLocalVideos.map(lv => (
               <TranscriptItem 
                 key={lv.name} 
                 video={lv.name} 
@@ -631,10 +688,10 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
           </div>
         )}
 
-        {videos.length > 0 && (
+        {filteredVideos.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <h3 style={{ color: '#60a5fa', margin: '0 0 -10px 0', fontSize: '1.1rem' }}>🎥 Helmet Videos</h3>
-            {videos.map(v => (
+            <h3 style={{ color: '#38bdf8', margin: '0 0 -10px 0', fontSize: '1.1rem' }}>☁️ Cloud Recorded Videos</h3>
+            {filteredVideos.map(v => (
               <TranscriptItem 
                 key={v} 
                 video={v} 

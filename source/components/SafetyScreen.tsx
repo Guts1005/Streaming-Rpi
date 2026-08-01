@@ -54,6 +54,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
   const [localVideos, setLocalVideos] = useState<{name: string, file: File}[]>([]);
   const [beaconLogs, setBeaconLogs] = useState<BeaconLog[]>([]);
   const [masterBeacons, setMasterBeacons] = useState<BeaconMaster[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
   
   const [processingVideo, setProcessingVideo] = useState<string | null>(null);
   const [progressMsg, setProgressMsg] = useState("");
@@ -69,6 +70,48 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
   // Hidden video ref for frame extraction
   const hiddenVideoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const locations = useMemo(() => {
+    const locs = new Set<string>();
+    masterBeacons.forEach(mb => {
+      if (mb.location_name) locs.add(mb.location_name);
+    });
+    return Array.from(locs);
+  }, [masterBeacons]);
+
+  useEffect(() => {
+    if (locations.length > 0 && !selectedLocation) {
+      setSelectedLocation(locations[0]);
+    }
+  }, [locations, selectedLocation]);
+
+  const filterVideoByLocation = (v: string) => {
+    if (!selectedLocation) return true;
+    if (v.includes("site_1_")) return true; // BYPASS RULE
+    const macs = masterBeacons.filter(mb => mb.location_name === selectedLocation).map(mb => mb.beacon_mac);
+    const relevantLogs = beaconLogs.filter(log => macs.includes(log.beacon_mac));
+    if (relevantLogs.length === 0) return false;
+
+    const startMs = parseVideoStartTime(v);
+    if (!startMs) return false;
+    let endMs = startMs + 120000;
+    const match = v.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_\d{8}_\d{6}_to_(\d{6})/);
+    if (match) {
+      const timeStr = match[1];
+      const dateStr = v.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_(\d{8})/)?.[1] || "";
+      if (dateStr) {
+         const isoStr = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}T${timeStr.substring(0,2)}:${timeStr.substring(2,4)}:${timeStr.substring(4,6)}+05:30`;
+         endMs = new Date(isoStr).getTime();
+      }
+    }
+    return relevantLogs.some(l => {
+      const t = new Date(l.timestamp).getTime();
+      return t >= startMs && t <= endMs;
+    });
+  };
+
+  const filteredVideos = useMemo(() => videos.filter(filterVideoByLocation), [videos, selectedLocation, masterBeacons, beaconLogs]);
+  const filteredLocalVideos = useMemo(() => localVideos.filter(lv => filterVideoByLocation(lv.name)), [localVideos, selectedLocation, masterBeacons, beaconLogs]);
 
   useEffect(() => {
     fetch('/api/transcripts/config').then(r => r.json()).then(d => {
@@ -118,10 +161,6 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
         if (handle) {
           let perm = await (handle as any).queryPermission({ mode: 'read' });
           if (perm === 'prompt') {
-            // Only prompt if they try to click a video or we explicitly need it. 
-            // Wait, since this runs on mount, we shouldn't spam the user with a prompt.
-            // But if it's silently returning, the videos disappear!
-            // Let's just return if it's not granted. They must click the Sync button again.
             if (perm !== 'granted') return;
           } else if (perm !== 'granted') {
             return;
@@ -595,6 +634,20 @@ function SafetyVideoCard({ video, isLocal, isProcessing, report, progressMsg, co
         </div>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <select 
+            value={selectedLocation} 
+            onChange={e => setSelectedLocation(e.target.value)}
+            style={{
+              padding: '8px 16px', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.2)',
+              background: 'rgba(255, 255, 255, 0.1)', color: '#fff', outline: 'none'
+            }}
+          >
+            {locations.length === 0 && <option value="">No Beacons Found</option>}
+            {locations.map(loc => (
+              <option key={loc} value={loc} style={{color: '#000'}}>{loc}</option>
+            ))}
+          </select>
+          
           <button onClick={() => loadLocalDirectory(false)} style={{ background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', border: '1px solid rgba(34, 197, 94, 0.4)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             🔗 Sync Local Folder
           </button>
@@ -612,16 +665,16 @@ function SafetyVideoCard({ video, isLocal, isProcessing, report, progressMsg, co
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         
-        {videos.length === 0 && localVideos.length === 0 && (
+        {filteredVideos.length === 0 && filteredLocalVideos.length === 0 && (
           <div style={{ textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
-            No videos found. Upload videos to the device or sync a local folder.
+            No videos found for this location. Upload videos to the device or sync a local folder.
           </div>
         )}
 
-        {localVideos.length > 0 && (
+        {filteredLocalVideos.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <h3 style={{ color: '#4ade80', margin: '0 0 10px 0', fontSize: '1.1rem' }}>💻 Locally Synced Videos</h3>
-            {localVideos.map(lv => (
+            {filteredLocalVideos.map(lv => (
               <SafetyVideoCard 
                 key={lv.name}
                 video={lv.name}
@@ -643,10 +696,10 @@ function SafetyVideoCard({ video, isLocal, isProcessing, report, progressMsg, co
           </div>
         )}
 
-        {videos.length > 0 && (
+        {filteredVideos.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <h3 style={{ color: '#60a5fa', margin: '0 0 10px 0', fontSize: '1.1rem' }}>🎥 Helmet Videos</h3>
-            {videos.map(v => (
+            {filteredVideos.map(v => (
               <SafetyVideoCard 
                 key={v}
                 video={v}
