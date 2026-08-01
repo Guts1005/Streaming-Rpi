@@ -156,6 +156,72 @@ def gpio_control_worker():
             record_led.off()
         time.sleep(0.25)
 
+def gps_logger_worker():
+    global current_gps_data, is_recording_active, app_running, recording_start_time
+    last_video = None
+    pts = []
+    
+    while app_running:
+        if is_recording_active and recording_start_time:
+            try:
+                videos = sorted(glob.glob(os.path.join(RECORD_FOLDER, "video_*.mp4")))
+                # Only consider videos created after recording started
+                valid_videos = [v for v in videos if os.path.getmtime(v) >= recording_start_time - 5]
+                
+                if valid_videos:
+                    latest_video = valid_videos[-1]
+                    # If this is a new video file, reset points
+                    if latest_video != last_video:
+                        last_video = latest_video
+                        pts = []
+                        # Optionally load existing points if we restarted the script
+                        base_name = os.path.basename(latest_video)
+                        json_name = base_name.replace('video_', 'gps_').replace('.mp4', '.json')
+                        json_path = os.path.join(RECORD_FOLDER, json_name)
+                        if os.path.exists(json_path):
+                            try:
+                                with open(json_path, 'r') as f:
+                                    pts = json.load(f).get("points", [])
+                            except:
+                                pass
+
+                    ts_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+                    try:
+                        lat = float(current_gps_data.get("lat", 0.0))
+                        lon = float(current_gps_data.get("lon", 0.0))
+                        acc = float(current_gps_data.get("accuracy", 0.0))
+                        spd = float(current_gps_data.get("speed", 0.0))
+                    except:
+                        lat, lon, acc, spd = 0.0, 0.0, 0.0, 0.0
+
+                    site_id = current_gps_data.get("site_id", "")
+                    beacon_mac = current_gps_data.get("beacon_mac", "")
+                    location_name = current_gps_data.get("location_name", "Unknown")
+
+                    pts.append({
+                        "timestamp": ts_str,
+                        "lat": lat,
+                        "lon": lon,
+                        "accuracy": acc,
+                        "speed": spd,
+                        "site_id": site_id,
+                        "beacon_mac": beacon_mac,
+                        "location_name": location_name
+                    })
+                    
+                    base_name = os.path.basename(latest_video)
+                    json_name = base_name.replace('video_', 'gps_').replace('.mp4', '.json')
+                    json_path = os.path.join(RECORD_FOLDER, json_name)
+                    _write_gps_json_file(json_path, pts)
+            except Exception as e:
+                logging.error(f"[GPS Logger] Error: {e}")
+                
+        else:
+            last_video = None
+            pts = []
+            
+        time.sleep(GPS_RECORD_INTERVAL)
+
 def offline_sync_worker():
     while app_running:
         try:
@@ -857,7 +923,7 @@ def resume_stream():
 record_proc = None
 @app.route('/api/start_record', methods=['GET', 'POST'])
 def start_record():
-    global record_proc, is_recording_active
+    global record_proc, is_recording_active, recording_start_time
     if not is_recording_active:
         is_recording_active = True
         if not record_proc:
@@ -885,6 +951,7 @@ def start_record():
                 f"-use_wallclock_as_timestamps 1 -thread_queue_size 1024 -f alsa -channels 1 -i hw:3,0 "
                 f"-c:v copy -c:a aac -ar 44100 -b:a 128k -async 1 -f segment -segment_time 300 -strftime 1 -reset_timestamps 1 '{path_mp4_pattern}' > '{log_path}' 2>&1"
             )
+            recording_start_time = time.time()
             record_proc = subprocess.Popen(cmd, shell=True, preexec_fn=os.setsid)
             global current_record_mp4
             current_record_mp4 = None
@@ -1295,7 +1362,7 @@ def get_gps_data(filename):
 def _gps_payload_from_video(filename):
     json_path = _find_existing_gps_json_for_video(filename)
     if not json_path:
-        return None, None, None
+        return None, None, None, None
 
     try:
         with open(json_path, "r") as jf:
@@ -2043,6 +2110,7 @@ if __name__ == '__main__':
     # threading.Thread(target=camera_worker, daemon=True).start()
     # threading.Thread(target=gpio_control_worker, daemon=True).start()
     threading.Thread(target=offline_sync_worker, daemon=True).start()
+    threading.Thread(target=gps_logger_worker, daemon=True).start()
 
     try:
         app.run(host='0.0.0.0', port=PORT, debug=False, threaded=True)
