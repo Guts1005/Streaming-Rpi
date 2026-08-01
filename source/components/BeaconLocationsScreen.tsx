@@ -43,7 +43,7 @@ export default function BeaconLocationsScreen({
     
     // Filter beacon logs that match these macs
     const relevantLogs = beaconLogs.filter(log => macs.includes(log.beacon_mac));
-    if (relevantLogs.length === 0) return [];
+    // if (relevantLogs.length === 0) return []; // Removed so we can force site_1 videos
 
     const videos: { media: MediaItem, detectionCount: number, durationStr: string }[] = [];
 
@@ -72,7 +72,9 @@ export default function BeaconLocationsScreen({
         return t >= startMs && t <= endMs;
       });
 
-      if (logsInVideo.length > 0) {
+      const isSite1Video = media.name.includes("site_1_");
+
+      if (logsInVideo.length > 0 || isSite1Video) {
         const durationSec = Math.floor((endMs - startMs) / 1000);
         const mins = Math.floor(durationSec / 60);
         const secs = durationSec % 60;
