@@ -307,7 +307,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   
   const [beaconLogs, setBeaconLogs] = useState<BeaconLog[]>([]);
   const [masterBeacons, setMasterBeacons] = useState<BeaconMaster[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState<string>('All Locations');
 
   const locations = useMemo(() => {
     const locs = new Set<string>();
@@ -318,15 +318,19 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
   }, [masterBeacons]);
 
   useEffect(() => {
-    if (locations.length > 0 && !selectedLocation) {
-      setSelectedLocation(locations[0]);
-    }
+    // We default to 'All Locations' so no need to auto-select the first one here.
   }, [locations, selectedLocation]);
 
   const filterVideoByLocation = (v: string) => {
     if (!selectedLocation) return true;
-    if (v.includes("site_1_")) return true; // BYPASS RULE
-    const macs = masterBeacons.filter(mb => mb.location_name === selectedLocation).map(mb => mb.beacon_mac);
+    
+    const isAllLocations = selectedLocation === 'All Locations';
+    if (isAllLocations && v.includes("site_1_")) return true;
+
+    const macs = isAllLocations 
+      ? masterBeacons.map(mb => mb.beacon_mac)
+      : masterBeacons.filter(mb => mb.location_name === selectedLocation).map(mb => mb.beacon_mac);
+    
     const relevantLogs = beaconLogs.filter(log => macs.includes(log.beacon_mac));
     if (relevantLogs.length === 0) return false;
 
@@ -610,7 +614,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
               background: 'rgba(255, 255, 255, 0.1)', color: '#fff', outline: 'none'
             }}
           >
-            {locations.length === 0 && <option value="">No Beacons Found</option>}
+            <option value="All Locations" style={{color: '#000'}}>All Locations</option>
             {locations.map(loc => (
               <option key={loc} value={loc} style={{color: '#000'}}>{loc}</option>
             ))}

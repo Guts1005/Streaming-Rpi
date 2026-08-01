@@ -23,7 +23,7 @@ export default function BeaconLocationsScreen({
   mediaFiles,
   onPlayVideo
 }: BeaconLocationsScreenProps) {
-  const [selectedLocation, setSelectedLocation] = useState<string>(masterBeacons[0]?.location_name || '');
+  const [selectedLocation, setSelectedLocation] = useState<string>('All Locations');
 
   // Find all unique locations from master beacons
   const locations = useMemo(() => {
@@ -38,8 +38,12 @@ export default function BeaconLocationsScreen({
   const videosForLocation = useMemo(() => {
     if (!selectedLocation) return [];
 
-    // Find all macs for the selected location
-    const macs = masterBeacons.filter(mb => mb.location_name === selectedLocation).map(mb => mb.beacon_mac);
+    const isAllLocations = selectedLocation === 'All Locations';
+
+    // Find all macs for the selected location (or all macs if All Locations)
+    const macs = isAllLocations 
+      ? masterBeacons.map(mb => mb.beacon_mac)
+      : masterBeacons.filter(mb => mb.location_name === selectedLocation).map(mb => mb.beacon_mac);
     
     // Filter beacon logs that match these macs
     const relevantLogs = beaconLogs.filter(log => macs.includes(log.beacon_mac));
@@ -72,9 +76,10 @@ export default function BeaconLocationsScreen({
         return t >= startMs && t <= endMs;
       });
 
+      // If "All Locations" is selected, show the video if it has logs OR if it is a site_1 video (to prevent hiding all videos due to missing logs)
       const isSite1Video = media.name.includes("site_1_");
-
-      if (logsInVideo.length > 0 || isSite1Video) {
+      
+      if (logsInVideo.length > 0 || (isAllLocations && isSite1Video)) {
         const durationSec = Math.floor((endMs - startMs) / 1000);
         const mins = Math.floor(durationSec / 60);
         const secs = durationSec % 60;
@@ -116,7 +121,7 @@ export default function BeaconLocationsScreen({
               minWidth: '200px'
             }}
           >
-            {locations.length === 0 && <option value="">No Beacons Found</option>}
+            <option value="All Locations">All Locations</option>
             {locations.map(loc => (
               <option key={loc} value={loc}>{loc}</option>
             ))}

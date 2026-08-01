@@ -1101,7 +1101,7 @@ function Dashboard() {
             <BeaconLocationsScreen 
               masterBeacons={beaconsList} 
               beaconLogs={beaconLogs} 
-              mediaFiles={desktopRecordings} 
+              mediaFiles={recordings} 
               onPlayVideo={(media) => {
                 setSelectedMedia(media);
                 setVideoError(false);
