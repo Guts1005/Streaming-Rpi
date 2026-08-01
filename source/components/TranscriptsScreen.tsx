@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { get, set } from 'idb-keyval';
 import BeaconTimeline from './BeaconTimeline';
 import { BeaconLog, BeaconMaster, parseVideoStartTime } from '../lib/beaconUtils';
