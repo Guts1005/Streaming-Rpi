@@ -10,7 +10,9 @@ This document serves as a permanent, locally stored memory bank for the AI assis
 - **Timestamps:** The chunks are dynamically named with exactly perfectly formatted timestamps (`video_YYYYMMDD_HHMMSS.mp4`) using `strftime`, which natively aligns with the beacon timestamps.
 
 ## 2. Beacon Data Pipeline & Site IDs
-- **The Problem:** The web dashboard's Location List wasn't able to group videos/images by `site_id` because the data was missing.
+- **Audio Output:** Pi runs `webrtc_audio_player.py` to play talkback audio from the browser through the Pi speaker.
+- **BLE Scanner:** `ble_locator.py` runs an async loop checking RSSI and updating `/api/update_gps`.
+- **GPS Logger**: A daemon thread `gps_logger_worker` runs continuously while `is_recording_active = True`. It scans the `RECORD_FOLDER` for the latest `video_*.mp4` created by `ffmpeg` and appends current GPS/BLE locations to the corresponding `gps_*.json` file. This allows robust GPS alignment even when the camera is locked by `rpicam-vid`.
 - **The Bug:** `ble_locator.py` scanned beacons and knew the `site_id`, but dropped it when posting to the local Pi backend. Therefore, `init.py` and `uploader.py` uploaded the videos without any `site_id`.
 - **The Solution (Implemented):** 
   - `ble_locator.py` now explicitly passes `site_id`, `beacon_mac`, and `location_name` to the local backend.
