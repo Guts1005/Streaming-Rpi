@@ -369,6 +369,9 @@ def _find_existing_gps_json_for_video(filename):
 
 def finalize_local_media_name(filename, site_id):
     import re
+    # HARDCODED: ALWAYS assign site_1 for now as requested by user
+    site_id = "1"
+    
     # If already finalized, skip
     if filename.startswith("site_") or "_to_" in filename:
         return filename
