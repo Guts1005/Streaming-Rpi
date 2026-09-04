@@ -20,6 +20,7 @@ function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscr
   const [searchQuery, setSearchQuery] = useState('');
   
   const videoRef = useRef<HTMLVideoElement>(null);
+  const localUrlRef = useRef<string | null>(null);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
 
   const videoStartTime = parseVideoStartTime(video);
@@ -196,8 +197,15 @@ function TranscriptItem({ video, localFile, initialData, apiKey, generateTranscr
       {/* Persistent Video Player with Beacon Timeline */}
       <div style={{ marginTop: '16px', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
         <video 
+          preload="none"
           ref={videoRef}
-          src={localFile ? URL.createObjectURL(localFile) : `/api/device/data/${encodeURIComponent(video)}`} 
+          src={(() => {
+            if (localFile) {
+              if (!localUrlRef.current) localUrlRef.current = URL.createObjectURL(localFile);
+              return localUrlRef.current;
+            }
+            return `/api/device/data/${encodeURIComponent(video)}?direct=1`;
+          })()} 
           controls 
           style={{ width: '100%', maxHeight: '400px', display: 'block' }} 
           onLoadedMetadata={() => {
@@ -325,7 +333,7 @@ export default function TranscriptsScreen({ currentUser, onClose }: TranscriptsS
     if (!selectedLocation) return true;
     
     const isAllLocations = selectedLocation === 'All Locations';
-    if (isAllLocations && v.includes("site_1_")) return true;
+    if (isAllLocations) return true;
 
     const macs = isAllLocations 
       ? masterBeacons.map(mb => mb.beacon_mac)

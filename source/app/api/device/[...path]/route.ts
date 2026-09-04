@@ -66,10 +66,14 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   const targetPath = path.map((part) => encodeURIComponent(part)).join("/");
   const targetUrl = `${base}/${targetPath}${request.nextUrl.search}`;
 
-  // If this is a file download or a live video stream, redirect the browser directly to the device URL
-  // This bypasses Vercel's 10-second timeout and response size limits for long-lived/large requests
-  if (path[0] === "download" || path[0] === "live") {
-    const redirectUrl = new URL(`${base}/${path[0] === "download" ? 'api/' : ''}${targetPath}${request.nextUrl.search}`);
+  // If this is a file download, live video stream, or a direct media request, redirect the browser directly to the device URL
+  // This bypasses Vercel's 10-second timeout, response size limits, and drastically reduces bandwidth usage
+  if (path[0] === "download" || path[0] === "live" || (path[0] === "data" && request.nextUrl.searchParams.get("direct") === "1")) {
+    const redirectUrl = new URL(`${base}/${path[0] === "download" ? 'api/' : ''}${targetPath}`);
+    // Keep existing query params (except direct)
+    request.nextUrl.searchParams.forEach((val, key) => {
+      if (key !== "direct") redirectUrl.searchParams.set(key, val);
+    });
     return Response.redirect(redirectUrl.toString(), 302);
   }
 

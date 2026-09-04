@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { get, set } from 'idb-keyval';
 import { BeaconMaster, BeaconLog, parseVideoStartTime } from '../lib/beaconUtils';
 
 type MediaItem = {
@@ -8,6 +9,7 @@ type MediaItem = {
   type: string;
   date: string;
   analysis?: any;
+  isLocal?: boolean;
 };
 
 type BeaconLocationsScreenProps = {
@@ -24,6 +26,69 @@ export default function BeaconLocationsScreen({
   onPlayVideo
 }: BeaconLocationsScreenProps) {
   const [selectedLocation, setSelectedLocation] = useState<string>('All Locations');
+  const [localVideos, setLocalVideos] = useState<MediaItem[]>([]);
+
+  useEffect(() => {
+    loadLocalDirectory(true);
+  }, []);
+
+  const loadLocalDirectory = async (silent = false) => {
+    try {
+      let handle: FileSystemDirectoryHandle | undefined;
+      if (silent) {
+        handle = await get('downloads_dir_handle');
+        if (handle) {
+          let perm = await (handle as any).queryPermission({ mode: 'read' });
+          if (perm === 'prompt') {
+            if (perm !== 'granted') return;
+          } else if (perm !== 'granted') {
+            return;
+          }
+        } else {
+          return;
+        }
+      } else {
+        if (!('showDirectoryPicker' in window)) return;
+        handle = await (window as any).showDirectoryPicker({ mode: 'read' });
+        await set('downloads_dir_handle', handle);
+      }
+
+      if (!handle) return;
+      const foundFiles: MediaItem[] = [];
+      const regex = /\.mp4$/i;
+      
+      for await (const entry of (handle as any).values()) {
+        if (entry.kind === 'file' && regex.test(entry.name)) {
+          const file = await entry.getFile();
+          foundFiles.push({
+            name: file.name,
+            size: (file.size / 1024 / 1024).toFixed(1) + 'MB',
+            url: URL.createObjectURL(file),
+            type: 'video',
+            date: new Date(file.lastModified).toLocaleString(),
+            isLocal: true
+          });
+        }
+      }
+      setLocalVideos(foundFiles.sort((a,b) => b.name.localeCompare(a.name)));
+    } catch (err: any) {
+      if (err.name !== 'AbortError') console.error("Failed to load directory", err);
+    }
+  };
+
+  const handleManualFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const newMedia = files.filter(f => f.name.toLowerCase().endsWith('.mp4')).map(file => ({
+      name: file.name,
+      size: (file.size / 1024 / 1024).toFixed(1) + 'MB',
+      url: URL.createObjectURL(file),
+      type: 'video',
+      date: new Date(file.lastModified).toLocaleString(),
+      isLocal: true
+    }));
+    setLocalVideos(prev => [...prev, ...newMedia]);
+  };
+
 
   // Find all unique locations from master beacons
   const locations = useMemo(() => {
@@ -33,6 +98,8 @@ export default function BeaconLocationsScreen({
     });
     return Array.from(locs);
   }, [masterBeacons]);
+
+  const allMediaFiles = useMemo(() => [...mediaFiles, ...localVideos], [mediaFiles, localVideos]);
 
   // For the selected location, find which videos have a beacon log corresponding to this location
   const videosForLocation = useMemo(() => {
@@ -52,47 +119,46 @@ export default function BeaconLocationsScreen({
     const videos: { media: MediaItem, detectionCount: number, durationStr: string }[] = [];
 
     // Group logs by video
-    mediaFiles.forEach(media => {
-      if (!media.name.endsWith('.mp4')) return;
+    allMediaFiles.forEach(media => {
+      if (!media.name || !media.name.endsWith('.mp4')) return;
       
       const startMs = parseVideoStartTime(media.name);
-      if (!startMs) return;
-
-      // Estimate video end time based on filename or default to a 2 min chunk
-      let endMs = startMs + 120000;
-      const match = media.name.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_\d{8}_\d{6}_to_(\d{6})/);
-      if (match) {
-        const timeStr = match[1];
-        const dateStr = media.name.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_(\d{8})/)?.[1] || "";
-        if (dateStr) {
-           const isoStr = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}T${timeStr.substring(0,2)}:${timeStr.substring(2,4)}:${timeStr.substring(4,6)}+05:30`;
-           endMs = new Date(isoStr).getTime();
+      
+      let endMs = 0;
+      let logsInVideo: typeof relevantLogs = [];
+      
+      if (startMs) {
+        endMs = startMs + 120000;
+        const match = media.name.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_\d{8}_\d{6}_to_(\d{6})/);
+        if (match) {
+          const timeStr = match[1];
+          const dateStr = media.name.match(/(?:site_[A-Za-z0-9_-]+_)?uploaded_(\d{8})/)?.[1] || "";
+          if (dateStr) {
+             const isoStr = `${dateStr.substring(0,4)}-${dateStr.substring(4,6)}-${dateStr.substring(6,8)}T${timeStr.substring(0,2)}:${timeStr.substring(2,4)}:${timeStr.substring(4,6)}+05:30`;
+             endMs = new Date(isoStr).getTime();
+          }
         }
+
+        logsInVideo = relevantLogs.filter(l => {
+          const t = new Date(l.timestamp).getTime();
+          return t >= startMs && t <= endMs;
+        });
       }
 
-      // Check how many logs fall into this video window
-      const logsInVideo = relevantLogs.filter(l => {
-        const t = new Date(l.timestamp).getTime();
-        return t >= startMs && t <= endMs;
-      });
-
-      // If "All Locations" is selected, show the video if it has logs OR if it is a site_1 video (to prevent hiding all videos due to missing logs)
-      const isSite1Video = media.name.includes("site_1_");
-      
-      if (logsInVideo.length > 0 || (isAllLocations && isSite1Video)) {
-        const durationSec = Math.floor((endMs - startMs) / 1000);
+      if (isAllLocations || logsInVideo.length > 0) {
+        const durationSec = (endMs && startMs) ? Math.floor((endMs - startMs) / 1000) : 0;
         const mins = Math.floor(durationSec / 60);
         const secs = durationSec % 60;
         videos.push({
           media,
           detectionCount: logsInVideo.length,
-          durationStr: `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+          durationStr: durationSec > 0 ? `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}` : "Unknown"
         });
       }
     });
 
     return videos;
-  }, [selectedLocation, masterBeacons, beaconLogs, mediaFiles]);
+  }, [selectedLocation, masterBeacons, beaconLogs, allMediaFiles]);
 
   const totalAlerts = useMemo(() => videosForLocation.reduce((acc, v) => acc + (v.media.analysis?.violations?.length || 0), 0), [videosForLocation]);
 
@@ -108,6 +174,19 @@ export default function BeaconLocationsScreen({
           </h1>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            onClick={() => loadLocalDirectory(false)}
+            style={{ padding: '8px 16px', background: 'rgba(16, 185, 129, 0.1)', color: '#34d399', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            Sync Local Folder
+          </button>
+          
+          <label style={{ padding: '8px 16px', background: 'rgba(245, 158, 11, 0.1)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 600 }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            Select Files
+            <input type="file" multiple accept="video/mp4" onChange={handleManualFiles} style={{ display: 'none' }} />
+          </label>
           <select 
             value={selectedLocation} 
             onChange={e => setSelectedLocation(e.target.value)}

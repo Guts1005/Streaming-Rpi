@@ -48,6 +48,188 @@ type AIReport = {
   overall_score: number;
 };
 
+// Refactored SafetyVideoCard to hold its own videoRef for timeline seeking
+function SafetyVideoCard({ video, isLocal, isProcessing, report, progressMsg, collapsedReports, setCollapsedReports, playingHazard, setPlayingHazard, handleExportPPT, processVideo, getSeverityBadge, beaconLogs, masterBeacons }: any) {
+  const localUrlRef = useRef<string | null>(null);
+  const mainVideoRef = useRef<HTMLVideoElement>(null);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
+
+  const videoStartTime = parseVideoStartTime(video);
+
+  const handleSeek = (seconds: number) => {
+    if (mainVideoRef.current) {
+      mainVideoRef.current.currentTime = seconds;
+      mainVideoRef.current.play().catch(e => console.log('Autoplay prevented', e));
+    }
+  };
+
+  const getVideoSrc = () => {
+    if (isLocal?.file) {
+      if (!localUrlRef.current) {
+        localUrlRef.current = URL.createObjectURL(isLocal.file);
+      }
+      return localUrlRef.current;
+    }
+    return `/api/device/data/${encodeURIComponent(video)}?direct=1`;
+  };
+
+  return (
+    <div className="card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+        <div>
+          <h3 style={{ margin: '0 0 4px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {video} {isLocal && <span style={{ fontSize: '12px', background: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>Local Sync</span>}
+          </h3>
+          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>
+            {report ? `Analyzed on ${new Date().toLocaleDateString()}` : 'No safety analysis run yet.'}
+          </p>
+        </div>
+        
+        {report ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Safety Score</div>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', color: report.overall_score > 80 ? '#4ade80' : report.overall_score > 60 ? '#facc15' : '#ef4444' }}>
+                {report.overall_score}/100
+              </div>
+            </div>
+            <button className="btn-primary" onClick={() => handleExportPPT(video, report)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e11d48', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
+              Download PPT
+            </button>
+            <button className="btn-outline" onClick={() => processVideo(video, isLocal?.file)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
+              Re-Analyze
+            </button>
+          </div>
+        ) : (
+          <button className="btn-primary" onClick={() => processVideo(video, isLocal?.file)} disabled={isProcessing} style={{ background: '#3b82f6', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
+            {isProcessing ? "Processing..." : "Generate AI Safety Report"}
+          </button>
+        )}
+      </div>
+
+      <div style={{ marginTop: '16px', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
+        <video preload="none" 
+          ref={mainVideoRef}
+          src={getVideoSrc()} 
+          controls 
+          style={{ width: '100%', maxHeight: '400px', display: 'block' }} 
+          onLoadedMetadata={() => {
+            if (mainVideoRef.current) setVideoDuration(mainVideoRef.current.duration * 1000);
+          }}
+        />
+      </div>
+
+      <BeaconTimeline 
+        videoName={video}
+        videoStartMs={videoStartTime}
+        videoDurationMs={videoDuration}
+        logs={beaconLogs}
+        masterBeacons={masterBeacons}
+        onSeek={handleSeek}
+      />
+
+        {isProcessing && (
+          <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59,130,246,0.3)', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#60a5fa' }}>
+              <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: '#60a5fa' }}></div>
+              <span style={{ fontWeight: 500 }}>{progressMsg}</span>
+            </div>
+          </div>
+        )}
+
+        {report && (
+          <>
+            <div style={{ marginTop: '24px', display: 'flex', gap: '16px' }}>
+              <div style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ef4444' }}>
+                  {report.hazards.filter((h: any) => h.severity === 'Critical').length}
+                </div>
+                <div style={{ fontSize: '12px', color: '#fca5a5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Critical</div>
+              </div>
+              <div style={{ flex: 1, background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>
+                  {report.hazards.filter((h: any) => h.severity === 'Warning').length}
+                </div>
+                <div style={{ fontSize: '12px', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Warning</div>
+              </div>
+              <div style={{ flex: 1, background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0d9488' }}>
+                  {report.hazards.filter((h: any) => h.severity === 'Low').length}
+                </div>
+                <div style={{ fontSize: '12px', color: '#5eead4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Low</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontSize: '16px', color: '#cbd5e1' }}>Detected Violations ({report.hazards.length})</h4>
+                <button 
+                  onClick={() => setCollapsedReports((prev: any) => ({ ...prev, [video]: !prev[video] }))} 
+                  style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 'bold' }}
+                >
+                  {collapsedReports[video] ? '▼ Show' : '▲ Hide'}
+                </button>
+              </div>
+            
+            {!collapsedReports[video] && (
+              report.hazards.length === 0 ? (
+                <div style={{ padding: '24px', background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', borderRadius: '8px', textAlign: 'center', border: '1px dashed #4ade80' }}>
+                  ✅ Perfect! No safety violations detected in this video.
+                </div>
+              ) : (
+                report.hazards.map((h: any, idx: number) => (
+                  <div key={idx} style={{ display: 'flex', gap: '20px', background: '#0f172a', padding: '16px', borderRadius: '12px', border: '1px solid #1e293b' }}>
+                    
+                    <div style={{ width: '240px', height: '135px', background: '#000', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                      {playingHazard === `${video}_${h.timestamp}` ? (
+                        <HazardVideoPlayer 
+                          src={getVideoSrc()} 
+                          timestamp={h.timestamp}
+                        />
+                      ) : (
+                        <>
+                          {h.imageBase64 ? (
+                            <img src={h.imageBase64} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '12px' }}>No Image</div>
+                          )}
+                          <button 
+                            onClick={() => setPlayingHazard(`${video}_${h.timestamp}`)}
+                            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', color: '#fff' }}
+                          >
+                            <svg style={{ width: '48px', height: '48px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" fillRule="evenodd"></path></svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                          <h5 style={{ margin: 0, fontSize: '16px', color: '#f1f5f9' }}>{h.category}</h5>
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <span style={{ fontSize: '13px', color: '#94a3b8', background: '#1e293b', padding: '2px 8px', borderRadius: '4px' }}>{h.timestamp}</span>
+                            {getSeverityBadge(h.severity)}
+                          </div>
+                        </div>
+                        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#94a3b8', lineHeight: '1.5' }}>
+                          <strong style={{ color: '#cbd5e1' }}>Observation:</strong> {h.observation}
+                        </p>
+                      </div>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '8px 12px', borderRadius: '6px' }}>
+                        <strong>Recommendation:</strong> {h.recommendation}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )
+            )}
+            </div>
+          </>
+        )}
+      </div>
+  );
+}
 export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps) {
   const [apiKey, setApiKey] = useState('');
   const [videos, setVideos] = useState<string[]>([]);
@@ -87,7 +269,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
     if (!selectedLocation) return true;
     
     const isAllLocations = selectedLocation === 'All Locations';
-    if (isAllLocations && v.includes("site_1_")) return true;
+    if (isAllLocations) return true;
 
     const macs = isAllLocations 
       ? masterBeacons.map(mb => mb.beacon_mac)
@@ -280,7 +462,7 @@ export default function SafetyScreen({ currentUser, onClose }: SafetyScreenProps
         // If it's a remote file, we need to download it as a Blob first so we can upload it to Gemini directly from browser.
         // Or proxy it. Due to size limits on Vercel, downloading to browser then uploading is safer.
         setProgressMsg(`Downloading remote video to browser memory...`);
-        const proxyUrl = `/api/device/data/${encodeURIComponent(videoName)}`;
+        const proxyUrl = `/api/device/data/${encodeURIComponent(videoName)}?direct=1`;
         const vidRes = await fetch(proxyUrl);
         const vidBlob = await vidRes.blob();
         
@@ -361,7 +543,7 @@ Output STRICTLY in this JSON format:
       }
 
       setProgressMsg("Extracting Photo Evidence from video timestamps...");
-      const videoUrl = localFile ? URL.createObjectURL(localFile) : `/api/device/data/${encodeURIComponent(videoName)}`;
+      const videoUrl = localFile ? URL.createObjectURL(localFile) : `/api/device/data/${encodeURIComponent(videoName)}?direct=1`;
       
       // Extract photos for each hazard
       const enrichedHazards: SafetyHazard[] = [];
@@ -446,188 +628,6 @@ Output STRICTLY in this JSON format:
     }
   };
 
-// Refactored SafetyVideoCard to hold its own videoRef for timeline seeking
-function SafetyVideoCard({ video, isLocal, isProcessing, report, progressMsg, collapsedReports, setCollapsedReports, playingHazard, setPlayingHazard, handleExportPPT, processVideo, getSeverityBadge, beaconLogs, masterBeacons }: any) {
-  const localUrlRef = useRef<string | null>(null);
-  const mainVideoRef = useRef<HTMLVideoElement>(null);
-  const [videoDuration, setVideoDuration] = useState<number | null>(null);
-
-  const videoStartTime = parseVideoStartTime(video);
-
-  const handleSeek = (seconds: number) => {
-    if (mainVideoRef.current) {
-      mainVideoRef.current.currentTime = seconds;
-      mainVideoRef.current.play().catch(e => console.log('Autoplay prevented', e));
-    }
-  };
-
-  const getVideoSrc = () => {
-    if (isLocal?.file) {
-      if (!localUrlRef.current) {
-        localUrlRef.current = URL.createObjectURL(isLocal.file);
-      }
-      return localUrlRef.current;
-    }
-    return `/api/device/data/${encodeURIComponent(video)}`;
-  };
-
-  return (
-    <div className="card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-        <div>
-          <h3 style={{ margin: '0 0 4px', fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {video} {isLocal && <span style={{ fontSize: '12px', background: '#3b82f6', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>Local Sync</span>}
-          </h3>
-          <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>
-            {report ? `Analyzed on ${new Date().toLocaleDateString()}` : 'No safety analysis run yet.'}
-          </p>
-        </div>
-        
-        {report ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Safety Score</div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: report.overall_score > 80 ? '#4ade80' : report.overall_score > 60 ? '#facc15' : '#ef4444' }}>
-                {report.overall_score}/100
-              </div>
-            </div>
-            <button className="btn-primary" onClick={() => handleExportPPT(video, report)} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#e11d48', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
-              Download PPT
-            </button>
-            <button className="btn-outline" onClick={() => processVideo(video, isLocal?.file)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
-              Re-Analyze
-            </button>
-          </div>
-        ) : (
-          <button className="btn-primary" onClick={() => processVideo(video, isLocal?.file)} disabled={isProcessing} style={{ background: '#3b82f6', padding: '8px 16px', height: '40px', fontWeight: 'bold' }}>
-            {isProcessing ? "Processing..." : "Generate AI Safety Report"}
-          </button>
-        )}
-      </div>
-
-      <div style={{ marginTop: '16px', background: '#000', borderRadius: '8px', overflow: 'hidden' }}>
-        <video 
-          ref={mainVideoRef}
-          src={getVideoSrc()} 
-          controls 
-          style={{ width: '100%', maxHeight: '400px', display: 'block' }} 
-          onLoadedMetadata={() => {
-            if (mainVideoRef.current) setVideoDuration(mainVideoRef.current.duration * 1000);
-          }}
-        />
-      </div>
-
-      <BeaconTimeline 
-        videoName={video}
-        videoStartMs={videoStartTime}
-        videoDurationMs={videoDuration}
-        logs={beaconLogs}
-        masterBeacons={masterBeacons}
-        onSeek={handleSeek}
-      />
-
-        {isProcessing && (
-          <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59,130,246,0.3)', padding: '16px', borderRadius: '8px', marginTop: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#60a5fa' }}>
-              <div className="spinner" style={{ width: '20px', height: '20px', borderTopColor: '#60a5fa' }}></div>
-              <span style={{ fontWeight: 500 }}>{progressMsg}</span>
-            </div>
-          </div>
-        )}
-
-        {report && (
-          <>
-            <div style={{ marginTop: '24px', display: 'flex', gap: '16px' }}>
-              <div style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#ef4444' }}>
-                  {report.hazards.filter((h: any) => h.severity === 'Critical').length}
-                </div>
-                <div style={{ fontSize: '12px', color: '#fca5a5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Critical</div>
-              </div>
-              <div style={{ flex: 1, background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>
-                  {report.hazards.filter((h: any) => h.severity === 'Warning').length}
-                </div>
-                <div style={{ fontSize: '12px', color: '#fcd34d', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Warning</div>
-              </div>
-              <div style={{ flex: 1, background: 'rgba(13, 148, 136, 0.1)', border: '1px solid rgba(13, 148, 136, 0.2)', borderRadius: '8px', padding: '16px', textAlign: 'center' }}>
-                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0d9488' }}>
-                  {report.hazards.filter((h: any) => h.severity === 'Low').length}
-                </div>
-                <div style={{ fontSize: '12px', color: '#5eead4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Low</div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ margin: 0, fontSize: '16px', color: '#cbd5e1' }}>Detected Violations ({report.hazards.length})</h4>
-                <button 
-                  onClick={() => setCollapsedReports((prev: any) => ({ ...prev, [video]: !prev[video] }))} 
-                  style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 'bold' }}
-                >
-                  {collapsedReports[video] ? '▼ Show' : '▲ Hide'}
-                </button>
-              </div>
-            
-            {!collapsedReports[video] && (
-              report.hazards.length === 0 ? (
-                <div style={{ padding: '24px', background: 'rgba(34, 197, 94, 0.1)', color: '#4ade80', borderRadius: '8px', textAlign: 'center', border: '1px dashed #4ade80' }}>
-                  ✅ Perfect! No safety violations detected in this video.
-                </div>
-              ) : (
-                report.hazards.map((h: any, idx: number) => (
-                  <div key={idx} style={{ display: 'flex', gap: '20px', background: '#0f172a', padding: '16px', borderRadius: '12px', border: '1px solid #1e293b' }}>
-                    
-                    <div style={{ width: '240px', height: '135px', background: '#000', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                      {playingHazard === `${video}_${h.timestamp}` ? (
-                        <HazardVideoPlayer 
-                          src={getVideoSrc()} 
-                          timestamp={h.timestamp}
-                        />
-                      ) : (
-                        <>
-                          {h.imageBase64 ? (
-                            <img src={h.imageBase64} alt="Evidence" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                          ) : (
-                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: '12px' }}>No Image</div>
-                          )}
-                          <button 
-                            onClick={() => setPlayingHazard(`${video}_${h.timestamp}`)}
-                            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', color: '#fff' }}
-                          >
-                            <svg style={{ width: '48px', height: '48px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }} fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" fillRule="evenodd"></path></svg>
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                          <h5 style={{ margin: 0, fontSize: '16px', color: '#f1f5f9' }}>{h.category}</h5>
-                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', color: '#94a3b8', background: '#1e293b', padding: '2px 8px', borderRadius: '4px' }}>{h.timestamp}</span>
-                            {getSeverityBadge(h.severity)}
-                          </div>
-                        </div>
-                        <p style={{ margin: '0 0 8px 0', fontSize: '14px', color: '#94a3b8', lineHeight: '1.5' }}>
-                          <strong style={{ color: '#cbd5e1' }}>Observation:</strong> {h.observation}
-                        </p>
-                      </div>
-                      <p style={{ margin: 0, fontSize: '14px', color: '#38bdf8', background: 'rgba(56, 189, 248, 0.1)', padding: '8px 12px', borderRadius: '6px' }}>
-                        <strong>Recommendation:</strong> {h.recommendation}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              )
-            )}
-            </div>
-          </>
-        )}
-      </div>
-  );
-}
 
   return (
     <div className="animate-fade-in" style={{ padding: '0 12px' }}>

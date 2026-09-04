@@ -327,13 +327,6 @@ function Dashboard() {
 
     const initPlayer = async () => {
       let streamUrl = '/api/device/live/livestream.flv';
-      try {
-        const res = await fetch('/api/device/get-stream-url');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.url) streamUrl = data.url;
-        }
-      } catch (e) {}
 
       import("mpegts.js").then((mpegtsModule) => {
         if (!isMounted) return;
@@ -1105,8 +1098,6 @@ function Dashboard() {
               onPlayVideo={(media) => {
                 setSelectedMedia(media);
                 setVideoError(false);
-                setGalleryMode('desktop');
-                setShowGallery(true);
               }}
             />
           </div>
@@ -1341,7 +1332,7 @@ function Dashboard() {
               <div className="recordings-list">
                 {recordings.length > 0 ? recordings.slice(0, 3).map((item: any, idx: number) => (
                   <div key={idx} className="rec-item" onClick={() => openMedia(item)}>
-                    <div className="rec-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`} : {}}>
+                    <div className="rec-thumb" style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name}?direct=1)`} : {}}>
                       {item.type !== 'image' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />}
                     </div>
                     <div className="rec-info">
@@ -1415,14 +1406,14 @@ function Dashboard() {
                   <video 
                     controls autoPlay
                     style={{width: '100%', maxHeight: '65vh', display: 'block'}} 
-                    src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}`}
+                    src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name || selectedMedia.chunks?.[0]?.name}?direct=1`}
                     onError={() => setVideoError(true)}
                   />
                 )}
               </div>
             ) : (
               <div style={{width: '100%', textAlign: 'center'}}>
-                <img src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name}`} style={{maxWidth: '100%', maxHeight: '65vh', borderRadius: 'var(--radius-sm)'}} alt="Captured" />
+                <img src={selectedMedia.isLocal ? selectedMedia.url : `/api/device/data/${selectedMedia.name}?direct=1`} style={{maxWidth: '100%', maxHeight: '65vh', borderRadius: 'var(--radius-sm)'}} alt="Captured" />
               </div>
             )}
             
@@ -1467,7 +1458,7 @@ function Dashboard() {
                   <div key={idx} className="gallery-card">
                     <div 
                       className="gallery-thumb"
-                      style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name})`} : {}}
+                      style={item.type === 'image' ? {backgroundImage: `url(/api/device/data/${item.name}?direct=1)`} : {}}
                       onClick={() => { setShowGallery(false); openMedia(item); }}
                     >
                       {item.type !== 'image' && <SvgIcon path="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />}
