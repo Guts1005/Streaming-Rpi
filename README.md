@@ -1,13 +1,24 @@
-# Aspire AI Smart Vision / Smart Helmet (`Streaming-Rpi`)
+<div align="center">
 
-[![Next.js](https://img.shields.io/badge/Next.js-16.2.6-black?style=flat&logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19.2.4-blue?style=flat&logo=react)](https://react.dev/)
-[![Python](https://img.shields.io/badge/Python-3.9+-yellow?style=flat&logo=python)](https://python.org)
-[![SRS](https://img.shields.io/badge/Streaming-SRS%205-red?style=flat)](https://github.com/ossrs/srs)
-[![Docker](https://img.shields.io/badge/Docker-Container-2496ED?style=flat&logo=docker)](https://www.docker.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+# 🪖 Smart Vision Edge / Smart Helmet (`Streaming-Rpi`)
 
-An industrial-grade, edge-computing Smart Helmet and IoT surveillance system powered by a Raspberry Pi and a modern Next.js cloud management portal. Built for frontline workers and site inspectors in low-connectivity and hazardous environments.
+### Industrial-Grade Edge Video Streaming, BLE Tracking & AI Safety System for Raspberry Pi
+
+[![GitHub Stars](https://img.shields.io/github/stars/Guts1005/Streaming-Rpi?style=for-the-badge&logo=star&color=ffd700)](https://github.com/Guts1005/Streaming-Rpi/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Guts1005/Streaming-Rpi?style=for-the-badge&logo=git&color=58a6ff)](https://github.com/Guts1005/Streaming-Rpi/network/members)
+[![Next.js](https://img.shields.io/badge/Next.js-16.2.6-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19.2.4-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![Raspberry Pi](https://img.shields.io/badge/Raspberry_Pi-4%20%2F%205-A22846?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://raspberrypi.org)
+[![SRS](https://img.shields.io/badge/Streaming-SRS%205-red?style=for-the-badge&logo=docker&logoColor=white)](https://github.com/ossrs/srs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-3DA639?style=for-the-badge)](LICENSE)
+
+<p align="center">
+  <b>Sub-300ms Glass-to-Glass Latency · Two-Way Audio Talkback · Offline-First Auto Sync · Headless QR Wi-Fi · BLE Beacons · Google Gemini AI</b>
+</p>
+
+⭐ **If you find this project useful for IoT, robotics, or edge video streaming, please star the repository!**
+
+</div>
 
 ---
 
@@ -210,6 +221,30 @@ When working in dead zones or shielded industrial basements:
 - **Camera Hardware Exclusivity**: On Linux/Raspberry Pi OS, camera capture devices (`libcamera` / `/dev/video0`) cannot be accessed by multiple processes concurrently. When local recording starts, the system automatically pauses the SRS publisher to grant exclusive hardware access, resuming the live stream when recording finishes.
 - **Deprecated Technologies**: **LiveKit and Ngrok are completely deprecated**. All video streams run on SRS HTTP-FLV, and remote access is managed via Cloudflare Tunnels (`cloudflared`).
 - **Secret Safety**: Do not commit `.env`, SSL certificates (`cert.pem`, `key.pem`), or authentication tokens into version control.
+
+---
+
+## ⭐ Star History
+
+If you're building with Raspberry Pi, video streaming, or IoT edge systems, drop a star on the repo to support continuous development!
+
+<div align="center">
+  <a href="https://star-history.com/#Guts1005/Streaming-Rpi&Date">
+    <img src="https://api.star-history.com/svg?repos=Guts1005/Streaming-Rpi&type=Date&theme=dark" alt="Star History Chart" width="75%">
+  </a>
+</div>
+
+---
+
+## Contributing & Community
+
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/Guts1005/Streaming-Rpi/issues).
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
 
