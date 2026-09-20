@@ -9,8 +9,8 @@ import logging
 import requests
 import datetime
 
-UPLOAD_URL = "https://centrix.co.in/v_api/upload"
-API_KEY = "DDjgMfxLqhxbNmaBoTkfBJkhMxNxkPwMgGjPUwCOaJRCBrvtUX"
+UPLOAD_URL = os.getenv("CENTRIX_UPLOAD_URL", "https://centrix.co.in/v_api/upload")
+API_KEY = os.getenv("CENTRIX_API_KEY", os.getenv("API_KEY", ""))
 
 
 def _extract_times_from_filename(filename: str):

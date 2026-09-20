@@ -36,13 +36,21 @@ async function targetBase(request: NextRequest): Promise<string | null> {
     device = await getQuery('SELECT api_base_url FROM ks_devices WHERE user_id = $1 AND status = $2 LIMIT 1', [(user as any).id, 'active']);
   }
 
-  // Fallback if no device found for user (e.g. admin accounts)
-  if (!device) {
+  // Fallback ONLY for verified Admin role if no device assigned directly to user or site
+  if (!device && (user as any).ac === 'Admin') {
     device = await getQuery("SELECT api_base_url FROM ks_devices WHERE api_base_url IS NOT NULL AND status = 'active' ORDER BY id ASC LIMIT 1");
   }
 
   if (device && device.api_base_url) {
-    return device.api_base_url.replace(/\/$/, "");
+    const raw = device.api_base_url.replace(/\/$/, "");
+    try {
+      const u = new URL(raw);
+      if (u.protocol === 'http:' || u.protocol === 'https:') {
+        return raw;
+      }
+    } catch {
+      return null;
+    }
   }
 
   return null;
@@ -58,6 +66,11 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   }
 
   const { path = [] } = await context.params;
+
+  // Guard against path traversal attempts
+  if (path.some((part) => part.includes("..") || part.includes("/") || part.includes("\\"))) {
+    return Response.json({ error: "Invalid path parameters" }, { status: 400 });
+  }
   
   if (path[0] === "get-stream-url") {
     return Response.json({ url: `${base}/live/livestream.flv` });
@@ -88,13 +101,14 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
   // Bypass tunnel warning screens (ngrok, localtunnel, etc)
   headers.set("ngrok-skip-browser-warning", "1");
   headers.set("Bypass-Tunnel-Reminder", "true");
-  
-
 
   const method = request.method.toUpperCase();
   const body = method === "GET" || method === "HEAD" ? undefined : await request.arrayBuffer();
 
   let upstream: Response;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
+
   try {
     console.log(`[Proxy] Fetching targetUrl: ${targetUrl}`);
     upstream = await fetch(targetUrl, {
@@ -102,6 +116,7 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
       headers,
       body,
       cache: "no-store",
+      signal: controller.signal,
     });
     console.log(`[Proxy] Response status: ${upstream.status}`);
   } catch (err: any) {
@@ -110,6 +125,8 @@ async function proxyDeviceRequest(request: NextRequest, context: RouteContext) {
       { error: "Helmet is offline. Please turn it on and check its Wi-Fi connection." },
       { status: 502 },
     );
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (upstream.status === 530 || upstream.status === 522 || upstream.status === 502) {

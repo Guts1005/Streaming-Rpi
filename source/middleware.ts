@@ -11,8 +11,7 @@ export function middleware(request: NextRequest) {
                       request.nextUrl.pathname.startsWith('/register') ||
                       request.nextUrl.pathname.startsWith('/register-user') ||
                       request.nextUrl.pathname.startsWith('/api/users/register') ||
-                      request.nextUrl.pathname.startsWith('/api/mdm/companies') ||
-                      request.nextUrl.pathname.startsWith('/api/migrate-db');
+                      request.nextUrl.pathname.startsWith('/api/mdm/companies');
 
   const isDeviceRoute = request.nextUrl.pathname.startsWith('/api/device');
   const isTokenRoute = request.nextUrl.pathname.startsWith('/api/token');

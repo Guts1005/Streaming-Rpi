@@ -1,35 +1,50 @@
-# SSL Certificates (auto-generated)
+# SSL & TLS Certificates
 cert.pem
 key.pem
 *.pem
+*.crt
+*.key
 
-# Runtime output
+# SQLite & Local Databases
+*.db
+*.sqlite
+*.sqlite3
+source/helmet.db
+
+# Runtime Recordings & Logs
 recordings/
 logs/
+*.log
+*logs.json
 *.mp4
 *.h264
 *.csv
 *.jpg
 
-# Python cache
+# Python Cache & Testing
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
 *.so
+.pytest_cache/
 
-# Environments
+# Environments & Secret Files
 .env
-venv/
-env/
-.venv/
+.env.*
+!.env.example
+*token*.txt
+secrets.json
 
-# Graphify generated cache internals
+# Cloudflare Tunnel & Cloud Credentials
+credentials.json
+
+# Graphify Cache Internals
 graphify-out/cache/
 graphify-out/.graphify_python
 
-# IDE / OS
+# IDE & OS Metadata
 .vscode/
 .idea/
 *.swp
@@ -37,16 +52,16 @@ graphify-out/.graphify_python
 .DS_Store
 Thumbs.db
 
-# Node
+# Node.js & Next.js
 node_modules/
 .next/
 build/
 dist/
+*.tsbuildinfo
+.vercel
 
-
-# Archives
+# Archives & Compressed Bundles
 *.rar
 *.zip
+*.tar.gz
 source.rar
-
-.vercel

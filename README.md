@@ -6,6 +6,10 @@
 
 [![GitHub Stars](https://img.shields.io/github/stars/Guts1005/Streaming-Rpi?style=for-the-badge&logo=star&color=ffd700)](https://github.com/Guts1005/Streaming-Rpi/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/Guts1005/Streaming-Rpi?style=for-the-badge&logo=git&color=58a6ff)](https://github.com/Guts1005/Streaming-Rpi/network/members)
+[![CI](https://github.com/Guts1005/Streaming-Rpi/actions/workflows/ci.yml/badge.svg)](https://github.com/Guts1005/Streaming-Rpi/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/Guts1005/Streaming-Rpi/actions/workflows/codeql.yml/badge.svg)](https://github.com/Guts1005/Streaming-Rpi/actions/workflows/codeql.yml)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg?style=for-the-badge&logo=shield)](SECURITY.md)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%99%A5-ff69b4?style=for-the-badge&logo=github-sponsors)](https://github.com/sponsors/Guts1005)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2.6-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2.4-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
 [![Raspberry Pi](https://img.shields.io/badge/Raspberry_Pi-4%20%2F%205-A22846?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://raspberrypi.org)

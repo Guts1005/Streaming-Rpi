@@ -29,11 +29,11 @@ Once the Pi has booted and connected to your Wi-Fi, open a terminal on the Pi (e
 
 ```bash
 cd ~
-wget -O setup_pi.sh "https://Guts1005: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@raw.githubusercontent.com/Guts1005/Streaming-Rpi/main/setup_pi.sh"
+wget -O setup_pi.sh "https://raw.githubusercontent.com/Guts1005/Streaming-Rpi/main/setup_pi.sh"
 bash setup_pi.sh
 ```
 
-*(Note: The embedded GitHub PAT allows secure cloning without prompting for passwords).*
+*(Note: The repository is public; setup_pi.sh clones directly without credential prompts).*
 
 ### The Interactive Camera & Audio Selection
 The script is interactive for the first few seconds. It will detect connected `/dev/video*` devices and ask you:

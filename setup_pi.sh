@@ -63,8 +63,9 @@ fi
 echo "Selected Audio Device: $AUDIO_DEVICE"
 
 echo ""
-echo "--- 2. Environment Variables ---"
-GITHUB_PAT="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"
+echo "--- 2. Environment Configuration ---"
+# Repository is public; GITHUB_PAT is optional for private forks or rate limit increases
+GITHUB_PAT="${GITHUB_PAT:-}"
 
 echo ""
 echo "Starting automated installation... This will take a few minutes."
@@ -79,7 +80,11 @@ mkdir -p ~/Desktop/Projects/Streaming-Rpi
 cd ~/Desktop/Projects/Streaming-Rpi
 
 if [ ! -d "hm_releases" ]; then
-    git clone https://Guts1005:${GITHUB_PAT}@github.com/Guts1005/Streaming-Rpi.git hm_releases
+    if [ -n "$GITHUB_PAT" ]; then
+        git clone "https://x-access-token:${GITHUB_PAT}@github.com/Guts1005/Streaming-Rpi.git" hm_releases
+    else
+        git clone "https://github.com/Guts1005/Streaming-Rpi.git" hm_releases
+    fi
 fi
 
 cd hm_releases

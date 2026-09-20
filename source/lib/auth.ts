@@ -2,16 +2,25 @@ import jwt from 'jsonwebtoken';
 import { serialize } from 'cookie';
 import { NextRequest } from 'next/server';
 
-const SECRET_KEY = process.env.JWT_SECRET || 'super-secret-key-12345';
+const isProduction = process.env.NODE_ENV === 'production';
+const SECRET_KEY = process.env.JWT_SECRET || (isProduction ? '' : 'dev-jwt-secret-do-not-use-in-production');
+
+if (isProduction && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'super-secret-key-12345')) {
+  console.warn('[SECURITY WARNING] JWT_SECRET is not configured for production; set JWT_SECRET in environment.');
+}
 
 export function signToken(payload: object) {
+  if (!SECRET_KEY) {
+    throw new Error('JWT_SECRET must be configured in environment');
+  }
   return jwt.sign(payload, SECRET_KEY, { expiresIn: '1d' });
 }
 
 export function verifyToken(token: string) {
+  if (!SECRET_KEY) return null;
   try {
     return jwt.verify(token, SECRET_KEY);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
