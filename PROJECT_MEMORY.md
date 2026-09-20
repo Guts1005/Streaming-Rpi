@@ -66,3 +66,17 @@ This document serves as a permanent, locally stored memory bank for the AI assis
 
 ## 8. Documentation Overhaul
 - **Modernized README.md**: Completely rewrote the root `README.md` for the `Streaming-Rpi` repository. Replaced outdated references to `main.py`, deprecated LiveKit cloud services, and legacy MJPEG streaming scripts with current SRS HTTP-FLV video streaming (`mpegts.js`), two-way talkback, GPIO hardware pinouts, auto-chunked local recording, headless Wi-Fi QR provisioning, and the Next.js cloud management dashboard.
+
+## 9. Production-Grade Security Hardening & Automated SQA Quality Gates
+- **Secrets Sanitization**: Purged hardcoded GitHub Personal Access Tokens (PATs) and third-party API keys from `setup_pi.sh`, `PI_SETUP_SOP.md`, and `uploader.py`. All credentials are now strictly environment-driven with secure defaults.
+- **Cache & Database Untracking**: Removed tracked production SQLite databases (`source/helmet.db`), 185KB runtime logs (`source/logs.json`), TypeScript build artifacts, and stray token files from git tracking. Updated `.gitignore` with comprehensive patterns covering SSL certificates, database files, and secrets.
+- **HTTP Security Headers**: Configured Content-Security-Policy (CSP), Strict-Transport-Security (HSTS), X-Frame-Options (DENY), X-Content-Type-Options (nosniff), Referrer-Policy, and Permissions-Policy in `source/next.config.ts`.
+- **SSRF & Tenant Boundary Enforcement**: Hardened `source/app/api/device/[...path]/route.ts` with strict role-based fallback isolation (preventing cross-tenant hardware leakage), path traversal sanitization, target protocol verification, and 12-second abort timeouts.
+- **Unauthenticated Route Lock Down**: Removed `/api/migrate-db` from public auth bypass in `source/middleware.ts`.
+- **Static Test Suite Integrity**: Restored `tools/start_rtsp_stream.sh` so that `tests/test_v1_static.py` passes 100% cleanly.
+- **Automated CI/CD & SAST Quality Gates**:
+  - `.github/workflows/ci.yml`: Python test suite (`pytest`) + Next.js type check & production build.
+  - `.github/workflows/codeql.yml`: Semantic AST Static Application Security Testing (Python & TypeScript).
+  - `.github/workflows/security-scan.yml`: Automated Gitleaks secret detection and dependency auditing.
+  - `SECURITY.md`: Published responsible coordinated disclosure policy and defense-in-depth architecture.
+  - `.github/FUNDING.yml`: Configured GitHub Sponsors support.

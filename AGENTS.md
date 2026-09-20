@@ -231,3 +231,19 @@ If the user asks for `/graphify` or architecture understanding, use the Graphify
 - With every change you make (be it small or big), you MUST update `PROJECT_MEMORY.md` to reflect the new state.
 - If you make a change and then remove/revert it later, you MUST update the "Removed or Reverted Features" section in the memory file so that future agents do not attempt to rebuild a flawed or removed feature.
 - Always keep this memory file perfectly synced with the latest codebase changes pushed to GitHub.
+
+## Mandatory Secure Vibe-Coding & SQA Standards
+
+All AI coding agents (Claude, Codex, Antigravity, Cursor) operating on this repository must comply with these non-negotiable rules:
+1. **Zero Secret Policy**: Never hardcode API keys, PATs, JWT secrets, passwords, or certificates into any file. Use `os.getenv` or `process.env`.
+2. **Defensive Trust Boundaries**:
+   - Sanitize all API inputs and route parameters.
+   - Enforce path traversal checks on any proxy or file streaming route.
+   - Enforce strict role-based access control (never fall back across tenant boundaries).
+3. **Mandatory SQA Verification Gates**:
+   - Before committing any Python change: run `python -m pytest tests/ -v`.
+   - Before committing any Next.js change: run `npm run build` inside `source/`.
+   - Never push changes that break existing tests or disable security linters.
+4. **Clean Git Hygiene**:
+   - Never stage `.db`, `logs/`, `*.pem`, `*.key`, `credentials.json`, or `.env` files.
+   - Verify `git status` and `git diff` before committing.
